@@ -1,5 +1,4 @@
 <!DOCtype html>
-
 <html>
     <head>
         <title>ESV Playlist</title>
@@ -17,21 +16,17 @@
         }
     </style>
     <body onload='restoreMemory()'>
-        <div class="container" style="max-width:450px;margin-top:25px;">
-            <div class="card" style="padding:25px;">    
-                <!-- <div class="btn-group">
-                    <button id="js-storage-btn" class="btn btn-primary btn-sm">Save List On Device</button>
-                </div> -->
-                
-                <audio controls id='player' src="#"></audio>
-
-                <div class="input-group mb-2" style="margin-top:20px;">
-                    <input id="input" type="text" class="form-control" placeholder="i.e. John 1:1-5" aria-label="Add List Item" aria-describedby="basic-addon2">
-                    <div class="input-group-append">
-                        <button id="js-storage-btn" class="btn btn-primary btn-sm">Save On Device</button>
+        <div class="container" style="max-width:450px;margin-top:10px;">
+            <div class="card" style="padding:10px;">    
+                <div align="center">
+                    <div align="center" class="mb-2">
+                        <input class="form-control" style="max-width:300px;" id="input" type="text" placeholder="i.e. John 1:1-5">
                     </div>
-                </div>
-                <small align="justify" style="color:#adb5bd;font-size:11px;">Scripture recordings are from The ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</small>        
+                    <audio style="padding-top:10px;padding-bottom:10px;" controls id='player' src="#"></audio>
+                    <div align="center" class="mb-2">
+                        <small align="justify" style="color:#adb5bd;font-size:10px;">Scripture recordings are from The ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</small>
+                    </div>
+                </div>       
             </div>
             <div id="output">
                 <div class='list-group list-group' id="list"></div>
@@ -58,13 +53,9 @@
             var a = { headers: { authorization: t.map(e => e = String.fromCharCode(e)).join().replace(/,/g,'') } };
 
             const ui = {
-                storage : {
-                    save : 'Save On Device',
-                    remove : 'Remove From Device'
-                },
                 placeholders : {
                     default: 'i.e. John 1:1-5',
-                    get_esv: 'Get ESV audio',
+                    get_esv: 'Getting ESV Audio ...',
                 }
             };
 
@@ -120,6 +111,8 @@
                 }
                 let targetElems = $("li[id="+elementId+"]").get();
                 $(targetElems).remove();
+                updateStorage();
+
             }
 
             function addListItem(responseJson) {
@@ -167,6 +160,7 @@
                     }       
                 }
                 removeInProgress();
+                updateStorage();
             }
 
             // player functions
@@ -218,13 +212,9 @@
             }
 
             // storage functions
-            function addToStorage(key, value) {
-                localStorage.setItem(key, value);
+            function updateStorage() {
                 localStorage.setItem('esvplaylist_sources', JSON.stringify(audioSources));
-            }
-            function removeFromStorage(key) {
-                localStorage.removeItem(key);
-                localStorage.removeItem('esvplaylist_sources');
+                localStorage.setItem('esvplaylist', document.getElementById('list').outerHTML);
             }
             function checkStorage(key) {
                 return localStorage.getItem(key);
@@ -234,7 +224,6 @@
                     var list = localStorage.getItem('esvplaylist');
                     list = list.replace(/<i style="display: inline;"/g, '<i style="display: none;"');
                     document.getElementById('list').outerHTML = list;
-                    document.getElementById('js-storage-btn').innerHTML = ui.storage.remove;
 
                     audioSources = JSON.parse(localStorage.getItem('esvplaylist_sources'));
                     setAndLoadPlayer(audioSources[0], false);
@@ -244,19 +233,6 @@
             // event listener functions
             audio.addEventListener('ended',getNextTrack);
             audio.addEventListener('play',showCurrentTrack);
-            $("#js-storage-btn").click(function(e){
-                if (checkStorage('esvplaylist')) {
-                    removeFromStorage('esvplaylist');
-                    e.target.innerHTML = ui.storage.save;
-                }
-                else {
-                    if (document.getElementById('list').innerHTML) {
-                        var list = document.getElementById('list').outerHTML;
-                        addToStorage('esvplaylist', list);
-                        e.target.innerHTML = ui.storage.remove;
-                    }
-                }
-            });
             
             $(document).keypress(function(e) {
                 if(e.which == 13) {
