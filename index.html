@@ -91,8 +91,9 @@
                     return response.json();
                 })
                 .then(function (responseJson) {
-                    console.log(responseJson);
-                    addListItem(responseJson);
+                    if (responseJson.canonical) {
+                        addListItem(responseJson);
+                    } else removeInProgress();
                 });
                 
             }
@@ -116,7 +117,7 @@
             }
 
             function addListItem(responseJson) {
-                console.log(responseJson);
+                //console.log(responseJson);
                 let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
                 let audioContentSrc = audioUrlTemp.replace('{start}', responseJson.parsed[0][0]).replace('{end}', responseJson.parsed[0][1]);
 
@@ -226,7 +227,9 @@
                     document.getElementById('list').outerHTML = list;
 
                     audioSources = JSON.parse(localStorage.getItem('esvplaylist_sources'));
-                    setAndLoadPlayer(audioSources[0], false);
+                    if (audioSources && audioSources.length > 0) {
+                        setAndLoadPlayer(audioSources[0], false);
+                    }
                 }
             }
 
