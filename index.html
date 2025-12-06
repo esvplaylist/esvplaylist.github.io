@@ -49,6 +49,7 @@
         </script>
       
         <script>
+            navigator.serviceWorker.register('./service-worker.js');
             var t = [84, 111, 107, 101, 110, 32, 57, 100, 100, 49, 54, 55, 48, 50, 98, 98, 55, 56, 51, 55, 56, 51, 98, 49, 57, 50, 49, 54, 97, 55, 56, 100, 55, 52, 54, 55, 48, 102, 50, 99, 100, 100, 97, 54, 55, 51];
             var a = { headers: { authorization: t.map(e => e = String.fromCharCode(e)).join().replace(/,/g,'') } };
 
