@@ -2,9 +2,9 @@
   "name": "ESV Playlist",
   "short_name": "ESVP",
   "description": "Create your own Scripture playlist.",
-  "scope": "/esvplaylist/",
-  "start_url": "https://esvplaylist.github.io/",
   "display": "standalone",
+  "scope": "/esvplaylist/",
+  "start_url": "/esvplaylist/",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
