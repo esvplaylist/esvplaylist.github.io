@@ -12,6 +12,11 @@
       "src": "/esvplaylist.github.io/headphone-symbol.png",
       "type": "image/png",
       "sizes": "512x512"
+    },
+    {
+      "src": "/esvplaylist.github.io/icon192.png",
+      "type": "image/png",
+      "sizes": "192x192"
     }
   ]
 }
