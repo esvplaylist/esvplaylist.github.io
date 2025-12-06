@@ -9,7 +9,7 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/esvplaylist.github.io/headphone-symbol.png",
+      "src": "/headphone-symbol.png",
       "type": "image/png",
       "sizes": "192x192 512x512"
     }
