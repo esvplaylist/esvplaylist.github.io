@@ -4,7 +4,7 @@
   "description": "Create your own Scripture playlist.",
   "display": "standalone",
   "scope": "/esvplaylist.github.io/",
-  "start_url": "/esvplaylist.github.io/index.html",
+  "start_url": "/",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
