@@ -6,7 +6,7 @@
   "scope": "/esvplaylist.github.io/",
   "start_url": "/esvplaylist.github.io/index.html",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/headphone-symbol.png",
