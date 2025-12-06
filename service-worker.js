@@ -1,5 +1,5 @@
 // Change this to your repository name
-var GHPATH = '/esvplaylist';
+var GHPATH = '/esvplaylist.github.io';
  
 // Choose a different app prefix name
 var APP_PREFIX = 'esvp_';
