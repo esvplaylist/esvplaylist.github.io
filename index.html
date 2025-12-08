@@ -187,6 +187,39 @@ function toggleShuffle() {
 }
 
 /* TRACKS */
+function addTrackToList() {
+  if (!currentPlaylist) return;
+  var elem = document.getElementById("input").value;
+  if (!elem) return;
+  if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
+
+  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+
+  fetch(url, a).then(res => res.json()).then(r => {
+    let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
+    let start = r.parsed[0][0];
+    let end = r.parsed[0][1];
+    let src = audioUrlTemp.replace('{start}', start).replace('{end}', end);
+
+    audioSources.push({ _id: start+""+end, url: src, label: r.canonical });
+    playlists[currentPlaylist] = audioSources;
+    savePlaylists();
+    renderTracks();
+    document.getElementById("input").value = "";
+  });
+
+}
+
+function removeTrackFromList() {
+  let id = event.target.id;
+  audioSources = audioSources.filter(t => t._id !== id);
+  playlists[currentPlaylist] = audioSources;
+  savePlaylists();
+  renderTracks();
+}
+
+
+
 function moveTrackUp(index) {
   if (index === 0) return;
   [audioSources[index - 1], audioSources[index]] = [audioSources[index], audioSources[index - 1]];
