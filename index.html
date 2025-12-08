@@ -17,10 +17,7 @@
     body { background: #f8f9fa; color: #212529; }
     body.dark { background: #121212; color: #f8f9fa; }
 
-    .card, .list-group-item {
-      background: inherit;
-      color: inherit;
-    }
+    .card, .list-group-item { background: inherit; color: inherit; }
 
     .playlist-item.active {
       background-color: #007bff;
@@ -33,6 +30,12 @@
     }
 
     li[draggable="true"] { cursor: grab; }
+
+    .reorder-btn {
+      width: 26px;
+      padding: 0;
+      line-height: 1;
+    }
 
     footer {
       font-size: 10px;
@@ -50,7 +53,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-2">
     <h4>🎧 ESV Playlist</h4>
-    <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">🌙</button>
+    <!-- <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">🌙</button> -->
   </div>
 
   <!-- Playlist Creation -->
@@ -83,21 +86,17 @@
 
       <div class="card mb-3">
         <div class="card-body text-center">
-
           <input class="form-control mb-2" id="input" type="text" placeholder="i.e. John 1:1-5">
-
           <audio id="player" controls></audio>
-
-          <div class="mt-2 d-flex justify-content-center gap-2">
+          <div class="mt-2">
             <button class="btn btn-outline-info btn-sm" onclick="toggleShuffle()">Shuffle</button>
           </div>
-
         </div>
       </div>
 
       <div class="card mb-3">
         <div class="card-header d-flex justify-content-between">
-          <span>Tracks (Drag to Reorder)</span>
+          <span>Tracks (Drag or Use ⬆⬇)</span>
           <button class="btn btn-sm btn-danger" onclick="deleteCurrentPlaylist()">Delete Playlist</button>
         </div>
         <ul class="list-group list-group-flush" id="list"></ul>
@@ -116,19 +115,13 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
 <script>
-/* ===========================
-   DARK MODE
-=========================== */
-
+/* DARK MODE */
 function toggleDarkMode() {
   document.body.classList.toggle("dark");
   localStorage.setItem("esv_dark", document.body.classList.contains("dark"));
 }
 
-/* ===========================
-   ESV AUTH
-=========================== */
-
+/* ESV AUTH */
 var t = [84,111,107,101,110,32,57,100,100,49,54,55,48,50,98,98,55,56,51,55,56,51,98,49,57,50,49,54,97,55,56,100,55,52,54,55,48,102,50,99,100,100,97,54,55,51];
 var a = { headers: { authorization: t.map(e => String.fromCharCode(e)).join('').replace(/,/g,'') } };
 
@@ -139,19 +132,12 @@ var isShuffle = false;
 let playlists = JSON.parse(localStorage.getItem("esv_playlists")) || {};
 let currentPlaylist = localStorage.getItem("esv_currentPlaylist") || null;
 
-/* ===========================
-   STORAGE
-=========================== */
-
 function savePlaylists() {
   localStorage.setItem("esv_playlists", JSON.stringify(playlists));
   localStorage.setItem("esv_currentPlaylist", currentPlaylist);
 }
 
-/* ===========================
-   PLAYLIST MANAGEMENT
-=========================== */
-
+/* PLAYLISTS */
 function createPlaylist() {
   const name = document.getElementById("newPlaylistName").value.trim();
   if (!name || playlists[name]) return;
@@ -168,11 +154,9 @@ function renamePlaylist() {
   if (!currentPlaylist) return;
   const newName = prompt("Rename playlist:", currentPlaylist);
   if (!newName || playlists[newName]) return;
-
   playlists[newName] = playlists[currentPlaylist];
   delete playlists[currentPlaylist];
   currentPlaylist = newName;
-
   savePlaylists();
   renderPlaylists();
 }
@@ -180,7 +164,6 @@ function renamePlaylist() {
 function deleteCurrentPlaylist() {
   if (!currentPlaylist) return;
   if (!confirm("Delete this playlist?")) return;
-
   delete playlists[currentPlaylist];
   currentPlaylist = Object.keys(playlists)[0] || null;
   audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
@@ -197,45 +180,23 @@ function selectPlaylist(name) {
   renderTracks();
 }
 
-/* ===========================
-   SHUFFLE
-=========================== */
-
+/* SHUFFLE */
 function toggleShuffle() {
   isShuffle = !isShuffle;
   alert("Shuffle " + (isShuffle ? "On" : "Off"));
 }
 
-/* ===========================
-   TRACK FUNCTIONS
-=========================== */
-
-function addTrackToList() {
-  if (!currentPlaylist) return;
-  var elem = document.getElementById("input").value;
-  if (!elem) return;
-  if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
-
-  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
-
-  fetch(url, a).then(res => res.json()).then(r => {
-    let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
-    let start = r.parsed[0][0];
-    let end = r.parsed[0][1];
-    let src = audioUrlTemp.replace('{start}', start).replace('{end}', end);
-
-    audioSources.push({ _id: start+""+end, url: src, label: r.canonical });
-    playlists[currentPlaylist] = audioSources;
-    savePlaylists();
-    renderTracks();
-    document.getElementById("input").value = "";
-  });
+/* TRACKS */
+function moveTrackUp(index) {
+  if (index === 0) return;
+  [audioSources[index - 1], audioSources[index]] = [audioSources[index], audioSources[index - 1]];
+  savePlaylists();
+  renderTracks();
 }
 
-function removeTrackFromList() {
-  let id = event.target.id;
-  audioSources = audioSources.filter(t => t._id !== id);
-  playlists[currentPlaylist] = audioSources;
+function moveTrackDown(index) {
+  if (index === audioSources.length - 1) return;
+  [audioSources[index + 1], audioSources[index]] = [audioSources[index], audioSources[index + 1]];
   savePlaylists();
   renderTracks();
 }
@@ -254,39 +215,11 @@ function playByIndex(idx) {
   renderTracks();
 }
 
-/* ===========================
-   AUTO PLAY NEXT
-=========================== */
-
 audio.addEventListener("ended", function() {
-  if (!audioSources.length) return;
-
   let idx = parseInt(audio.dataset.index || 0);
-
-  if (isShuffle) {
-    idx = Math.floor(Math.random() * audioSources.length);
-  } else {
-    idx = (idx + 1) % audioSources.length;
-  }
+  idx = isShuffle ? Math.floor(Math.random() * audioSources.length) : (idx + 1) % audioSources.length;
   playByIndex(idx);
 });
-
-/* ===========================
-   RENDERING
-=========================== */
-
-function renderPlaylists() {
-  const list = document.getElementById('playlistList');
-  list.innerHTML = "";
-
-  Object.keys(playlists).forEach(name => {
-    const li = document.createElement('li');
-    li.className = "list-group-item playlist-item " + (name === currentPlaylist ? "active" : "");
-    li.textContent = name;
-    li.onclick = () => selectPlaylist(name);
-    list.appendChild(li);
-  });
-}
 
 let dragStartIndex = null;
 
@@ -294,13 +227,10 @@ function renderTracks() {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if (!currentPlaylist) return;
-
   audioSources.forEach((track, index) => {
     let li = document.createElement("li");
     li.className = "list-group-item d-flex align-items-center";
     li.draggable = true;
-    li.dataset.index = index;
 
     if (parseInt(audio.dataset.index) === index) {
       li.classList.add("now-playing");
@@ -309,60 +239,46 @@ function renderTracks() {
     li.addEventListener("dragstart", () => dragStartIndex = index);
     li.addEventListener("dragover", e => e.preventDefault());
     li.addEventListener("drop", () => {
-      let temp = audioSources[dragStartIndex];
-      audioSources[dragStartIndex] = audioSources[index];
-      audioSources[index] = temp;
-      playlists[currentPlaylist] = audioSources;
+      [audioSources[dragStartIndex], audioSources[index]] =
+      [audioSources[index], audioSources[dragStartIndex]];
       savePlaylists();
       renderTracks();
     });
 
-    let playBtn = document.createElement("button");
-    playBtn.className = "btn btn-outline-secondary btn-sm mr-2";
-    playBtn.textContent = "▶";
-    playBtn.id = track._id;
-    playBtn.onclick = playTrack;
-
-    let label = document.createElement("span");
-    label.textContent = track.label;
-    label.className = "flex-grow-1 ml-2";
-
-    let delBtn = document.createElement("button");
-    delBtn.className = "btn btn-outline-danger btn-sm ml-2";
-    delBtn.textContent = "✕";
-    delBtn.id = track._id;
-    delBtn.onclick = removeTrackFromList;
-
-    li.appendChild(playBtn);
-    li.appendChild(label);
-    li.appendChild(delBtn);
+    li.innerHTML = `
+      <button class="btn btn-outline-secondary btn-sm mr-2" id="${track._id}" onclick="playTrack()">▶</button>
+      <span class="flex-grow-1">${track.label}</span>
+      <button class="btn btn-outline-secondary btn-sm reorder-btn mr-1" onclick="moveTrackUp(${index})">⬆</button>
+      <button class="btn btn-outline-secondary btn-sm reorder-btn mr-2" onclick="moveTrackDown(${index})">⬇</button>
+    `;
 
     list.appendChild(li);
   });
 }
 
-/* ===========================
-   INIT
-=========================== */
-
+/* INIT */
 function restoreMemory() {
   if (localStorage.getItem("esv_dark") === "true") {
     document.body.classList.add("dark");
   }
-
   if (currentPlaylist && playlists[currentPlaylist]) {
     audioSources = playlists[currentPlaylist];
   }
-
   renderPlaylists();
   renderTracks();
 }
 
-$(document).keypress(function(e) {
-  if (e.which === 13 && document.activeElement.id === "input") {
-    addTrackToList();
-  }
-});
+function renderPlaylists() {
+  const list = document.getElementById('playlistList');
+  list.innerHTML = "";
+  Object.keys(playlists).forEach(name => {
+    const li = document.createElement('li');
+    li.className = "list-group-item playlist-item " + (name === currentPlaylist ? "active" : "");
+    li.textContent = name;
+    li.onclick = () => selectPlaylist(name);
+    list.appendChild(li);
+  });
+}
 </script>
 
 </body>
