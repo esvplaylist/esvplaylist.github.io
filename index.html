@@ -283,7 +283,7 @@ function renderTracks() {
 
 // DELETE TRACK AND PLAY NEXT IF CURRENT, UPDATE HIGHLIGHT
 function deleteTrack(index) {
-  if (!confirm("Remove this track from the playlist?")) return;
+  //if (!confirm("Remove this track from the playlist?")) return;
   let currentIndex = parseInt(audio.dataset.index || -1);
   let isPlayingCurrent = (index === currentIndex);
 
