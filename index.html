@@ -92,7 +92,7 @@
 
       <div class="card mb-3">
         <div class="card-header d-flex justify-content-between">
-          <span>Tracks (Drag or Use ⬆⬇)</span>
+          <span>Tracks</span>
           <button class="btn btn-sm btn-danger" onclick="deleteCurrentPlaylist()">Delete Playlist</button>
         </div>
         <ul class="list-group list-group-flush" id="list"></ul>
@@ -159,7 +159,7 @@ function renamePlaylist() {
 
 function deleteCurrentPlaylist() {
   if (!currentPlaylist) return;
-  if (!confirm("Delete this playlist?")) return;
+  //if (!confirm("Delete this playlist?")) return;
   delete playlists[currentPlaylist];
   currentPlaylist = Object.keys(playlists)[0] || null;
   audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
@@ -268,11 +268,11 @@ function renderTracks() {
     });
 
     li.innerHTML = `
-      <button class="btn btn-outline-secondary btn-sm mr-2" id="${track._id}" onclick="playTrack()">▶</button>
+      <button class="btn btn-outline-primary btn-play" id="${track._id}" onclick="playTrack()"><i class="fa-solid fa-play"></i></button>
       <span class="flex-grow-1">${track.label}</span>
-      <button class="btn btn-outline-secondary btn-sm reorder-btn mr-1" onclick="moveTrackUp(${index})">⬆</button>
-      <button class="btn btn-outline-secondary btn-sm reorder-btn mr-2" onclick="moveTrackDown(${index})">⬇</button>
-      <button class="btn btn-outline-danger btn-sm" onclick="deleteTrack(${index})">X</button>
+      <button class="btn btn-outline-secondary track-btn" onclick="moveTrackUp(${index})"><i class="fa-solid fa-arrow-up"></i></button>
+      <button class="btn btn-outline-secondary track-btn" onclick="moveTrackDown(${index})"><i class="fa-solid fa-arrow-down"></i></button>
+      <button class="btn btn-outline-danger track-btn" onclick="deleteTrack(${index})"><i class="fa-solid fa-trash"></i></button>
     `;
 
     list.appendChild(li);
