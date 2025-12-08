@@ -1,259 +1,369 @@
-<!DOCtype html>
-<html>
-    <head>
-        <title>ESV Playlist</title>
-        <link rel="stylesheet"
-        	href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-        	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-        	crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <link rel="icon" type="image/x-icon" href="/headphone-symbol.png">
-        <title>ESV Playlist</title>
-        <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
-        <!-- <link rel="manifest" href="/esvplaylist.github.io/manifest.webmanifest"> -->
-        <link rel="manifest" crossorigin="use-credentials" href="manifest.json"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="white" />
-    </head>
-    <style>
-        #input.loading {
-            background: url(https://www.xiconeditor.com/image/icons/loading.gif) no-repeat right center;
-        }
-    </style>
-    <body onload='restoreMemory()'>
-        <div class="container" style="max-width:350px;margin-top:10px;">
-            <div class="card" style="padding:10px;">    
-                <div align="center">
-                    <div align="center" class="mb-2">
-                        <input class="form-control" style="max-width:250px;" id="input" type="text" placeholder="i.e. John 1:1-5">
-                    </div>
-                    <audio style="width:250px;padding-top:10px;padding-bottom:10px;" controls id='player' src="#"></audio>
-                    <div style="max-width:250px;" align="center" class="mb-2">
-                        <div style="color:#adb5bd;font-size:10px;">Scripture recordings are from The ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</div>
-                    </div>
-                </div>       
-            </div>
-            <div id="output">
-                <div class='list-group list-group' id="list"></div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESV Playlist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="white" />
+
+  <link rel="icon" type="image/x-icon" href="/headphone-symbol.png">
+  <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
+  <link rel="manifest" crossorigin="use-credentials" href="manifest.json"/>
+
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+  <style>
+    body { background: #f8f9fa; color: #212529; }
+    body.dark { background: #121212; color: #f8f9fa; }
+
+    .card, .list-group-item {
+      background: inherit;
+      color: inherit;
+    }
+
+    .playlist-item.active {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .now-playing {
+      border-left: 6px solid #28a745;
+      font-weight: bold;
+    }
+
+    li[draggable="true"] { cursor: grab; }
+
+    footer {
+      font-size: 10px;
+      color: #adb5bd;
+      margin-top: 30px;
+      padding: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body onload="restoreMemory()">
+
+<div class="container" style="max-width: 900px; margin-top: 15px;">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h4>🎧 ESV Playlist</h4>
+    <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">🌙</button>
+  </div>
+
+  <!-- Playlist Creation -->
+  <div class="card mb-3">
+    <div class="card-body row">
+      <div class="col-md-8 mb-2">
+        <input id="newPlaylistName" class="form-control" placeholder="New Playlist Name">
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-primary btn-block" onclick="createPlaylist()">Create Playlist</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- Playlist List -->
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Playlists</span>
+          <button class="btn btn-sm btn-outline-secondary" onclick="renamePlaylist()">Rename</button>
         </div>
-    
-        <script
-            src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
-        <script
-        	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-        	integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-        	crossorigin="anonymous">
-        </script>
-        <script
-        	src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
-        	integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
-        	crossorigin="anonymous">
-        </script>
-      
-        <script>
-            if (navigator.serviceWorker) {
-                navigator.serviceWorker.register (
-                    '/service-worker.js',
-                    {scope: '/'}
-                )
-            }
+        <ul id="playlistList" class="list-group list-group-flush"></ul>
+      </div>
+    </div>
 
-            var t = [84, 111, 107, 101, 110, 32, 57, 100, 100, 49, 54, 55, 48, 50, 98, 98, 55, 56, 51, 55, 56, 51, 98, 49, 57, 50, 49, 54, 97, 55, 56, 100, 55, 52, 54, 55, 48, 102, 50, 99, 100, 100, 97, 54, 55, 51];
-            var a = { headers: { authorization: t.map(e => e = String.fromCharCode(e)).join().replace(/,/g,'') } };
+    <!-- Player & Tracks -->
+    <div class="col-md-8">
 
-            const ui = {
-                placeholders : {
-                    default: 'i.e. John 1:1-5',
-                    get_esv: 'Getting ESV Audio ...',
-                }
-            };
+      <div class="card mb-3">
+        <div class="card-body text-center">
 
-            var audioSources = [];
-            var audio = document.getElementById('player');
+          <input class="form-control mb-2" id="input" type="text" placeholder="i.e. John 1:1-5">
 
-            function showInProgress() {
-                document.getElementById("input").value = "";
-                document.getElementById("input").setAttribute('placeholder', ui.placeholders.get_esv);
-                $("#input").addClass('loading');
-                document.getElementById("input").disabled = true;
-            }
-            function removeInProgress() {
-                document.getElementById("input").setAttribute('placeholder', ui.placeholders.default);
-                document.getElementById("input").disabled = false;
-                $("#input").removeClass('loading');
-            }
-            
-            // list functions
-            function addTrackToList() {
-                var elem = document.getElementById("input").value;
-                if (!elem) return;
-                showInProgress();
+          <audio id="player" controls></audio>
 
-                if (elem.includes(',')) {
-                    elem = elem.substring(0, elem.indexOf(','));
-                } 
+          <div class="mt-2 d-flex justify-content-center gap-2">
+            <button class="btn btn-outline-info btn-sm" onclick="toggleShuffle()">Shuffle</button>
+          </div>
 
-                var url = 'https://api.esv.org/v3/passage/html/?q=' + elem;
-                
-                fetch(url, a)
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (responseJson) {
-                    if (responseJson.canonical) {
-                        addListItem(responseJson);
-                    } else removeInProgress();
-                });
-                
-            }
+        </div>
+      </div>
 
-            function removeTrackFromList() {
-                let elementId = $(event.target).attr("id");
-                let trackIdx = audioSources.findIndex(e => e._id == elementId);
-                if (trackIdx >= 0) {
-                    audioSources.splice(trackIdx, 1);
-                    if (audioSources.length > 0) {
-                        setAndLoadPlayer(audioSources[0]);
-                    } else {
-                        audio.src = '';
-                        audio.pause();
-                    }
-                }
-                let targetElems = $("li[id="+elementId+"]").get();
-                $(targetElems).remove();
-                updateStorage();
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span>Tracks (Drag to Reorder)</span>
+          <button class="btn btn-sm btn-danger" onclick="deleteCurrentPlaylist()">Delete Playlist</button>
+        </div>
+        <ul class="list-group list-group-flush" id="list"></ul>
+      </div>
+    </div>
+  </div>
 
-            }
+  <footer>
+    Scripture recordings are from The ESV® Bible (The Holy Bible, English Standard Version®),
+    © 2001 by Crossway, a publishing ministry of Good News Publishers.
+    Used by permission. All rights reserved.
+  </footer>
 
-            function addListItem(responseJson) {
-                //console.log(responseJson);
-                let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
-                let audioContentSrc = audioUrlTemp.replace('{start}', responseJson.parsed[0][0]).replace('{end}', responseJson.parsed[0][1]);
+</div>
 
-                var id = responseJson.parsed[0][0] + responseJson.parsed[0][1];
-                if (id) {
-                    // create new list entry
-                    var list_item = document.createElement("LI");
-                    list_item.setAttribute("id", id);
-                    $(list_item).addClass('list-group-item');
-                    $(list_item).attr("contenteditable","false");
-                
-                    // add play button
-                    var btn_play = $(list_item).add('<button type="button" class="btn btn-outline-secondary btn-sm" onclick="playTrack()">&#9654;</button>');
-                    $(btn_play).attr("id", id);
-                    $(list_item).append(btn_play);
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
-                    // add remove button
-                    var btn_delete = $(list_item).add("<button class='btn btn-outline-danger btn-sm' onclick='removeTrackFromList()' style='margin-left:3px;margin-right:15px;'>&#x2715</button>");
-                    $(btn_delete).attr("id", id);
-                    $(list_item).append(btn_delete);
-                    
-                    // add content
-                    var item_content = document.createTextNode(responseJson.canonical);
-                    list_item.appendChild(item_content);
+<script>
+/* ===========================
+   DARK MODE
+=========================== */
 
-                    // add playing now icon
-                    var playingIcon = '&nbsp&nbsp<i style="display:none;" class="bi bi-mic-fill" id="' + id + '_icon"></i>';
-                    $(list_item).append(playingIcon);
-                    
-                    // add to existing list
-                    document.getElementById("list").appendChild(list_item);
+function toggleDarkMode() {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("esv_dark", document.body.classList.contains("dark"));
+}
 
-                    audioSources.push({
-                        _id: id,
-                        url: audioContentSrc
-                    });
+/* ===========================
+   ESV AUTH
+=========================== */
 
-                    // set player to first track
-                    if (audioSources.length == 1) {
-                        setAndLoadPlayer(audioSources[0], false); 
-                    }       
-                }
-                removeInProgress();
-                updateStorage();
-            }
+var t = [84,111,107,101,110,32,57,100,100,49,54,55,48,50,98,98,55,56,51,55,56,51,98,49,57,50,49,54,97,55,56,100,55,52,54,55,48,102,50,99,100,100,97,54,55,51];
+var a = { headers: { authorization: t.map(e => String.fromCharCode(e)).join('').replace(/,/g,'') } };
 
-            // player functions
-            function setAndLoadPlayer (source, startPlay) {
-                audio.src = source.url; 
-                audio.pause();  
-                audio.load();
-                if (startPlay) audio.play();
-            }
-            function playTrack() {
-                clearTrackIcons();
-                let id = $(event.target).attr("id");
-                let trackIdx = audioSources.findIndex(e => e._id == id);  
-                setAndLoadPlayer(audioSources[trackIdx], true); 
-            }
-            function getNextTrack() {
-                if (audio.src && audioSources.length > 0) {
-                    clearTrackIcons();
-                    let trackIdx = audioSources.findIndex(e => e.url == audio.src);
-                    let id = audioSources[trackIdx]._id + '_icon';
-                    document.getElementById(id).style.display = 'none';
-                    if (trackIdx + 1 < audioSources.length) {
-                        setAndLoadPlayer(audioSources[trackIdx+1], true);
-                        document.getElementById(id).style.display = 'inline';
-                    } else {
-                        setAndLoadPlayer(audioSources[0], true);
-                        document.getElementById(id).style.display = 'inline';
-                    }
-                }
-            }
-            function showCurrentTrack() {
-                if (audio.src && audioSources.length > 0) {
-                    clearTrackIcons();
-                    let trackIdx = audioSources.findIndex(e => e.url == audio.src);
-                    let id = audioSources[trackIdx]._id + '_icon';
-                    document.getElementById(id).style.display = 'none';
-                    if (trackIdx + 1 < audioSources.length) {
-                        document.getElementById(id).style.display = 'inline';
-                    } else {
-                        document.getElementById(id).style.display = 'inline';
-                    }
-                }
-            }
-            function clearTrackIcons() {
-                audioSources.forEach(function(audio){
-                    let id = audio._id+'_icon';
-                    document.getElementById(id).style.display = 'none';
-                });
-            }
+var audio = document.getElementById('player');
+var audioSources = [];
+var isShuffle = false;
 
-            // storage functions
-            function updateStorage() {
-                localStorage.setItem('esvplaylist_sources', JSON.stringify(audioSources));
-                localStorage.setItem('esvplaylist', document.getElementById('list').outerHTML);
-            }
-            function checkStorage(key) {
-                return localStorage.getItem(key);
-            }
-            function restoreMemory() {
-                if (localStorage.getItem('esvplaylist')) {
-                    var list = localStorage.getItem('esvplaylist');
-                    list = list.replace(/<i style="display: inline;"/g, '<i style="display: none;"');
-                    document.getElementById('list').outerHTML = list;
+let playlists = JSON.parse(localStorage.getItem("esv_playlists")) || {};
+let currentPlaylist = localStorage.getItem("esv_currentPlaylist") || null;
 
-                    audioSources = JSON.parse(localStorage.getItem('esvplaylist_sources'));
-                    if (audioSources && audioSources.length > 0) {
-                        setAndLoadPlayer(audioSources[0], false);
-                    }
-                }
-            }
+/* ===========================
+   STORAGE
+=========================== */
 
-            // event listener functions
-            audio.addEventListener('ended',getNextTrack);
-            audio.addEventListener('play',showCurrentTrack);
-            
-            $(document).keypress(function(e) {
-                if(e.which == 13) {
-                    addTrackToList();
-                };
-            });
-        </script>
-    </body>
+function savePlaylists() {
+  localStorage.setItem("esv_playlists", JSON.stringify(playlists));
+  localStorage.setItem("esv_currentPlaylist", currentPlaylist);
+}
+
+/* ===========================
+   PLAYLIST MANAGEMENT
+=========================== */
+
+function createPlaylist() {
+  const name = document.getElementById("newPlaylistName").value.trim();
+  if (!name || playlists[name]) return;
+  playlists[name] = [];
+  currentPlaylist = name;
+  audioSources = [];
+  document.getElementById("newPlaylistName").value = "";
+  savePlaylists();
+  renderPlaylists();
+  renderTracks();
+}
+
+function renamePlaylist() {
+  if (!currentPlaylist) return;
+  const newName = prompt("Rename playlist:", currentPlaylist);
+  if (!newName || playlists[newName]) return;
+
+  playlists[newName] = playlists[currentPlaylist];
+  delete playlists[currentPlaylist];
+  currentPlaylist = newName;
+
+  savePlaylists();
+  renderPlaylists();
+}
+
+function deleteCurrentPlaylist() {
+  if (!currentPlaylist) return;
+  if (!confirm("Delete this playlist?")) return;
+
+  delete playlists[currentPlaylist];
+  currentPlaylist = Object.keys(playlists)[0] || null;
+  audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+  savePlaylists();
+  renderPlaylists();
+  renderTracks();
+}
+
+function selectPlaylist(name) {
+  currentPlaylist = name;
+  audioSources = playlists[name] || [];
+  savePlaylists();
+  renderPlaylists();
+  renderTracks();
+}
+
+/* ===========================
+   SHUFFLE
+=========================== */
+
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  alert("Shuffle " + (isShuffle ? "On" : "Off"));
+}
+
+/* ===========================
+   TRACK FUNCTIONS
+=========================== */
+
+function addTrackToList() {
+  if (!currentPlaylist) return;
+  var elem = document.getElementById("input").value;
+  if (!elem) return;
+  if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
+
+  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+
+  fetch(url, a).then(res => res.json()).then(r => {
+    let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
+    let start = r.parsed[0][0];
+    let end = r.parsed[0][1];
+    let src = audioUrlTemp.replace('{start}', start).replace('{end}', end);
+
+    audioSources.push({ _id: start+""+end, url: src, label: r.canonical });
+    playlists[currentPlaylist] = audioSources;
+    savePlaylists();
+    renderTracks();
+    document.getElementById("input").value = "";
+  });
+}
+
+function removeTrackFromList() {
+  let id = event.target.id;
+  audioSources = audioSources.filter(t => t._id !== id);
+  playlists[currentPlaylist] = audioSources;
+  savePlaylists();
+  renderTracks();
+}
+
+function playTrack() {
+  let id = event.target.id;
+  let idx = audioSources.findIndex(x => x._id === id);
+  playByIndex(idx);
+}
+
+function playByIndex(idx) {
+  if (!audioSources[idx]) return;
+  audio.src = audioSources[idx].url;
+  audio.dataset.index = idx;
+  audio.play();
+  renderTracks();
+}
+
+/* ===========================
+   AUTO PLAY NEXT
+=========================== */
+
+audio.addEventListener("ended", function() {
+  if (!audioSources.length) return;
+
+  let idx = parseInt(audio.dataset.index || 0);
+
+  if (isShuffle) {
+    idx = Math.floor(Math.random() * audioSources.length);
+  } else {
+    idx = (idx + 1) % audioSources.length;
+  }
+  playByIndex(idx);
+});
+
+/* ===========================
+   RENDERING
+=========================== */
+
+function renderPlaylists() {
+  const list = document.getElementById('playlistList');
+  list.innerHTML = "";
+
+  Object.keys(playlists).forEach(name => {
+    const li = document.createElement('li');
+    li.className = "list-group-item playlist-item " + (name === currentPlaylist ? "active" : "");
+    li.textContent = name;
+    li.onclick = () => selectPlaylist(name);
+    list.appendChild(li);
+  });
+}
+
+let dragStartIndex = null;
+
+function renderTracks() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!currentPlaylist) return;
+
+  audioSources.forEach((track, index) => {
+    let li = document.createElement("li");
+    li.className = "list-group-item d-flex align-items-center";
+    li.draggable = true;
+    li.dataset.index = index;
+
+    if (parseInt(audio.dataset.index) === index) {
+      li.classList.add("now-playing");
+    }
+
+    li.addEventListener("dragstart", () => dragStartIndex = index);
+    li.addEventListener("dragover", e => e.preventDefault());
+    li.addEventListener("drop", () => {
+      let temp = audioSources[dragStartIndex];
+      audioSources[dragStartIndex] = audioSources[index];
+      audioSources[index] = temp;
+      playlists[currentPlaylist] = audioSources;
+      savePlaylists();
+      renderTracks();
+    });
+
+    let playBtn = document.createElement("button");
+    playBtn.className = "btn btn-outline-secondary btn-sm mr-2";
+    playBtn.textContent = "▶";
+    playBtn.id = track._id;
+    playBtn.onclick = playTrack;
+
+    let label = document.createElement("span");
+    label.textContent = track.label;
+    label.className = "flex-grow-1 ml-2";
+
+    let delBtn = document.createElement("button");
+    delBtn.className = "btn btn-outline-danger btn-sm ml-2";
+    delBtn.textContent = "✕";
+    delBtn.id = track._id;
+    delBtn.onclick = removeTrackFromList;
+
+    li.appendChild(playBtn);
+    li.appendChild(label);
+    li.appendChild(delBtn);
+
+    list.appendChild(li);
+  });
+}
+
+/* ===========================
+   INIT
+=========================== */
+
+function restoreMemory() {
+  if (localStorage.getItem("esv_dark") === "true") {
+    document.body.classList.add("dark");
+  }
+
+  if (currentPlaylist && playlists[currentPlaylist]) {
+    audioSources = playlists[currentPlaylist];
+  }
+
+  renderPlaylists();
+  renderTracks();
+}
+
+$(document).keypress(function(e) {
+  if (e.which === 13 && document.activeElement.id === "input") {
+    addTrackToList();
+  }
+});
+</script>
+
+</body>
 </html>
