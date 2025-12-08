@@ -53,7 +53,6 @@
 
   <div class="d-flex justify-content-between align-items-center mb-2">
     <h4>🎧 ESV Playlist</h4>
-    <!-- <button class="btn btn-sm btn-outline-secondary" onclick="toggleDarkMode()">🌙</button> -->
   </div>
 
   <!-- Playlist Creation -->
@@ -88,9 +87,6 @@
         <div class="card-body text-center">
           <input class="form-control mb-2" id="input" type="text" placeholder="i.e. John 1:1-5">
           <audio id="player" controls></audio>
-          <!-- <div class="mt-2">
-            <button class="btn btn-outline-info btn-sm" onclick="toggleShuffle()">Shuffle</button>
-          </div> -->
         </div>
       </div>
 
@@ -167,6 +163,7 @@ function deleteCurrentPlaylist() {
   delete playlists[currentPlaylist];
   currentPlaylist = Object.keys(playlists)[0] || null;
   audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+  audio.src = "";
   savePlaylists();
   renderPlaylists();
   renderTracks();
@@ -207,15 +204,6 @@ function addTrackToList() {
     renderTracks();
     document.getElementById("input").value = "";
   });
-
-}
-
-function removeTrackFromList() {
-  let id = event.target.id;
-  audioSources = audioSources.filter(t => t._id !== id);
-  playlists[currentPlaylist] = audioSources;
-  savePlaylists();
-  renderTracks();
 }
 
 function moveTrackUp(index) {
@@ -239,7 +227,10 @@ function playTrack() {
 }
 
 function playByIndex(idx) {
-  if (!audioSources[idx]) return;
+  if (!audioSources[idx]) {
+    audio.src = "";
+    return;
+  }
   audio.src = audioSources[idx].url;
   audio.dataset.index = idx;
   audio.play();
@@ -279,13 +270,36 @@ function renderTracks() {
     li.innerHTML = `
       <button class="btn btn-outline-secondary btn-sm mr-2" id="${track._id}" onclick="playTrack()">▶</button>
       <span class="flex-grow-1">${track.label}</span>
-      <button class="btn btn-outline-danger btn-sm reorder-btn mr-1" onclick="removeTrackFromList(${index})">❌</button>
       <button class="btn btn-outline-secondary btn-sm reorder-btn mr-1" onclick="moveTrackUp(${index})">⬆</button>
       <button class="btn btn-outline-secondary btn-sm reorder-btn mr-2" onclick="moveTrackDown(${index})">⬇</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="deleteTrack(${index})">X</button>
     `;
 
     list.appendChild(li);
   });
+}
+
+// DELETE TRACK AND PLAY NEXT IF CURRENT, UPDATE HIGHLIGHT
+function deleteTrack(index) {
+  if (!confirm("Remove this track from the playlist?")) return;
+  let currentIndex = parseInt(audio.dataset.index || -1);
+  let isPlayingCurrent = (index === currentIndex);
+
+  audioSources.splice(index, 1); // Remove from array
+  playlists[currentPlaylist] = audioSources; // Update playlist
+
+  if (audioSources.length === 0) {
+    audio.src = "";
+    audio.dataset.index = -1;
+  } else if (isPlayingCurrent) {
+    let nextIndex = index >= audioSources.length ? audioSources.length - 1 : index;
+    playByIndex(nextIndex);
+  } else if (currentIndex > index) {
+    audio.dataset.index = currentIndex - 1;
+  }
+
+  savePlaylists();
+  renderTracks();
 }
 
 /* INIT */
