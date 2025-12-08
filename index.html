@@ -14,7 +14,6 @@
         href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
   <style>
     body { background: #f8f9fa; color: #212529; }
     body.dark { background: #121212; color: #f8f9fa; }
@@ -46,6 +45,9 @@
       padding: 15px;
       text-align: center;
     }
+
+    .track-label { cursor: default; }
+    .btn-group .btn { min-width: 36px; }
   </style>
 </head>
 
@@ -161,7 +163,6 @@ function renamePlaylist() {
 
 function deleteCurrentPlaylist() {
   if (!currentPlaylist) return;
-  //if (!confirm("Delete this playlist?")) return;
   delete playlists[currentPlaylist];
   currentPlaylist = Object.keys(playlists)[0] || null;
   audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
@@ -188,24 +189,34 @@ function toggleShuffle() {
 /* TRACKS */
 function addTrackToList() {
   if (!currentPlaylist) return;
-  var elem = document.getElementById("input").value;
+  let elem = document.getElementById("input").value.trim();
   if (!elem) return;
+
   if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
 
-  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+  const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
 
-  fetch(url, a).then(res => res.json()).then(r => {
-    let audioUrlTemp = 'https://audio.esv.org/david-cochran-heath/mq/{start}-{end}.mp3';
-    let start = r.parsed[0][0];
-    let end = r.parsed[0][1];
-    let src = audioUrlTemp.replace('{start}', start).replace('{end}', end);
+  fetch(url, a)
+    .then(res => res.json())
+    .then(r => {
+      if (!r.parsed || !r.parsed[0]) return;
 
-    audioSources.push({ _id: start+""+end, url: src, label: r.canonical });
-    playlists[currentPlaylist] = audioSources;
-    savePlaylists();
-    renderTracks();
-    document.getElementById("input").value = "";
-  });
+      let start = r.parsed[0][0];
+      let end = r.parsed[0][1];
+
+      const trackId = Date.now() + "-" + start + "-" + end;
+      const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+
+      const newTrack = { _id: trackId, url: src, label: r.canonical };
+
+      audioSources.push(newTrack);
+      playlists[currentPlaylist] = audioSources;
+
+      savePlaylists();
+      renderTracks();
+      document.getElementById("input").value = "";
+    })
+    .catch(err => console.error("Error fetching ESV passage:", err));
 }
 
 function moveTrackUp(index) {
@@ -222,10 +233,21 @@ function moveTrackDown(index) {
   renderTracks();
 }
 
-function playTrack() {
-  let id = event.target.id;
-  let idx = audioSources.findIndex(x => x._id === id);
-  playByIndex(idx);
+function playTrack(trackId) {
+  let idx = audioSources.findIndex(x => x._id === trackId);
+  if (idx === -1) return;
+
+  if (parseInt(audio.dataset.index) === idx) {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  } else {
+    playByIndex(idx);
+  }
+
+  renderTracks();
 }
 
 function playByIndex(idx) {
@@ -253,7 +275,7 @@ function renderTracks() {
 
   audioSources.forEach((track, index) => {
     let li = document.createElement("li");
-    li.className = "list-group-item d-flex align-items-center";
+    li.className = "list-group-item d-flex align-items-center justify-content-between";
     li.draggable = true;
 
     if (parseInt(audio.dataset.index) === index) {
@@ -269,26 +291,33 @@ function renderTracks() {
       renderTracks();
     });
 
+    const isPlaying = parseInt(audio.dataset.index) === index && !audio.paused;
+    const playIcon = isPlaying ? "fa-pause" : "fa-play";
+
     li.innerHTML = `
-      <button class="btn btn-outline-primary btn-play" style="margin-right:10px;" id="${track._id}" onclick="playTrack()"><i class="fa-solid fa-play"></i></button>
-      <span class="flex-grow-1">${track.label}</span>
-      <button class="btn btn-outline-secondary track-btn" onclick="moveTrackUp(${index})"><i class="fa-solid fa-arrow-up"></i></button>
-      <button class="btn btn-outline-secondary track-btn" onclick="moveTrackDown(${index})"><i class="fa-solid fa-arrow-down"></i></button>
-      <button class="btn btn-outline-danger track-btn" onclick="deleteTrack(${index})"><i class="fa-solid fa-trash"></i></button>
+      <div class="d-flex align-items-center flex-grow-1">
+        <button class="btn btn-outline-primary btn-sm mr-2" style="width:36px;" onclick="playTrack('${track._id}')">
+          <i class="fa-solid ${playIcon}"></i>
+        </button>
+        <span class="track-label flex-grow-1">${track.label}</span>
+      </div>
+      <div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-outline-secondary" onclick="moveTrackUp(${index})"><i class="fa-solid fa-arrow-up"></i></button>
+        <button class="btn btn-outline-secondary" onclick="moveTrackDown(${index})"><i class="fa-solid fa-arrow-down"></i></button>
+        <button class="btn btn-outline-danger" onclick="deleteTrack(${index})"><i class="fa-solid fa-trash"></i></button>
+      </div>
     `;
 
     list.appendChild(li);
   });
 }
 
-// DELETE TRACK AND PLAY NEXT IF CURRENT, UPDATE HIGHLIGHT
 function deleteTrack(index) {
-  //if (!confirm("Remove this track from the playlist?")) return;
   let currentIndex = parseInt(audio.dataset.index || -1);
   let isPlayingCurrent = (index === currentIndex);
 
-  audioSources.splice(index, 1); // Remove from array
-  playlists[currentPlaylist] = audioSources; // Update playlist
+  audioSources.splice(index, 1);
+  playlists[currentPlaylist] = audioSources;
 
   if (audioSources.length === 0) {
     audio.src = "";
