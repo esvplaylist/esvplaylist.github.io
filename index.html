@@ -218,8 +218,6 @@ function removeTrackFromList() {
   renderTracks();
 }
 
-
-
 function moveTrackUp(index) {
   if (index === 0) return;
   [audioSources[index - 1], audioSources[index]] = [audioSources[index], audioSources[index - 1]];
@@ -281,6 +279,7 @@ function renderTracks() {
     li.innerHTML = `
       <button class="btn btn-outline-secondary btn-sm mr-2" id="${track._id}" onclick="playTrack()">▶</button>
       <span class="flex-grow-1">${track.label}</span>
+      <button class="btn btn-outline-danger btn-sm reorder-btn mr-1" onclick="removeTrackFromList(${index})">❌</button>
       <button class="btn btn-outline-secondary btn-sm reorder-btn mr-1" onclick="moveTrackUp(${index})">⬆</button>
       <button class="btn btn-outline-secondary btn-sm reorder-btn mr-2" onclick="moveTrackDown(${index})">⬇</button>
     `;
@@ -312,6 +311,12 @@ function renderPlaylists() {
     list.appendChild(li);
   });
 }
+
+$(document).keypress(function(e) {
+  if (e.which === 13 && document.activeElement.id === "input") {
+    addTrackToList();
+  }
+});
 </script>
 
 </body>
