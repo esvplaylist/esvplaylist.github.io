@@ -2,135 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>ESV Playlist — Minimal Modal UI</title>
+  <title>ESV Playlist — Minimal Modal UI (Material Symbols)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="white" />
 
-  <link rel="icon" type="image/x-icon" href="/headphone-symbol.png">
-  <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
-  <link rel="manifest" crossorigin="use-credentials" href="manifest.json"/>
-
-  <link rel="stylesheet"
-        href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
   <style>
-    :root {
-      --bg: #f8f9fa;
-      --card: #ffffff;
-      --muted: #6c757d;
-      --accent: #007bff;
-      --now: #28a745;
-      --btn-bg: #f1f3f5;
+    :root{
+      --bg:#f8f9fa; --card:#ffffff; --muted:#6c757d; --accent:#0d6efd; --now:#28a745; --btn-bg:#f1f3f5;
+      --text:#212529;
     }
-    body {
-      background: var(--bg);
-      color: #212529;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      transition: background .2s, color .2s;
-      margin: 18px;
-    }
+    body { margin:18px; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); transition:background .2s, color .2s; }
+    body.dark { --bg:#0f1113; --card:#121314; --muted:#9aa0a6; --btn-bg:#1b1b1d; --text:#eef2ff; }
 
-    .app {
-      max-width: 920px;
-      margin: 0 auto;
-    }
+    .app { max-width:920px; margin:0 auto; }
 
-    header.top {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom: 14px;
-    }
-
-    h1 { font-size: 20px; margin: 0; display:flex; gap:10px; align-items:center; }
+    header.top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
+    h1 { font-size:20px; margin:0; display:flex; gap:10px; align-items:center; }
 
     .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
-    .card {
-      background: var(--card);
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-    }
+    .card { background:var(--card); border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); border:none; }
+    .card-body { padding:16px; }
 
     .create-row { display:flex; gap:8px; align-items:center; }
-    .create-row input { flex:1; }
+    .create-row input, #modalNewPlaylist, #newPlaylistName, #input { padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); width:100%; background:transparent; color:inherit; }
 
-    .small-muted { color: var(--muted); font-size: 13px; }
+    .small-muted { color:var(--muted); font-size:13px; }
 
-    .player-card { padding: 18px; text-align:center; }
+    .player-card { padding:18px; text-align:center; }
     audio { width:100%; }
 
-    .tracks-card { margin-top: 12px; }
+    .tracks-card { margin-top:12px; }
+    .list-group { list-style:none; margin:0; padding:0; }
+    .list-group-item { padding:6px 8px; border-radius:8px; background:transparent; margin-bottom:6px; }
 
-    .list-group-item { border: none; background: transparent; padding: 8px 16px; }
-    .track-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 8px 10px; border-radius: 8px; }
-    .track-row:hover { transform: translateY(-1px); transition: transform .08s; }
-    .track-left { display:flex; gap:8px; align-items:center; flex:1; min-width:0; }
-    .track-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-row { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:8px; border-radius:8px; }
+    .track-row:hover { transform:translateY(-2px); transition:transform .08s; }
+    .track-left { display:flex; gap:8px; align-items:flex-start; flex:1; min-width:0; }
+    .track-label { white-space:normal; overflow:visible; display:block; line-height:1.25; font-size:15px; }
 
-    .btn-icon { width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; }
-    .btn-small { padding:6px 10px; border-radius:8px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; padding:8px 10px; border:none; cursor:pointer; background:var(--btn-bg); color:inherit; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-outline { background:transparent; border:1px solid rgba(0,0,0,0.08); }
+    .btn-danger { background:transparent; border:1px solid rgba(220,53,69,0.25); color:#dc3545; }
 
-    .now-playing {
-      border-left: 6px solid var(--now);
-      font-weight:600;
-      background: rgba(40,167,69,0.03);
-    }
+    .btn-icon { width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; background:var(--btn-bg); }
 
-    /* modal (Option A style: minimal rounded white) */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      padding: 20px;
-    }
-    .modal-card {
-      width: 100%;
-      max-width: 420px;
-      background: var(--card);
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    }
-    .modal-card h3 { margin:0 0 8px 0; font-size:18px; }
-    .modal-playlist {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      padding:10px;
-      border-radius:8px;
-      background: var(--btn-bg);
-      margin-bottom:8px;
-      cursor:pointer;
-    }
-    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; font-size:18px; }
 
-    footer { margin-top: 26px; font-size: 12px; color: var(--muted); text-align:center; }
+    .now-playing { border-left:6px solid var(--now); background: rgba(40,167,69,0.03); font-weight:600; }
+
+    /* Modal (Option A visual) */
+    .modal-overlay { position:fixed; inset:0; display:none; justify-content:center; align-items:center; background:rgba(0,0,0,0.45); z-index:9999; padding:20px; }
+    .modal-card { width:100%; max-width:420px; background:var(--card); border-radius:12px; padding:16px; box-shadow:0 20px 50px rgba(0,0,0,0.2); }
+    .modal-playlist { display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:8px; background:var(--btn-bg); margin-bottom:8px; cursor:pointer; }
+
+    footer { margin-top:26px; font-size:12px; color:var(--muted); text-align:center; }
+
+    /* Responsive mobile tweaks */
     @media (max-width:600px) {
-      .desktop-only { display:none; }
+      .btn-icon { width:34px; height:34px; border-radius:6px; }
+      .track-row { padding:6px; gap:6px; }
+      .track-left { align-items:flex-start; }
+      .track-actions { display:flex; gap:6px; align-items:center; }
+      .material-symbols-outlined { font-size:16px; }
+      .btn { padding:6px 8px; border-radius:6px; }
     }
   </style>
 </head>
-
 <body>
   <div class="app">
+
     <header class="top">
       <h1>🎧 ESV Playlist</h1>
+
       <div class="controls">
-        <button class="btn btn-sm btn-primary" onclick="createPlaylistFromInput()">
-          <i class="fa-solid fa-plus"></i> Create Playlist
+        <button class="btn btn-primary" onclick="createPlaylistFromInput()" title="Create playlist">
+          <span class="material-symbols-outlined">add</span> Create Playlist
         </button>
-        <button class="btn btn-sm btn-outline-primary" onclick="openPlaylistModal()">
-          <i class="fa-solid fa-list"></i> Playlists
+
+        <button class="btn btn-outline" onclick="openPlaylistModal()" title="Open playlists">
+          <span class="material-symbols-outlined">playlist_play</span> Playlists
         </button>
+
+        <!-- <button class="btn btn-outline" onclick="toggleDarkMode()" title="Toggle dark mode">
+          <span class="material-symbols-outlined">dark_mode</span>
+        </button> -->
       </div>
     </header>
 
@@ -138,16 +98,16 @@
     <div class="card mb-3">
       <div class="card-body">
         <div class="create-row mb-2">
-          <input id="newPlaylistName" class="form-control" placeholder="New Playlist Name" />
+          <input id="newPlaylistName" placeholder="New Playlist Name" />
+          <!-- <button class="btn btn-outline" onclick="createPlaylistFromInput()" title="Create"><span class="material-symbols-outlined">add</span></button> -->
         </div>
-
-        <div>
-          <input id="input" class="form-control" placeholder="Add track (e.g. John 1:1-5). Press Enter to add" />
+        <div class="create-row mb-2">
+          <input id="input" placeholder="Add track (e.g. John 1:1-5)" />
         </div>
       </div>
     </div>
 
-    <!-- current playlist heading -->
+    <!-- header for current playlist -->
     <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
       <div>
         <h4 id="currentPlaylistName" style="margin:0">No playlist selected</h4>
@@ -164,14 +124,15 @@
     <!-- tracks -->
     <div class="card tracks-card mb-3">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <strong>Tracks</strong>
-          <div>
-            <button class="btn btn-sm btn-outline-danger btn-small" onclick="deleteCurrentPlaylist()"><i class="fa-solid fa-trash"></i> Delete Playlist</button>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <!-- <button class="btn btn-outline" onclick="toggleShuffle()" title="Shuffle"><span class="material-symbols-outlined">shuffle</span></button> -->
+            <button class="btn btn-danger" onclick="deleteCurrentPlaylist()" title="Delete playlist"><span class="material-symbols-outlined">delete</span>&nbsp;Delete Playlist</button>
           </div>
         </div>
 
-        <ul id="list" class="list-group list-group-flush"></ul>
+        <ul id="list" class="list-group"></ul>
       </div>
     </div>
 
@@ -182,393 +143,366 @@
     </footer>
   </div>
 
-  <!-- PLAYLIST MODAL (Option A minimal) -->
+  <!-- Modal (Option A) -->
   <div id="playlistModal" class="modal-overlay" onclick="closePlaylistModal(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
-      <h3>Playlists</h3>
-      <div id="modalPlaylistList" style="margin-bottom:6px;"></div>
+      <h3 style="margin-top:0">Playlists</h3>
+      <div id="modalPlaylistList" style="margin-bottom:8px;"></div>
 
       <div style="display:flex; gap:8px; margin-top:8px;">
-        <input id="modalNewPlaylist" class="form-control" placeholder="New playlist name (create from modal)" />
-        <button class="btn btn-primary" onclick="createPlaylistFromModal()">Create</button>
+        <input id="modalNewPlaylist" placeholder="New playlist name (create from modal)" />
+        <button class="btn btn-primary" onclick="createPlaylistFromModal()"><span class="material-symbols-outlined">add</span></button>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn btn-outline-secondary" onclick="closePlaylistModal(event)">Close</button>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+        <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
       </div>
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+/* -------------------------
+   ESV AUTH
+------------------------- */
+var t = [84,111,107,101,110,32,57,100,100,49,54,55,48,50,98,98,55,56,51,55,56,51,98,49,57,50,49,54,97,55,56,100,55,52,54,55,48,102,50,99,100,100,97,54,55,51];
+var a = { headers: { authorization: t.map(e => String.fromCharCode(e)).join('').replace(/,/g,'') } };
 
-  <script>
-    /* -------------------------
-       ESV AUTH
-    ------------------------- */
-    var t = [84,111,107,101,110,32,57,100,100,49,54,55,48,50,98,98,55,56,51,55,56,51,98,49,57,50,49,54,97,55,56,100,55,52,54,55,48,102,50,99,100,100,97,54,55,51];
-    var a = { headers: { authorization: t.map(e => String.fromCharCode(e)).join('').replace(/,/g,'') } };
+/* App state */
+var audio = document.getElementById('player');
+var audioSources = []; // current playlist array (objects: {_id,url,label})
+var isShuffle = false;
 
-    /* App state */
-    var audio = document.getElementById('player');
-    var audioSources = []; // will point to playlists[currentPlaylist]
+let playlists = JSON.parse(localStorage.getItem("esv_playlists")) || {};
+let currentPlaylist = localStorage.getItem("esv_currentPlaylist") || null;
 
-    let playlists = JSON.parse(localStorage.getItem("esv_playlists")) || {}; // { name: [{_id,url,label}, ...] }
-    let currentPlaylist = localStorage.getItem("esv_currentPlaylist") || null;
+/* Persistence */
+function savePlaylists(){
+  localStorage.setItem("esv_playlists", JSON.stringify(playlists));
+  localStorage.setItem("esv_currentPlaylist", currentPlaylist);
+}
 
-    /* Helpers */
-    function savePlaylists() {
-      localStorage.setItem("esv_playlists", JSON.stringify(playlists));
-      localStorage.setItem("esv_currentPlaylist", currentPlaylist);
-    }
+/* Reset player */
+function resetPlayer(){
+  audio.src = "";
+  audio.pause();
+  audio.dataset.index = -1;
+  renderTracks();
+  updateNowPlayingMini();
+}
 
-    function resetPlayer() {
-      audio.src = "";
-      audio.pause();
-      audio.dataset.index = -1;
-      renderTracks(); // to clear highlight
-      updateNowPlayingMini();
-    }
+/* Dark mode toggle */
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("esv_dark", document.body.classList.contains("dark"));
+}
 
-    /* CREATE playlist from top input */
-    function createPlaylistFromInput() {
-      const name = document.getElementById("newPlaylistName").value.trim();
-      if (!name) return alert("Please provide a playlist name.");
-      if (playlists[name]) return alert("A playlist with that name already exists.");
-      playlists[name] = [];
-      currentPlaylist = name;
-      audioSources = playlists[name];
-      resetPlayer();
-      document.getElementById("newPlaylistName").value = "";
+/* Create playlist from header input */
+function createPlaylistFromInput(){
+  const name = document.getElementById("newPlaylistName").value.trim();
+  if(!name) return alert("Please provide a playlist name.");
+  if(playlists[name]) return alert("A playlist with that name already exists.");
+  playlists[name]=[];
+  currentPlaylist = name;
+  audioSources = playlists[name];
+  resetPlayer();
+  document.getElementById("newPlaylistName").value = "";
+  savePlaylists();
+  renderModalPlaylistList();
+  renderTracks();
+  renderHeader();
+}
+
+/* Create from modal */
+function createPlaylistFromModal(){
+  const name = document.getElementById("modalNewPlaylist").value.trim();
+  if(!name) return;
+  if(playlists[name]) return alert("Playlist exists.");
+  playlists[name]=[];
+  document.getElementById("modalNewPlaylist").value="";
+  savePlaylists();
+  renderModalPlaylistList();
+}
+
+/* Modal open/close */
+function openPlaylistModal(){ renderModalPlaylistList(); document.getElementById('playlistModal').style.display='flex'; }
+function closePlaylistModal(e){ if(e && e.stopPropagation) e.stopPropagation(); document.getElementById('playlistModal').style.display='none'; }
+
+/* Render modal list */
+function renderModalPlaylistList(){
+  const container = document.getElementById('modalPlaylistList');
+  container.innerHTML = '';
+  const keys = Object.keys(playlists);
+  if(keys.length===0){ container.innerHTML = '<div class="small-muted">No playlists yet.</div>'; return; }
+  keys.forEach(name=>{
+    const div = document.createElement('div');
+    div.className='modal-playlist';
+    div.innerHTML = `
+      <div style="flex:1; min-width:0; margin-right:8px;">${name}</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><span class="material-symbols-outlined">edit</span></button>
+        <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><span class="material-symbols-outlined">delete</span></button>
+      </div>`;
+    div.onclick = ()=> selectPlaylist(name);
+    container.appendChild(div);
+  });
+}
+
+/* rename/delete from modal */
+function renameFromModal(encodedName){
+  const name = decodeURIComponent(encodedName);
+  const newName = prompt("Rename playlist:", name);
+  if(!newName || newName===name) return;
+  if(playlists[newName]) return alert("A playlist with that name already exists.");
+  playlists[newName]=playlists[name];
+  delete playlists[name];
+  if(currentPlaylist===name) currentPlaylist=newName;
+  savePlaylists();
+  renderModalPlaylistList();
+  renderTracks();
+  renderHeader();
+}
+function deleteFromModal(encodedName){
+  const name = decodeURIComponent(encodedName);
+  if(!confirm("Delete playlist '"+name+"'?")) return;
+  delete playlists[name];
+  if(currentPlaylist===name){
+    currentPlaylist = Object.keys(playlists)[0] || null;
+    audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+    resetPlayer();
+  }
+  savePlaylists();
+  renderModalPlaylistList();
+  renderTracks();
+  renderHeader();
+}
+
+/* select playlist */
+function selectPlaylist(name){
+  currentPlaylist = name;
+  audioSources = playlists[name] || [];
+  resetPlayer();
+  savePlaylists();
+  closePlaylistModal();
+  renderTracks();
+  renderHeader();
+}
+
+/* Add track (ESV API) */
+function addTrackToList(){
+  if(!currentPlaylist) return alert("Select or create a playlist first.");
+  var elem = document.getElementById("input").value.trim();
+  if(!elem) return;
+  if(elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
+
+  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+
+  fetch(url, a)
+    .then(res=>res.json())
+    .then(r=>{
+      if(!r.parsed || !r.parsed[0]) return alert("Couldn't parse passage.");
+      let start = r.parsed[0][0];
+      let end = r.parsed[0][1];
+      const trackId = Date.now() + "-" + start + "-" + end + "-" + Math.floor(Math.random()*10000);
+      const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+      const newTrack = { _id: trackId, url: src, label: r.canonical };
+      audioSources.push(newTrack);
+      playlists[currentPlaylist]=audioSources;
       savePlaylists();
-      renderModalPlaylistList();
       renderTracks();
+      document.getElementById("input").value='';
       renderHeader();
-    }
+    })
+    .catch(err=>{
+      console.error("Error fetching ESV passage:", err);
+      alert("Error fetching passage. See console.");
+    });
+}
 
-    /* CREATE from modal */
-    function createPlaylistFromModal() {
-      const name = document.getElementById("modalNewPlaylist").value.trim();
-      if (!name) return;
-      if (playlists[name]) return alert("Playlist exists.");
-      playlists[name] = [];
-      document.getElementById("modalNewPlaylist").value = "";
-      savePlaylists();
-      renderModalPlaylistList();
-    }
+/* move Up/Down */
+function moveTrackUp(index){ if(index===0) return; [audioSources[index-1], audioSources[index]]=[audioSources[index], audioSources[index-1]]; playlists[currentPlaylist]=audioSources; savePlaylists(); renderTracks(); }
+function moveTrackDown(index){ if(index===audioSources.length-1) return; [audioSources[index+1], audioSources[index]]=[audioSources[index], audioSources[index+1]]; playlists[currentPlaylist]=audioSources; savePlaylists(); renderTracks(); }
 
-    /* SELECT / RENAME / DELETE from modal */
-    function openPlaylistModal() {
-      renderModalPlaylistList();
-      document.getElementById('playlistModal').style.display = 'flex';
-    }
-    function closePlaylistModal(e) {
-      if (e && e.stopPropagation) e.stopPropagation();
-      document.getElementById('playlistModal').style.display = 'none';
-    }
+/* play/pause by id */
+function playTrack(trackId){
+  let idx = audioSources.findIndex(x=>x._id===trackId);
+  if(idx===-1) return;
+  if(parseInt(audio.dataset.index)===idx){
+    audio.paused ? audio.play() : audio.pause();
+  } else {
+    playByIndex(idx);
+  }
+  renderTracks();
+  updateNowPlayingMini();
+}
+function playByIndex(idx){
+  if(!audioSources[idx]){ resetPlayer(); return; }
+  audio.src = audioSources[idx].url;
+  audio.dataset.index = idx;
+  audio.play();
+  renderTracks();
+  updateNowPlayingMini();
+}
 
-    function renderModalPlaylistList() {
-      const container = document.getElementById('modalPlaylistList');
-      container.innerHTML = '';
-      if (Object.keys(playlists).length === 0) {
-        container.innerHTML = '<div class="small-muted">No playlists yet.</div>';
-        return;
-      }
-      Object.keys(playlists).forEach(name => {
-        const div = document.createElement('div');
-        div.className = 'modal-playlist';
-        div.innerHTML = `
-          <div style="flex:1; min-width:0; margin-right:8px;">${name}</div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-sm btn-outline-secondary" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        `;
-        div.onclick = () => selectPlaylist(name);
-        container.appendChild(div);
-      });
-    }
+/* ended */
+audio.addEventListener("ended", function(){
+  if(!audioSources || audioSources.length===0) return;
+  let idx = parseInt(audio.dataset.index || 0);
+  idx = isShuffle ? Math.floor(Math.random()*audioSources.length) : (idx+1) % audioSources.length;
+  playByIndex(idx);
+});
 
-    function renameFromModal(encodedName) {
-      const name = decodeURIComponent(encodedName);
-      const newName = prompt("Rename playlist:", name);
-      if (!newName || newName === name) return;
-      if (playlists[newName]) return alert("A playlist with that name already exists.");
-      playlists[newName] = playlists[name];
-      delete playlists[name];
-      if (currentPlaylist === name) currentPlaylist = newName;
-      savePlaylists();
-      renderModalPlaylistList();
-      renderTracks();
-      renderHeader();
-    }
+/* delete track */
+function deleteTrack(index){
+  let currentIndex = parseInt(audio.dataset.index||-1);
+  let isPlayingCurrent = (index===currentIndex);
+  audioSources.splice(index,1);
+  playlists[currentPlaylist]=audioSources;
+  if(audioSources.length===0){ resetPlayer(); }
+  else if(isPlayingCurrent){
+    let nextIndex = index>=audioSources.length ? audioSources.length-1 : index;
+    playByIndex(nextIndex);
+  } else if(currentIndex>index){
+    audio.dataset.index = currentIndex -1;
+  }
+  savePlaylists();
+  renderTracks();
+  renderHeader();
+}
 
-    function deleteFromModal(encodedName) {
-      const name = decodeURIComponent(encodedName);
-      if (!confirm("Delete playlist '" + name + "'?")) return;
-      delete playlists[name];
-      if (currentPlaylist === name) {
-        currentPlaylist = Object.keys(playlists)[0] || null;
-        audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
-        resetPlayer();
-      }
-      savePlaylists();
-      renderModalPlaylistList();
-      renderTracks();
-      renderHeader();
-    }
+/* drag & drop */
+let dragStartIndex = null;
 
-    function selectPlaylist(name) {
-      currentPlaylist = name;
-      audioSources = playlists[name] || [];
-      resetPlayer();
-      savePlaylists();
-      closePlaylistModal();
-      renderTracks();
-      renderHeader();
-    }
+function renderTracks(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
 
-    /* Add track via ESV API */
-    function addTrackToList() {
-      if (!currentPlaylist) return alert("Select or create a playlist first.");
-      var elem = document.getElementById("input").value.trim();
-      if (!elem) return;
-      if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
+  if(!currentPlaylist){
+    list.innerHTML = '<li class="list-group-item small-muted">No playlist selected. Open Playlists or Create one.</li>';
+    document.getElementById("playlistCount").textContent = '';
+    return;
+  }
 
-      var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+  document.getElementById("playlistCount").textContent = (audioSources.length===0) ? 'No tracks' : (audioSources.length + ' track' + (audioSources.length===1? '':'s'));
 
-      fetch(url, a)
-        .then(res => res.json())
-        .then(r => {
-          if (!r.parsed || !r.parsed[0]) return alert("Couldn't parse passage.");
-          let start = r.parsed[0][0];
-          let end = r.parsed[0][1];
-          const trackId = Date.now() + "-" + start + "-" + end + "-" + Math.floor(Math.random()*10000);
-          const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-          const newTrack = { _id: trackId, url: src, label: r.canonical };
-
-          audioSources.push(newTrack);
-          playlists[currentPlaylist] = audioSources;
-          savePlaylists();
-          renderTracks();
-          document.getElementById("input").value = "";
-          renderHeader();
-        })
-        .catch(err => {
-          console.error("Error fetching ESV passage:", err);
-          alert("Error fetching passage. See console.");
-        });
-    }
-
-    /* Move up/down */
-    function moveTrackUp(index) {
-      if (index === 0) return;
-      [audioSources[index - 1], audioSources[index]] = [audioSources[index], audioSources[index - 1]];
-      savePlaylists();
-      renderTracks();
-    }
-    function moveTrackDown(index) {
-      if (index === audioSources.length - 1) return;
-      [audioSources[index + 1], audioSources[index]] = [audioSources[index], audioSources[index + 1]];
-      savePlaylists();
-      renderTracks();
-    }
-
-    /* Play/pause by id (reliable) */
-    function playTrack(trackId) {
-      let idx = audioSources.findIndex(x => x._id === trackId);
-      if (idx === -1) return;
-      if (parseInt(audio.dataset.index) === idx) {
-        if (audio.paused) audio.play(); else audio.pause();
-      } else {
-        playByIndex(idx);
-      }
-      renderTracks();
-      updateNowPlayingMini();
-    }
-
-    function playByIndex(idx) {
-      if (!audioSources[idx]) { resetPlayer(); return; }
-      audio.src = audioSources[idx].url;
-      audio.dataset.index = idx;
-      audio.play();
-      renderTracks();
-      updateNowPlayingMini();
-    }
-
-    audio.addEventListener("ended", function() {
-      if (!audioSources || audioSources.length === 0) return;
-      let idx = parseInt(audio.dataset.index || 0);
-      idx = (idx + 1) % audioSources.length;
-      playByIndex(idx);
+  audioSources.forEach((track,index)=>{
+    const li = document.createElement('li');
+    li.className = "list-group-item";
+    if(parseInt(audio.dataset.index)===index) li.className += " now-playing";
+    li.draggable = true;
+    li.addEventListener("dragstart", ()=> dragStartIndex = index);
+    li.addEventListener("dragover", e=> e.preventDefault());
+    li.addEventListener("drop", ()=>{
+      [audioSources[dragStartIndex], audioSources[index]] = [audioSources[index], audioSources[dragStartIndex]];
+      playlists[currentPlaylist]=audioSources; savePlaylists(); renderTracks();
     });
 
-    /* Delete track with correct next behavior */
-    function deleteTrack(index) {
-      let currentIndex = parseInt(audio.dataset.index || -1);
-      let isPlayingCurrent = (index === currentIndex);
-      audioSources.splice(index, 1);
+    const isPlaying = parseInt(audio.dataset.index)===index && !audio.paused;
+    const playIcon = isPlaying ? 'pause' : 'play_arrow';
+
+    li.innerHTML = `
+      <div class="track-row">
+        <div class="track-left">
+          <button class="btn-icon" onclick="playTrack('${track._id}')" title="Play/Pause"><span class="material-symbols-outlined">${playIcon}</span></button>
+          <div class="track-label">${track.label}</div>
+        </div>
+
+        <div class="track-actions" style="display:flex; gap:8px; align-items:center;">
+          <button class="btn" title="Move up" onclick="moveTrackUp(${index})"><span class="material-symbols-outlined">arrow_upward</span></button>
+          <button class="btn" title="Move down" onclick="moveTrackDown(${index})"><span class="material-symbols-outlined">arrow_downward</span></button>
+          <button class="btn" title="Delete" onclick="deleteTrack(${index})"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+/* header updates */
+function renderHeader(){
+  document.getElementById("currentPlaylistName").textContent = currentPlaylist || "No playlist selected";
+  document.getElementById("playlistCount").textContent = currentPlaylist ? ((playlists[currentPlaylist]||[]).length + " tracks") : '';
+  updateNowPlayingMini();
+}
+function updateNowPlayingMini(){
+  const idx = parseInt(audio.dataset.index||-1);
+  const mini = document.getElementById("nowPlayingMini");
+  if(idx>=0 && audioSources[idx]) mini.textContent = "Now playing: " + audioSources[idx].label;
+  else mini.textContent = "Not playing";
+}
+
+/* toggle shuffle simple */
+function toggleShuffle(){ isShuffle = !isShuffle; alert("Shuffle " + (isShuffle ? "On":"Off")); }
+
+/* delete playlist */
+function deleteCurrentPlaylist(){
+  if(!currentPlaylist) return;
+  if(!confirm("Delete playlist '" + currentPlaylist + "'?")) return;
+  delete playlists[currentPlaylist];
+  currentPlaylist = Object.keys(playlists)[0] || null;
+  audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+  resetPlayer();
+  savePlaylists();
+  renderModalPlaylistList();
+  renderTracks();
+  renderHeader();
+}
+
+/* restore memory */
+function restoreMemory(){
+  if(localStorage.getItem("esv_dark")==="true") document.body.classList.add("dark");
+  if(currentPlaylist && playlists[currentPlaylist]) audioSources = playlists[currentPlaylist];
+  else audioSources = [];
+  renderModalPlaylistList();
+  renderTracks();
+  renderHeader();
+}
+
+/* Enter key handler to add track */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.activeElement && document.activeElement.id === 'input'){
+    addTrackToList();
+  }
+});
+
+/* Expose addTrackToList as public function name used above */
+function addTrackToList(){ addTrackToListInternal(); }
+function addTrackToListInternal(){
+  addTrackToList(); // placeholder, replaced below
+}
+/* assign core implementation (prevent earlier recursion issues) */
+addTrackToList = function(){
+  if(!currentPlaylist) return alert("Select or create a playlist first.");
+  var elem = document.getElementById("input").value.trim();
+  if(!elem) return;
+  if(elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
+
+  var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+
+  fetch(url, a)
+    .then(res=>res.json())
+    .then(r=>{
+      if(!r.parsed || !r.parsed[0]) return alert("Couldn't parse passage.");
+      let start = r.parsed[0][0];
+      let end = r.parsed[0][1];
+      const trackId = Date.now() + "-" + start + "-" + end + "-" + Math.floor(Math.random()*10000);
+      const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+      const newTrack = { _id: trackId, url: src, label: r.canonical };
+      audioSources.push(newTrack);
       playlists[currentPlaylist] = audioSources;
-      if (audioSources.length === 0) {
-        resetPlayer();
-      } else if (isPlayingCurrent) {
-        let nextIndex = index >= audioSources.length ? audioSources.length - 1 : index;
-        playByIndex(nextIndex);
-      } else if (currentIndex > index) {
-        audio.dataset.index = currentIndex - 1;
-      }
       savePlaylists();
       renderTracks();
+      document.getElementById("input").value='';
       renderHeader();
-    }
-
-    /* Drag & drop reorder */
-    let dragStartIndex = null;
-
-    function renderTracks() {
-      const list = document.getElementById("list");
-      list.innerHTML = "";
-
-      audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
-
-      if (!currentPlaylist) {
-        list.innerHTML = '<li class="list-group-item small-muted">No playlist selected. Open Playlists or Create one.</li>';
-        document.getElementById("playlistCount").textContent = '';
-        return;
-      }
-
-      document.getElementById("playlistCount").textContent = (audioSources.length === 0) ? 'No tracks' : (audioSources.length + ' track' + (audioSources.length === 1 ? '' : 's'));
-
-      audioSources.forEach((track, index) => {
-        const li = document.createElement('li');
-        li.className = "list-group-item";
-
-        if (parseInt(audio.dataset.index) === index) li.className += " now-playing";
-
-        li.draggable = true;
-        li.addEventListener("dragstart", () => dragStartIndex = index);
-        li.addEventListener("dragover", e => e.preventDefault());
-        li.addEventListener("drop", () => {
-          [audioSources[dragStartIndex], audioSources[index]] =
-            [audioSources[index], audioSources[dragStartIndex]];
-          playlists[currentPlaylist] = audioSources;
-          savePlaylists();
-          renderTracks();
-        });
-
-        const isPlaying = parseInt(audio.dataset.index) === index && !audio.paused;
-        const playIcon = isPlaying ? "fa-pause" : "fa-play";
-
-        li.innerHTML = `
-          <div class="track-row">
-            <div class="track-left">
-              <button class="btn btn-outline-primary btn-icon" onclick="playTrack('${track._id}')"><i class="fa-solid ${playIcon}"></i></button>
-              <div class="track-label">${track.label}</div>
-            </div>
-
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button class="btn btn-outline-secondary mobile-only" onclick="moveTrackUp(${index})"><i class="fa-solid fa-chevron-up"></i></button>
-              <button class="btn btn-outline-secondary mobile-only" onclick="moveTrackDown(${index})"><i class="fa-solid fa-chevron-down"></i></button>
-
-              <button class="btn btn-outline-danger" onclick="deleteTrack(${index})"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-        `;
-        list.appendChild(li);
-      });
-    }
-
-    function renderHeader() {
-      document.getElementById("currentPlaylistName").textContent = currentPlaylist || "No playlist selected";
-      document.getElementById("playlistCount").textContent = currentPlaylist ? ((playlists[currentPlaylist] || []).length + " tracks") : '';
-      updateNowPlayingMini();
-    }
-
-    function updateNowPlayingMini() {
-      const idx = parseInt(audio.dataset.index || -1);
-      const mini = document.getElementById("nowPlayingMini");
-      if (idx >= 0 && audioSources[idx]) {
-        mini.textContent = "Now playing: " + audioSources[idx].label;
-      } else {
-        mini.textContent = "Not playing";
-      }
-    }
-
-    function deleteCurrentPlaylist() {
-      if (!currentPlaylist) return;
-      if (!confirm("Delete playlist '" + currentPlaylist + "'?")) return;
-      delete playlists[currentPlaylist];
-      currentPlaylist = Object.keys(playlists)[0] || null;
-      audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
-      resetPlayer();
-      savePlaylists();
-      renderModalPlaylistList();
-      renderTracks();
-      renderHeader();
-    }
-
-    /* INIT */
-    function restoreMemory() {
-      if (currentPlaylist && playlists[currentPlaylist]) {
-        audioSources = playlists[currentPlaylist];
-      } else {
-        audioSources = [];
-      }
-      renderModalPlaylistList();
-      renderTracks();
-      renderHeader();
-    }
-
-    /* Keypress: Enter adds track */
-    $(document).keypress(function(e) {
-      if (e.which === 13 && document.activeElement.id === "input") {
-        addTrackToList();
-      }
+    })
+    .catch(err=>{
+      console.error("Error fetching ESV passage:", err);
+      alert("Error fetching passage. See console.");
     });
+};
 
-    // expose addTrackToList globally for top-level Enter handling
-    function addTrackToList() { addTrackToListInner(); }
-    function addTrackToListInner() { addTrackToListActual(); }
-
-    // For clarity, define final function used above (keeps names consistent)
-    function addTrackToListActual() {
-      addTrackToList();
-    }
-
-    // avoid infinite recursion: replace quick wrappers with actual function
-    // (The above is a small compatibility safeguard; now assign correctly:)
-    addTrackToList = function() {
-      if (!currentPlaylist) return alert("Select or create a playlist first.");
-      var elem = document.getElementById("input").value.trim();
-      if (!elem) return;
-      if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
-
-      var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
-
-      fetch(url, a)
-        .then(res => res.json())
-        .then(r => {
-          if (!r.parsed || !r.parsed[0]) return alert("Couldn't parse passage.");
-          let start = r.parsed[0][0];
-          let end = r.parsed[0][1];
-          const trackId = Date.now() + "-" + start + "-" + end + "-" + Math.floor(Math.random()*10000);
-          const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-          const newTrack = { _id: trackId, url: src, label: r.canonical };
-
-          audioSources.push(newTrack);
-          playlists[currentPlaylist] = audioSources;
-          savePlaylists();
-          renderTracks();
-          document.getElementById("input").value = "";
-          renderHeader();
-        })
-        .catch(err => {
-          console.error("Error fetching ESV passage:", err);
-          alert("Error fetching passage. See console.");
-        });
-    };
-
-    // start
-    restoreMemory();
-  </script>
+/* start */
+restoreMemory();
+</script>
 </body>
 </html>
