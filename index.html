@@ -419,6 +419,68 @@
             var isShuffle = false;
             var repeatTrackIndex = null;
 
+            // --- Media Session Integration ---
+            if ('mediaSession' in navigator) {
+                function updateMediaSessionMetadata() {
+                    const idx = parseInt(player.dataset.index || -1);
+                    if (idx < 0 || !audioSources[idx]) return;
+
+                    const track = audioSources[idx];
+
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: track.label,
+                        artist: "ESV Audio",
+                        album: currentPlaylist || "ESV Playlist",
+                        artwork: [
+                            { src: '/headphone-symbol.png', sizes: '96x96', type: 'image/png' },
+                            { src: '/headphone-symbol.png', sizes: '192x192', type: 'image/png' },
+                            { src: '/headphone-symbol.png', sizes: '256x256', type: 'image/png' },
+                            { src: '/headphone-symbol.png', sizes: '384x384', type: 'image/png' },
+                            { src: '/headphone-symbol.png', sizes: '512x512', type: 'image/png' }
+                        ]
+                    });
+                }
+
+                navigator.mediaSession.setActionHandler('play', () => {
+                    player.play();
+                });
+
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    player.pause();
+                });
+
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    let idx = parseInt(player.dataset.index || 0);
+                    if (idx > 0) playByIndex(idx - 1);
+                });
+
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    let idx = parseInt(player.dataset.index || 0);
+                    if (idx < audioSources.length - 1) playByIndex(idx + 1);
+                });
+
+                navigator.mediaSession.setActionHandler('seekto', (details) => {
+                    if (details.fastSeek && 'fastSeek' in player) {
+                        player.fastSeek(details.seekTime);
+                    } else {
+                        player.currentTime = details.seekTime;
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('seekforward', () => {
+                    player.currentTime = Math.min(player.currentTime + 10, player.duration || player.currentTime);
+                });
+
+                navigator.mediaSession.setActionHandler('seekbackward', () => {
+                    player.currentTime = Math.max(player.currentTime - 10, 0);
+                });
+
+                // Update metadata when track changes
+                player.addEventListener('play', updateMediaSessionMetadata);
+                player.addEventListener('loadedmetadata', updateMediaSessionMetadata);
+            }
+
+
             let playlists = JSON.parse(localStorage.getItem('esv_playlists')) || {};
             let currentPlaylist = localStorage.getItem('esv_currentPlaylist') || null;
 
@@ -473,11 +535,15 @@
                     const div = document.createElement('div');
                     div.className = 'modal-playlist';
                     div.innerHTML = `
-      <div style="flex:1; min-width:0; margin-right:8px;">${name}</div>
-      <div style="display:flex; gap:6px;">
-        <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><span class="material-symbols-outlined">edit</span></button>
-        <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();"><span class="material-symbols-outlined">delete</span></button>
-      </div>`;
+                        <div style="flex:1; min-width:0; margin-right:8px;">${name}</div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(
+                                name
+                            )}'); event.stopPropagation();"><span class="material-symbols-outlined">edit</span></button>
+                            <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(
+                                name
+                            )}'); event.stopPropagation();"><span class="material-symbols-outlined">delete</span></button>
+                        </div>`;
                     div.onclick = () => selectPlaylist(name);
                     container.appendChild(div);
                 });
@@ -664,12 +730,25 @@
                 e.stopPropagation();
                 closeAllTrackMenus();
 
+                const track = audioSources[index];
+                const readUrl = 'https://www.esv.org/' + track.label.replace(/\s+/g, '+');
+
                 const menu = document.createElement('div');
                 menu.className = 'track-menu';
                 menu.innerHTML = `
-    <button onclick="deleteTrack(${index}); closeAllTrackMenus();">Delete</button>
-    <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat Track'}</button>
-  `;
+                    <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">
+                        ${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat'}
+                    </button>
+
+                    <button onclick="window.open('${readUrl}', '_blank'); closeAllTrackMenus();">
+                        Read
+                    </button>
+
+                    <button onclick="deleteTrack(${index}); closeAllTrackMenus();">
+                        Delete
+                    </button>
+                `;
+
                 e.currentTarget.parentElement.parentElement.appendChild(menu);
             }
 
