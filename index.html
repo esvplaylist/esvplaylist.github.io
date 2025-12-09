@@ -703,30 +703,30 @@
                     const playIcon = isPlaying ? 'pause' : 'play_arrow';
 
                     li.innerHTML = `
-  <div class="track-row">
-    <div class="track-left">
-      <button class="btn-icon" onclick="playTrack('${track._id}')" title="Play/Pause">
-        <span class="material-symbols-outlined">${playIcon}</span>
-      </button>
-      <div class="track-label">
-        ${track.label} 
-        ${repeatTrackIndex === index ? '<span title="Repeating" style="color:var(--accent); margin-left:4px;">🔁</span>' : ''}
-      </div>
-    </div>
+                    <div class="track-row">
+                        <div class="track-left">
+                        <button class="btn-icon" onclick="playTrack('${track._id}')" title="Play/Pause">
+                            <span class="material-symbols-outlined">${playIcon}</span>
+                        </button>
+                        <div class="track-label">
+                            ${track.label} 
+                            ${repeatTrackIndex === index ? '<span title="Repeating" style="color:var(--accent); margin-left:4px;">🔁</span>' : ''}
+                        </div>
+                        </div>
 
-    <div class="track-actions">
-      <button class="btn" title="Move up" onclick="moveTrackUp(${index})">
-        <span class="material-symbols-outlined">arrow_upward</span>
-      </button>
-      <button class="btn" title="Move down" onclick="moveTrackDown(${index})">
-        <span class="material-symbols-outlined">arrow_downward</span>
-      </button>
-      <button class="btn" title="Options" onclick="showTrackMenu(event, ${index})">
-        <span class="material-symbols-outlined">more_vert</span>
-      </button>
-    </div>
-  </div>
-`;
+                        <div class="track-actions">
+                        <button class="btn" title="Move up" onclick="moveTrackUp(${index})">
+                            <span class="material-symbols-outlined">arrow_upward</span>
+                        </button>
+                        <button class="btn" title="Move down" onclick="moveTrackDown(${index})">
+                            <span class="material-symbols-outlined">arrow_downward</span>
+                        </button>
+                        <button class="btn" title="Options" onclick="showTrackMenu(event, ${index})">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                        </div>
+                    </div>
+                    `;
                     list.appendChild(li);
                 });
             }
