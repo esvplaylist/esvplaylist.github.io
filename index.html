@@ -759,7 +759,7 @@
 
 
         /* render tracks */
-        function renderTracks() {            
+        function renderTracks() {
             const list = document.getElementById('list');
             list.innerHTML = '';
             audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
@@ -1097,13 +1097,23 @@
         }
 
         async function removeOfflineCache(url) {
-            if (!('caches' in window)) return;
-            const keys = await caches.keys();
-            for (const key of keys) {
-                const cache = await caches.open(key);
-                await cache.delete(url);
+            async function removeOfflineCache(url) {
+                if (!('caches' in window)) return;
+
+                try {
+                    const keys = await caches.keys();
+                    for (const key of keys) {
+                        const cache = await caches.open(key);
+                        // Try both exact match and Request object
+                        await cache.delete(url);
+                        await cache.delete(new Request(url, { mode: 'no-cors' }));
+                    }
+                } catch (err) {
+                    console.warn('Failed to remove cached track:', err);
+                }
+
+                renderTracks(); // refresh offline indicators
             }
-            renderTracks();
         }
 
         async function isTrackCached(url) {
