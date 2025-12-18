@@ -640,6 +640,13 @@
 
         function deleteFromModal(encodedName) {
             const name = decodeURIComponent(encodedName);
+            const tracksToDelete = playlists[name] || [];
+
+            // Remove cached tracks without blocking
+            tracksToDelete.forEach(track => {
+                if (track.url) removeOfflineCache(track.url);
+            });
+
             delete playlists[name];
             if (currentPlaylist === name) {
                 currentPlaylist = Object.keys(playlists)[0] || null;
@@ -724,6 +731,12 @@
             let isPlayingCurrent = index === currentIndex;
             audioSources.splice(index, 1);
             playlists[currentPlaylist] = audioSources;
+
+            // Remove cached file
+            if (deletedTrack && deletedTrack.url) {
+                removeOfflineCache(deletedTrack.url); // fire-and-forget
+            }
+
             if (audioSources.length === 0) {
                 resetPlayer();
             } else if (isPlayingCurrent) {
