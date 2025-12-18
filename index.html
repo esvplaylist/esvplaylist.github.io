@@ -374,7 +374,7 @@
 
 <body>
     <div id="offlineBanner" class="offline-banner">
-        You're offline. Some features may not work.
+        Offline Mode
     </div>
 
     <div class="app">
@@ -423,8 +423,7 @@
                         </div>
                     </div>
                     <select id="speedSelect" class="btn" style="width: auto">
-                        <option value="0.5">0.5×</option>
-                        <option value="0.75">0.75×</option>
+                        <option value="0.8">0.8×</option>
                         <option value="1">1×</option>
                         <option value="1.25">1.25×</option>
                         <option value="1.5">1.5×</option>
@@ -705,7 +704,7 @@
                 })
                 .catch((err) => {
                     console.error('Error fetching ESV passage:', err);
-                    alert('Error fetching passage. See console.');
+                    alert('Unable to retrieve passage.');
                 });
         }
 
@@ -801,7 +800,7 @@
                         </button>
                         <div class="track-label">
                             ${track.label} 
-                            ${repeatTrackIndex === index ? '<span title="Repeating" style="color:var(--accent); margin-left:4px;">🔁</span>' : ''}
+                            ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating" style="color:var(--accent); margin-left:4px;">repeat</span>' : ''}
                         </div>
                         </div>
 
@@ -1017,6 +1016,9 @@
 
         function updateOnlineStatus() {
             offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
+            // Get the input element by its ID
+            let userInputFld = document.getElementById("input");
+            userInputFld.disabled = !navigator.onLine;
         }
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
