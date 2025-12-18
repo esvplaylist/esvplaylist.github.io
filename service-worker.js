@@ -18,29 +18,49 @@ var URLS = [
   `${GHPATH}/headphone-symbol.png`
 ]
 
-const CACHE = 'esv-playlist-v1';
+const CACHE_NAME = 'esvplaylist-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/headphone-symbol.png',
+  '/service-worker.js',
+  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
+  // add more assets if needed
+];
 
-self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+  );
+  self.skipWaiting();
+});
 
-self.addEventListener('fetch', event => {
-    const req = event.request;
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      }))
+    )
+  );
+  self.clients.claim();
+});
 
-    // Only cache audio when browser fetches it naturally
-    if (req.destination === 'audio') {
-        event.respondWith(
-            caches.open('esv-playlist-v1').then(async cache => {
-                const cached = await cache.match(req);
-                if (cached) return cached;
-
-                const response = await fetch(req);
-                cache.put(req, response.clone());
-                return response;
-            })
-        );
-        return;
-    }
-
-    event.respondWith(
-        fetch(req).catch(() => caches.match(req))
-    );
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((res) => {
+        // Optionally cache new requests dynamically
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, res.clone());
+          return res;
+        });
+      }).catch(() => {
+        // Fallback offline page
+        if (event.request.mode === 'navigate') return caches.match('/index.html');
+      });
+    })
+  );
 });
