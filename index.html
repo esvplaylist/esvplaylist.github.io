@@ -849,22 +849,12 @@
                 <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">
                     ${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat'}
                 </button>
-
                 <button onclick="window.open('${readUrl}', '_blank'); closeAllTrackMenus();">
                     Read
                 </button>
-
                 <button onclick="deleteTrack(${index}); closeAllTrackMenus();">
                     Delete
                 </button>
-
-                // <button onclick="silentCaptureDownload(audioSources[${index}].url); closeAllTrackMenus();">
-                //     Download for offline
-                // </button>
-
-                // <button onclick="removeOfflineCache(audioSources[${index}].url); closeAllTrackMenus();">
-                //     Remove from offline
-                // </button>
             `;
 
             // Attach to body instead of being trapped inside the track row
