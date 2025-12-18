@@ -1097,25 +1097,24 @@
         }
 
         async function removeOfflineCache(url) {
-            async function removeOfflineCache(url) {
-                if (!('caches' in window)) return;
+            if (!('caches' in window)) return;
 
-                try {
-                    const keys = await caches.keys();
-                    for (const key of keys) {
-                        const cache = await caches.open(key);
-                        // Try both exact match and Request object
-                        console.log(url);
-                        await cache.delete(url);
-                        //await cache.delete(new Request(url, { mode: 'no-cors' }));
-                    }
-                } catch (err) {
-                    console.warn('Failed to remove cached track:', err);
+            try {
+                const keys = await caches.keys();
+                for (const key of keys) {
+                    const cache = await caches.open(key);
+                    // Try both exact match and Request object
+                    console.log(url);
+                    await cache.delete(url);
+                    //await cache.delete(new Request(url, { mode: 'no-cors' }));
                 }
-                updateStorageIndicator();
-                renderTracks(); // refresh offline indicators
+            } catch (err) {
+                console.warn('Failed to remove cached track:', err);
             }
+            updateStorageIndicator();
+            renderTracks(); // refresh offline indicators
         }
+        
 
         async function isTrackCached(url) {
             if (!('caches' in window)) return false;
