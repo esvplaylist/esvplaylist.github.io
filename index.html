@@ -1111,7 +1111,7 @@
                 } catch (err) {
                     console.warn('Failed to remove cached track:', err);
                 }
-
+                updateStorageIndicator();
                 renderTracks(); // refresh offline indicators
             }
         }
