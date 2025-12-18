@@ -1130,26 +1130,26 @@
 
         /* ================= EXTEND TRACK MENU (ADDITIVE) ================= */
 
-        const originalShowTrackMenu = showTrackMenu;
-        showTrackMenu = async function (e, index) {
-            originalShowTrackMenu(e, index);
+        // const originalShowTrackMenu = showTrackMenu;
+        // showTrackMenu = async function (e, index) {
+        //     originalShowTrackMenu(e, index);
 
-            const track = audioSources[index];
-            const cached = await isTrackCached(track.url);
-            const menu = document.querySelector('.track-menu');
-            if (!menu) return;
+        //     const track = audioSources[index];
+        //     const cached = await isTrackCached(track.url);
+        //     const menu = document.querySelector('.track-menu');
+        //     if (!menu) return;
 
-            const btn = document.createElement('button');
-            btn.textContent = cached ? 'Remove from offline' : 'Download for offline';
-            btn.onclick = async () => {
-                cached ? await removeCachedTrack(track.url) : await cacheTrack(track.url);
-                closeAllTrackMenus();
-                renderTracks();
-                updateStorageIndicator();
-            };
+        //     const btn = document.createElement('button');
+        //     btn.textContent = cached ? 'Remove from offline' : 'Download for offline';
+        //     btn.onclick = async () => {
+        //         cached ? await removeCachedTrack(track.url) : await cacheTrack(track.url);
+        //         closeAllTrackMenus();
+        //         renderTracks();
+        //         updateStorageIndicator();
+        //     };
 
-            menu.insertBefore(btn, menu.firstChild);
-        };
+        //     menu.insertBefore(btn, menu.firstChild);
+        // };
 
         /* ================= EXTEND RENDER TRACKS (ADDITIVE) ================= */
 
