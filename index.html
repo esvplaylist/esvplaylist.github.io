@@ -732,6 +732,8 @@
             audioSources.splice(index, 1);
             playlists[currentPlaylist] = audioSources;
 
+            // Capture the track before removing it
+            const deletedTrack = audioSources[index];
             // Remove cached file
             if (deletedTrack && deletedTrack.url) {
                 removeOfflineCache(deletedTrack.url); // fire-and-forget
