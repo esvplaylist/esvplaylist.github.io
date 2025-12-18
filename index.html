@@ -888,8 +888,13 @@
 
         /* repeat track toggle */
         function toggleRepeat(index) {
-            if (repeatTrackIndex === index) repeatTrackIndex = null;
-            else repeatTrackIndex = index;
+            if (repeatTrackIndex === index) {
+                repeatTrackIndex = null;
+            } 
+            else {
+                repeatTrackIndex = index;
+                renderTracks();
+            } 
         }
 
         /* play/pause */
