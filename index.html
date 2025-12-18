@@ -336,10 +336,47 @@
                 border-radius: 6px;
             }
         }
+
+        .offline-banner {
+            display: none;
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc3545;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            z-index: 100000;
+        }
+
+        .offline-indicator {
+            margin-left: 6px;
+            font-size: 16px;
+            color: var(--muted);
+            vertical-align: middle;
+        }
+
+        .btn-offline-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .storage-meter {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
     </style>
 </head>
 
 <body>
+    <div id="offlineBanner" class="offline-banner">
+        You're offline. Some features may not work.
+    </div>
+
     <div class="app">
         <header class="top">
             <div class="controls">
@@ -924,6 +961,116 @@
 
         player.addEventListener('play', applySavedSpeed);
         restoreMemory();
+
+        const offlineBanner = document.getElementById('offlineBanner');
+
+        function updateOnlineStatus() {
+            offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        async function isTrackCached(url) {
+            if (!('caches' in window)) return false;
+            const keys = await caches.keys();
+            for (const k of keys) {
+                const cache = await caches.open(k);
+                if (await cache.match(url)) return true;
+            }
+            return false;
+        }
+
+        async function cacheTrack(url) {
+            const cache = await caches.open('esv-playlist-v1');
+            const res = await fetch(url);
+            await cache.put(url, res.clone());
+        }
+
+        async function removeCachedTrack(url) {
+            const keys = await caches.keys();
+            for (const k of keys) {
+                const cache = await caches.open(k);
+                await cache.delete(url);
+            }
+        }
+
+        /* ================= STORAGE USAGE INDICATOR ================= */
+
+        async function updateStorageIndicator() {
+            if (!navigator.storage?.estimate) return;
+            const { usage, quota } = await navigator.storage.estimate();
+            const mb = n => (n / 1024 / 1024).toFixed(1);
+            const el = document.getElementById('storageUsage');
+            if (el) el.textContent = `Offline storage: ${mb(usage)} MB used of ${mb(quota)} MB`;
+        }
+
+        /* ================= EXTEND MODAL (ADDITIVE) ================= */
+
+        const modalList = document.getElementById('modalPlaylistList');
+        const storageDiv = document.createElement('div');
+        storageDiv.id = 'storageUsage';
+        storageDiv.className = 'storage-meter';
+        modalList.parentElement.appendChild(storageDiv);
+        updateStorageIndicator();
+
+        /* ================= EXTEND TRACK MENU (ADDITIVE) ================= */
+
+        const originalShowTrackMenu = showTrackMenu;
+        showTrackMenu = async function (e, index) {
+            originalShowTrackMenu(e, index);
+
+            const track = audioSources[index];
+            const cached = await isTrackCached(track.url);
+            const menu = document.querySelector('.track-menu');
+            if (!menu) return;
+
+            const btn = document.createElement('button');
+            btn.textContent = cached ? 'Remove from offline' : 'Download for offline';
+            btn.onclick = async () => {
+                cached ? await removeCachedTrack(track.url) : await cacheTrack(track.url);
+                closeAllTrackMenus();
+                renderTracks();
+                updateStorageIndicator();
+            };
+
+            menu.insertBefore(btn, menu.firstChild);
+        };
+
+        /* ================= EXTEND RENDER TRACKS (ADDITIVE) ================= */
+
+        const originalRenderTracks = renderTracks;
+        renderTracks = function () {
+            originalRenderTracks();
+
+            audioSources.forEach(async (track, index) => {
+                const cached = await isTrackCached(track.url);
+                const row = document.querySelectorAll('.track-row')[index];
+                if (!row) return;
+
+                const playBtn = row.querySelector('.btn-icon');
+                const label = row.querySelector('.track-label');
+
+                if (!navigator.onLine && !cached && playBtn) {
+                    playBtn.classList.add('btn-offline-disabled');
+                }
+
+                if (cached && label && !label.querySelector('.offline-indicator')) {
+                    label.insertAdjacentHTML(
+                        'beforeend',
+                        '<span class="material-symbols-outlined offline-indicator" title="Available offline">download_done</span>'
+                    );
+                }
+            });
+        };
+
+        /* ================= SERVICE WORKER REGISTRATION ================= */
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+
+
     </script>
 </body>
 
