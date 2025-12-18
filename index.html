@@ -856,13 +856,13 @@
                     Delete
                 </button>
 
-                <button onclick="silentCaptureDownload(audioSources[${index}].url); closeAllTrackMenus();">
-                    Download for offline
-                </button>
+                // <button onclick="silentCaptureDownload(audioSources[${index}].url); closeAllTrackMenus();">
+                //     Download for offline
+                // </button>
 
-                <button onclick="removeOfflineCache(audioSources[${index}].url); closeAllTrackMenus();">
-                    Remove from offline
-                </button>
+                // <button onclick="removeOfflineCache(audioSources[${index}].url); closeAllTrackMenus();">
+                //     Remove from offline
+                // </button>
             `;
 
             // Attach to body instead of being trapped inside the track row
@@ -1128,34 +1128,7 @@
         modalList.parentElement.appendChild(storageDiv);
         updateStorageIndicator();
 
-        /* ================= EXTEND TRACK MENU (ADDITIVE) ================= */
-
-        // const originalShowTrackMenu = showTrackMenu;
-        // showTrackMenu = async function (e, index) {
-        //     originalShowTrackMenu(e, index);
-
-        //     const track = audioSources[index];
-        //     const cached = await isTrackCached(track.url);
-        //     const menu = document.querySelector('.track-menu');
-        //     if (!menu) return;
-
-        //     const btn = document.createElement('button');
-        //     btn.textContent = cached ? 'Remove from offline' : 'Download for offline';
-        //     btn.onclick = async () => {
-        //         cached ? await removeCachedTrack(track.url) : await cacheTrack(track.url);
-        //         closeAllTrackMenus();
-        //         renderTracks();
-        //         updateStorageIndicator();
-        //     };
-
-        //     menu.insertBefore(btn, menu.firstChild);
-        // };
-
-        /* ================= EXTEND RENDER TRACKS (ADDITIVE) ================= */
-
-        const originalRenderTracks = renderTracks;
         renderTracks = function () {
-            originalRenderTracks();
 
             audioSources.forEach(async (track, index) => {
                 const cached = await isTrackCached(track.url);
@@ -1169,12 +1142,12 @@
                     playBtn.classList.add('btn-offline-disabled');
                 }
 
-                if (cached && label && !label.querySelector('.offline-indicator')) {
-                    label.insertAdjacentHTML(
-                        'beforeend',
-                        '<span class="material-symbols-outlined offline-indicator" title="Available offline">download_done</span>'
-                    );
-                }
+                // if (cached && label && !label.querySelector('.offline-indicator')) {
+                //     label.insertAdjacentHTML(
+                //         'beforeend',
+                //         '<span class="material-symbols-outlined offline-indicator" title="Available offline">download_done</span>'
+                //     );
+                // }
             });
         };
 
