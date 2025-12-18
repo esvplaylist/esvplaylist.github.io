@@ -1105,8 +1105,9 @@
                     for (const key of keys) {
                         const cache = await caches.open(key);
                         // Try both exact match and Request object
+                        console.log(url);
                         await cache.delete(url);
-                        await cache.delete(new Request(url, { mode: 'no-cors' }));
+                        //await cache.delete(new Request(url, { mode: 'no-cors' }));
                     }
                 } catch (err) {
                     console.warn('Failed to remove cached track:', err);
