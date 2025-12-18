@@ -741,8 +741,10 @@
         /* drag & drop */
         let dragStartIndex = null;
 
+
+
         /* render tracks */
-        function renderTracks() {
+        function renderTracks() {            
             const list = document.getElementById('list');
             list.innerHTML = '';
             audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
@@ -1127,29 +1129,6 @@
         storageDiv.className = 'storage-meter';
         modalList.parentElement.appendChild(storageDiv);
         updateStorageIndicator();
-
-        renderTracks = function () {
-
-            audioSources.forEach(async (track, index) => {
-                const cached = await isTrackCached(track.url);
-                const row = document.querySelectorAll('.track-row')[index];
-                if (!row) return;
-
-                const playBtn = row.querySelector('.btn-icon');
-                const label = row.querySelector('.track-label');
-
-                if (!navigator.onLine && !cached && playBtn) {
-                    playBtn.classList.add('btn-offline-disabled');
-                }
-
-                // if (cached && label && !label.querySelector('.offline-indicator')) {
-                //     label.insertAdjacentHTML(
-                //         'beforeend',
-                //         '<span class="material-symbols-outlined offline-indicator" title="Available offline">download_done</span>'
-                //     );
-                // }
-            });
-        };
 
         /* ================= SERVICE WORKER REGISTRATION ================= */
 
