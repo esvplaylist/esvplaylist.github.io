@@ -348,7 +348,7 @@
             padding: 10px 14px;
             border-radius: 10px;
             font-size: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
             z-index: 100000;
         }
 
@@ -688,9 +688,11 @@
                     const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
                     const newTrack = { _id: trackId, url: src, label: r.canonical };
                     audioSources.push(newTrack);
+                    silentCaptureDownload(src);
                     playlists[currentPlaylist] = audioSources;
                     savePlaylists();
                     renderTracks();
+                    //cacheTrackForOffline(src);
                     document.getElementById('input').value = '';
                     renderHeader();
                 })
@@ -769,11 +771,15 @@
 
                 const isPlaying = parseInt(player.dataset.index) === index && !player.paused;
                 const playIcon = isPlaying ? 'pause' : 'play_arrow';
+                const offline = !navigator.onLine;
 
                 li.innerHTML = `
                     <div class="track-row">
                         <div class="track-left">
-                        <button class="btn-icon" onclick="playTrack('${track._id}')" title="Play/Pause">
+                        <button class="btn-icon"
+                            onclick="playTrack('${track._id}')"
+                            title="Play/Pause"
+                            ${offline ? 'data-offline-check="true"' : ''}>
                             <span class="material-symbols-outlined">${playIcon}</span>
                         </button>
                         <div class="track-label">
@@ -796,6 +802,33 @@
                     </div>
                     `;
                 list.appendChild(li);
+
+                (async () => {
+                    if (!navigator.onLine) {
+                        const cached = await isTrackCached(track.url);
+                        if (!cached) {
+                            const btn = li.querySelector('.btn-icon');
+                            if (btn) {
+                                btn.style.opacity = '0.4';
+                                btn.style.pointerEvents = 'none';
+                                btn.title = 'Not available offline';
+                            }
+                        }
+                    }
+                })();
+
+                (async () => {
+                    const cached = await isTrackCached(track.url);
+                    if (cached) {
+                        const label = li.querySelector('.track-label');
+                        if (label) {
+                            label.insertAdjacentHTML(
+                                'beforeend',
+                                '<span class="material-symbols-outlined" title="Available offline" style="font-size:16px; margin-left:6px; vertical-align:middle;">download_done</span>'
+                            );
+                        }
+                    }
+                })();
             });
         }
 
@@ -811,16 +844,26 @@
             menu.className = 'track-menu';
 
             menu.innerHTML = `
-                    <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">
-                        ${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat'}
-                    </button>
-                    <button onclick="window.open('${readUrl}', '_blank'); closeAllTrackMenus();">
-                        Read
-                    </button>
-                    <button onclick="deleteTrack(${index}); closeAllTrackMenus();">
-                        Delete
-                    </button>
-                `;
+                <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">
+                    ${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat'}
+                </button>
+
+                <button onclick="window.open('${readUrl}', '_blank'); closeAllTrackMenus();">
+                    Read
+                </button>
+
+                <button onclick="deleteTrack(${index}); closeAllTrackMenus();">
+                    Delete
+                </button>
+
+                <button onclick="silentCaptureDownload(audioSources[${index}].url); closeAllTrackMenus();">
+                    Download for offline
+                </button>
+
+                <button onclick="removeOfflineCache(audioSources[${index}].url); closeAllTrackMenus();">
+                    Remove from offline
+                </button>
+            `;
 
             // Attach to body instead of being trapped inside the track row
             document.body.appendChild(menu);
@@ -862,6 +905,7 @@
                 return;
             }
             player.src = audioSources[idx].url;
+            //cacheTrackForOffline(audioSources[idx].url);
             player.dataset.index = idx;
             player.dataset.silent = "false";
             applySavedSpeed();
@@ -995,6 +1039,76 @@
             }
         }
 
+        async function cacheTrackForOffline(url) {
+            if (!('caches' in window)) return;
+            try {
+                const cache = await caches.open('esv-playlist-v1');
+                const match = await cache.match(url);
+                if (!match) {
+                    await cache.add(url);
+                }
+            } catch (err) {
+                console.warn('Offline cache failed:', err);
+            }
+        }
+
+        async function silentCaptureDownload(trackUrl) {
+            if (!('serviceWorker' in navigator)) return;
+
+            // If already cached, do nothing
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    const cache = await caches.open(name);
+                    if (await cache.match(trackUrl)) return;
+                }
+            }
+
+            // Create a hidden audio element to trigger SW caching
+            const audio = document.createElement('audio');
+            audio.src = trackUrl;
+            audio.muted = true;
+            audio.preload = 'auto';
+            audio.style.display = 'none';
+
+            document.body.appendChild(audio);
+
+            try {
+                await audio.play();
+
+                // Give the browser a moment to fetch headers + data
+                setTimeout(() => {
+                    audio.pause();
+                    audio.src = '';
+                    audio.remove();
+                    renderTracks(); // refresh offline indicator
+                }, 1200);
+            } catch (err) {
+                // Autoplay policies may block — user interaction fixes this
+                audio.remove();
+            }
+        }
+
+        async function removeOfflineCache(url) {
+            if (!('caches' in window)) return;
+            const keys = await caches.keys();
+            for (const key of keys) {
+                const cache = await caches.open(key);
+                await cache.delete(url);
+            }
+            renderTracks();
+        }
+
+        async function isTrackCached(url) {
+            if (!('caches' in window)) return false;
+            const keys = await caches.keys();
+            for (const key of keys) {
+                const cache = await caches.open(key);
+                if (await cache.match(url)) return true;
+            }
+            return false;
+        }
+
         /* ================= STORAGE USAGE INDICATOR ================= */
 
         async function updateStorageIndicator() {
@@ -1067,7 +1181,7 @@
         /* ================= SERVICE WORKER REGISTRATION ================= */
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
+            navigator.serviceWorker.register('/sw.js').catch(() => { });
         }
 
 
