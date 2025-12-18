@@ -789,6 +789,13 @@
                 const playIcon = isPlaying ? 'pause' : 'play_arrow';
                 const offline = !navigator.onLine;
 
+                // <button class="btn" title="Move up" onclick="moveTrackUp(${index})">
+                //     <span class="material-symbols-outlined">arrow_upward</span>
+                // </button>
+                // <button class="btn" title="Move down" onclick="moveTrackDown(${index})">
+                //     <span class="material-symbols-outlined">arrow_downward</span>
+                // </button>
+
                 li.innerHTML = `
                     <div class="track-row">
                         <div class="track-left">
@@ -805,12 +812,6 @@
                         </div>
 
                         <div class="track-actions">
-                        <button class="btn" title="Move up" onclick="moveTrackUp(${index})">
-                            <span class="material-symbols-outlined">arrow_upward</span>
-                        </button>
-                        <button class="btn" title="Move down" onclick="moveTrackDown(${index})">
-                            <span class="material-symbols-outlined">arrow_downward</span>
-                        </button>
                         <button class="btn" title="Options" onclick="showTrackMenu(event, ${index})">
                             <span class="material-symbols-outlined">more_vert</span>
                         </button>
@@ -1018,7 +1019,9 @@
             offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
             // Get the input element by its ID
             let userInputFld = document.getElementById("input");
+            userInputFld.placeholder = navigator.onLine ? 'Add track (e.g. John 1:1-5)' : 'Not available offline.';
             userInputFld.disabled = !navigator.onLine;
+             
         }
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
@@ -1135,7 +1138,7 @@
             const { usage, quota } = await navigator.storage.estimate();
             const mb = n => (n / 1024 / 1024).toFixed(1);
             const el = document.getElementById('storageUsage');
-            if (el) el.textContent = `Offline storage: ${mb(usage)} MB used of ${mb(quota)} MB`;
+            if (el) el.textContent = `Storage used: ${mb(usage)} MB`;
         }
 
         /* ================= EXTEND MODAL (ADDITIVE) ================= */
