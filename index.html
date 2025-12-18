@@ -806,8 +806,8 @@
                             <span class="material-symbols-outlined">${playIcon}</span>
                         </button>
                         <div class="track-label">
-                            ${track.label} 
-                            ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating" style="color:var(--accent); margin-left:4px;">repeat</span>' : ''}
+                            ${track.label}
+                            ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating">repeat</span>' : ''}
                         </div>
                         </div>
 
@@ -1019,7 +1019,7 @@
             offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
             // Get the input element by its ID
             let userInputFld = document.getElementById("input");
-            userInputFld.placeholder = navigator.onLine ? 'Add track (e.g. John 1:1-5)' : 'Not available offline.';
+            userInputFld.placeholder = navigator.onLine ? 'Add track (e.g. John 1:1-5)' : 'Add track not available offline.';
             userInputFld.disabled = !navigator.onLine;
              
         }
