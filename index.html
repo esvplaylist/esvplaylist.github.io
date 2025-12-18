@@ -799,18 +799,17 @@
                 li.innerHTML = `
                     <div class="track-row">
                         <div class="track-left">
-                        <button class="btn-icon"
-                            onclick="playTrack('${track._id}')"
-                            title="Play/Pause"
-                            ${offline ? 'data-offline-check="true"' : ''}>
-                            <span class="material-symbols-outlined">${playIcon}</span>
-                        </button>
-                        <div class="track-label">
-                            ${track.label}
-                            ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating">repeat</span>' : ''}
+                            <button class="btn-icon"
+                                onclick="playTrack('${track._id}')"
+                                title="Play/Pause"
+                                ${offline ? 'data-offline-check="true"' : ''}>
+                                <span class="material-symbols-outlined">${playIcon}</span>
+                            </button>
+                            <div class="track-label">
+                                ${track.label}
+                                ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating" style="font-size:16px; margin-left:6px; vertical-align:middle;">repeat</span>' : ''}
+                            </div>
                         </div>
-                        </div>
-
                         <div class="track-actions">
                         <button class="btn" title="Options" onclick="showTrackMenu(event, ${index})">
                             <span class="material-symbols-outlined">more_vert</span>
