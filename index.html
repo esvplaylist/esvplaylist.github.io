@@ -87,13 +87,20 @@
         .create-row input,
         #modalNewPlaylist,
         #newPlaylistName,
-        #input {
+        #input,
+        #bulkPassages {
             padding: 10px;
             border-radius: 8px;
             border: 1px solid rgba(0, 0, 0, 0.06);
             width: 100%;
             background: transparent;
             color: inherit;
+        }
+        
+        #bulkPassages {
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 8px;
         }
 
         .small-muted {
@@ -259,6 +266,8 @@
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-playlist {
@@ -378,7 +387,6 @@
     </div>
 
     <div class="app">
-        <!-- create + add input -->
         <div class="card mb-3">
             <div class="card-body">
                 <div class="create-row mb-2">
@@ -389,7 +397,6 @@
             </div>
         </div>
 
-        <!-- header for current playlist -->
         <div
             style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; margin-top: 8px">
             <div>
@@ -399,7 +406,6 @@
             <div id="nowPlayingMini" class="small-muted">Not playing</div>
         </div>
 
-        <!-- custom player -->
         <div class="card player-card mb-3">
             <div class="custom-player">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px">
@@ -429,7 +435,6 @@
             </div>
         </div>
 
-        <!-- tracks -->
         <div class="card tracks-card mb-3">
             <div class="card-body">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
@@ -447,7 +452,6 @@
         </footer>
     </div>
 
-    <!-- Modal -->
     <div id="playlistModal" class="modal-overlay" onclick="closePlaylistModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="margin-top: 0">Playlists</h3>
@@ -455,11 +459,31 @@
 
             <div style="display: flex; gap: 8px; margin-top: 8px">
                 <input id="modalNewPlaylist" placeholder="New playlist" />
-                <button class="btn btn-primary" onclick="createPlaylistFromModal()"><span
+                <button class="btn btn-primary" onclick="createPlaylistFromModal()" title="Create empty playlist"><span
                         class="material-symbols-outlined">add</span></button>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px">
+            <hr style="opacity: 0.1; margin: 15px 0;">
+            <div id="bulkSection">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
+                        <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()" title="Upload CSV File">
+                            <span class="material-symbols-outlined">upload_file</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="toggleBulkText()" title="Import As Text">
+                            <span class="material-symbols-outlined">description</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="bulkTextContainer" style="display: none;">
+                    <textarea id="bulkPassages" rows="4" style="width: 95%;" placeholder="Enter passages (one per line)"></textarea>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="addBulkFromText()">Add Bulk Passages</button>
+                </div>
+                <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px">
                 <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
             </div>
         </div>
@@ -701,6 +725,74 @@
                     console.error('Error fetching ESV passage:', err);
                     alert('Unable to retrieve passage.');
                 });
+        }
+
+        /* Bulk Handling Logic */
+        function toggleBulkText() {
+            const container = document.getElementById('bulkTextContainer');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function handleCsvUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const playlistName = file.name.replace(/\.csv$/i, '');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const passages = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                processBulkPassages(playlistName, passages);
+            };
+            reader.readAsText(file);
+        }
+
+        function addBulkFromText() {
+            const text = document.getElementById('bulkPassages').value;
+            const passages = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+            if (passages.length === 0) return alert('Please enter at least one passage.');
+            
+            const timestamp = new Date().toLocaleString().replace(/[\/,:]/g, '-');
+            const playlistName = `Playlist ${timestamp}`;
+            processBulkPassages(playlistName, passages);
+        }
+
+        async function processBulkPassages(name, passageList) {
+            const status = document.getElementById('bulkStatus');
+            status.textContent = `Processing 0/${passageList.length}...`;
+            
+            if (!playlists[name]) playlists[name] = [];
+            const targetArray = playlists[name];
+
+            for (let i = 0; i < passageList.length; i++) {
+                const passage = passageList[i];
+                status.textContent = `Processing ${i + 1}/${passageList.length}: ${passage}`;
+                
+                try {
+                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(passage);
+                    const response = await fetch(url, a);
+                    const r = await response.json();
+                    
+                    if (r.parsed && r.parsed[0]) {
+                        let start = r.parsed[0][0];
+                        let end = r.parsed[0][1];
+                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
+                        const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+                        
+                        targetArray.push({ _id: trackId, url: src, label: r.canonical });
+                        silentCaptureDownload(src);
+                    }
+                } catch (err) {
+                    console.error('Bulk failed for:', passage, err);
+                }
+            }
+
+            status.textContent = 'Complete!';
+            currentPlaylist = name;
+            savePlaylists();
+            selectPlaylist(name); // Switches to and renders the new list
+            document.getElementById('bulkPassages').value = '';
+            document.getElementById('bulkTextContainer').style.display = 'none';
         }
 
         /* move Up/Down */
