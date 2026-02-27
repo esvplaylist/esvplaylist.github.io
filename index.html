@@ -1006,6 +1006,13 @@
             //cacheTrackForOffline(audioSources[idx].url);
             player.dataset.index = idx;
             player.dataset.silent = "false";
+
+            // RE-SYNC HANDLERS HERE
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.setActionHandler('play', () => player.play());
+                navigator.mediaSession.setActionHandler('pause', () => player.pause());
+            }
+
             applySavedSpeed();
             player.play();
             renderTracks();
