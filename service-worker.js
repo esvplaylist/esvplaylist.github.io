@@ -8,7 +8,7 @@ var APP_PREFIX = 'esvp_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = 'version_63';
+var VERSION = 'version_64';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
@@ -63,4 +63,11 @@ self.addEventListener('fetch', (event) => {
       });
     })
   );
+});
+
+// Listen for messages from the main app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: VERSION });
+  }
 });
