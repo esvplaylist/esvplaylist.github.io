@@ -1005,8 +1005,6 @@
             document.getElementById('bulkTextContainer').style.display = 'none';
         }
 
-        /* INTELLIGENT PLAN GENERATOR */
-        /* CUSTOM PLAN GENERATOR LOGIC - FIXED */
         async function generateCustomPlan() {
             const days = parseInt(document.getElementById('planDays').value);
             const startDateStr = document.getElementById('planStart').value;
@@ -1029,69 +1027,71 @@
             const perDay = Math.ceil(allChapters.length / days);
             const baseDate = new Date(startDateStr + 'T12:00:00');
 
-            // 2. Group chapters into daily ranges
-            const planPassages = [];
-            for (let d = 0; d < days; d++) {
-                const slice = allChapters.slice(d * perDay, (d + 1) * perDay);
-                if (slice.length === 0) break;
-
-                const dayDate = new Date(baseDate);
-                dayDate.setDate(baseDate.getDate() + d);
-                const dateStr = dayDate.toISOString().split('T')[0];
-
-                const first = slice[0];
-                const last = slice[slice.length - 1];
-
-                // Better range logic: Handles spans across different books
-                let query = "";
-                if (first.book === last.book) {
-                    query = first.chapter === last.chapter ? `${first.book} ${first.chapter}` : `${first.book} ${first.chapter}-${last.chapter}`;
-                } else {
-                    query = `${first.book} ${first.chapter} - ${last.book} ${last.chapter}`;
-                }
-
-                planPassages.push({ query: query, date: dateStr });
-            }
-
-            // 3. Create playlist and fetch data
+            // 2. Prepare playlist
             const timestamp = new Date().getTime();
             const planName = `Plan ${new Date().toLocaleDateString()} (${timestamp})`;
             playlists[planName] = [];
             const targetArray = playlists[planName];
 
-            for (let i = 0; i < planPassages.length; i++) {
-                status.textContent = `Fetching Day ${i + 1}/${planPassages.length}: ${planPassages[i].query}`;
+            // 3. Process each day
+            for (let i = 0; i < days; i++) {
+                const dayChapters = allChapters.slice(i * perDay, (i + 1) * perDay);
+                if (dayChapters.length === 0) break;
 
-                try {
-                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planPassages[i].query);
-                    const response = await fetch(url, a);
-                    const r = await response.json();
+                const dayDate = new Date(baseDate);
+                dayDate.setDate(baseDate.getDate() + i);
+                const dateStr = dayDate.toISOString().split('T')[0];
 
-                    if (r.parsed && r.parsed[0]) {
-                        let start = r.parsed[0][0];
-                        let end = r.parsed[0][1];
-                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
-                        const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+                status.textContent = `Fetching Day ${i + 1}/${days}...`;
 
-                        targetArray.push({
-                            _id: trackId,
-                            url: src,
-                            label: r.canonical,
-                            date: planPassages[i].date,
-                            done: false
-                        });
+                let dayStartId = null;
+                let dayEndId = null;
+                let dayCanonical = "";
 
-                        // Silent download helps with offline mode
-                        silentCaptureDownload(src);
-                    } else {
-                        console.warn("API returned no parsed data for:", planPassages[i].query, r);
+                // Fetch each chapter individually to avoid the 500-verse limit
+                for (const ch of dayChapters) {
+                    const query = `${ch.book} ${ch.chapter}`;
+                    const url = 'https://api.esv.org/v3/passage/text/?q=' + encodeURIComponent(query);
+
+                    try {
+                        const response = await fetch(url, a);
+                        const r = await response.json();
+
+                        if (r.parsed && r.parsed[0]) {
+                            // Capture start ID from the very first chapter, end ID from the last
+                            if (!dayStartId) dayStartId = r.parsed[0][0];
+                            dayEndId = r.parsed[0][1];
+
+                            // Build a label like "Genesis 1-3"
+                            if (dayCanonical === "") {
+                                dayCanonical = r.canonical;
+                            } else {
+                                const parts = r.canonical.split(' ');
+                                dayCanonical = dayCanonical.split('-')[0] + "-" + parts[parts.length - 1];
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Plan fetch failed for:', query, err);
                     }
-                } catch (err) {
-                    console.error('Plan fetch failed for:', planPassages[i].query, err);
+                    // Small delay to respect rate limits
+                    await new Promise(resolve => setTimeout(resolve, 200));
                 }
 
-                // 200ms delay to prevent rate limiting (429 errors)
-                await new Promise(resolve => setTimeout(resolve, 200));
+                // Add the combined day to the playlist
+                if (dayStartId && dayEndId) {
+                    const trackId = Date.now() + '-' + dayStartId + '-' + dayEndId + '-' + Math.floor(Math.random() * 10000);
+                    const src = `https://audio.esv.org/david-cochran-heath/mq/${dayStartId}-${dayEndId}.mp3`;
+
+                    targetArray.push({
+                        _id: trackId,
+                        url: src,
+                        label: dayCanonical,
+                        date: dateStr,
+                        done: false
+                    });
+
+                    silentCaptureDownload(src);
+                }
             }
 
             status.textContent = 'Plan Complete!';
