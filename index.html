@@ -88,7 +88,9 @@
         #modalNewPlaylist,
         #newPlaylistName,
         #input,
-        #bulkPassages {
+        #bulkPassages,
+        #planDays,
+        #planStart {
             padding: 10px;
             border-radius: 8px;
             border: 1px solid rgba(0, 0, 0, 0.06);
@@ -378,6 +380,13 @@
             color: var(--muted);
             margin-top: 6px;
         }
+
+        /* PLAN GENERATOR UI ADDITIONS */
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; border-bottom: 2px solid transparent; cursor: pointer; color: var(--muted); font-size: 15px; font-weight: 600; transition: all 0.2s; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .bible-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 5px; margin: 15px 0; max-height: 250px; overflow-y: auto; padding: 5px; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; }
+        .book-btn { font-size: 10px; padding: 8px 2px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; background: var(--btn-bg); cursor: pointer; text-align: center; color: inherit; transition: 0.1s; }
+        .book-btn.selected { background: var(--accent); color: white; border-color: var(--accent); }
     </style>
 </head>
 
@@ -435,6 +444,18 @@
             </div>
         </div>
 
+        <div id="planProgressCard" class="card mb-3" style="display: none;">
+            <div class="card-body" style="padding: 12px 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                    <strong id="planStatTitle">Reading Plan Progress</strong>
+                    <span id="planStatDetail" style="color: var(--now); font-weight: bold;">0%</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: var(--btn-bg); border-radius: 3px; overflow: hidden;">
+                    <div id="planProgressBar" style="height: 100%; width: 0%; background: var(--now); border-radius: 3px; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="card tracks-card mb-3">
             <div class="card-body">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
@@ -455,36 +476,63 @@
 
     <div id="playlistModal" class="modal-overlay" onclick="closePlaylistModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <h3 style="margin-top: 0">Playlists</h3>
-            <div id="modalPlaylistList" style="margin-bottom: 8px"></div>
-
-            <div style="display: flex; gap: 8px; margin-top: 8px">
-                <input id="modalNewPlaylist" placeholder="New playlist" />
-                <button class="btn btn-primary" onclick="createPlaylistFromModal()" title="Create empty playlist"><span
-                        class="material-symbols-outlined">add</span></button>
+            
+            <div style="display: flex; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 15px;">
+                <button id="tabBtnManage" class="tab-btn active" onclick="switchTab('manage')">Playlists</button>
+                <button id="tabBtnPlan" class="tab-btn" onclick="switchTab('plan')">Reading Plan</button>
             </div>
 
-            <hr style="opacity: 0.1; margin: 15px 0;">
-            <div id="bulkSection">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="display: flex; gap: 5px;">
-                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
-                        <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()" title="Upload CSV File">
-                            <span class="material-symbols-outlined">upload_file</span>
-                        </button>
-                        <button class="btn btn-outline" onclick="toggleBulkText()" title="Import As Text">
-                            <span class="material-symbols-outlined">description</span>
-                        </button>
+            <div id="tabManage">
+                <div id="modalPlaylistList" style="margin-bottom: 8px"></div>
+
+                <div style="display: flex; gap: 8px; margin-top: 8px">
+                    <input id="modalNewPlaylist" placeholder="New playlist" />
+                    <button class="btn btn-primary" onclick="createPlaylistFromModal()" title="Create empty playlist"><span
+                            class="material-symbols-outlined">add</span></button>
+                </div>
+
+                <hr style="opacity: 0.1; margin: 15px 0;">
+                <div id="bulkSection">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; gap: 5px;">
+                            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
+                            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()" title="Upload CSV File">
+                                <span class="material-symbols-outlined">upload_file</span>
+                            </button>
+                            <button class="btn btn-outline" onclick="toggleBulkText()" title="Import As Text">
+                                <span class="material-symbols-outlined">description</span>
+                            </button>
+                        </div>
                     </div>
+                    <div id="bulkTextContainer" style="display: none;">
+                        <textarea id="bulkPassages" rows="4" style="width: 95%;" placeholder="Enter passages (one per line)"></textarea>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="addBulkFromText()">Add Bulk Passages</button>
+                    </div>
+                    <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px;"></div>
                 </div>
-                <div id="bulkTextContainer" style="display: none;">
-                    <textarea id="bulkPassages" rows="4" style="width: 95%;" placeholder="Enter passages (one per line)"></textarea>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="addBulkFromText()">Add Bulk Passages</button>
-                </div>
-                <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px;"></div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px">
+            <div id="tabPlan" style="display: none;">
+                <label class="small-muted">1. Select Books:</label>
+                <div style="margin: 5px 0;">
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectAllBooks(true)">All</button>
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectAllBooks(false)">None</button>
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('nt')">NT</button>
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('ot')">OT</button>
+                </div>
+                <div id="bibleGrid" class="bible-grid"></div>
+
+                <label class="small-muted">2. Plan Details:</label>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <input type="number" id="planDays" placeholder="Days" value="30" style="flex:1;">
+                    <input type="date" id="planStart" style="flex:1;">
+                </div>
+                
+                <button class="btn btn-primary" style="margin-top: 15px;" onclick="generateCustomPlan()">Generate Plan</button>
+                <div id="planGenStatus" class="small-muted" style="text-align: center; margin-top: 8px;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
                 <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
             </div>
         </div>
@@ -511,6 +559,26 @@
         var audioSources = [];
         var isShuffle = false;
         var repeatTrackIndex = null;
+
+        /* ================= BIBLE DATA (For Plan Generator) ================= */
+        const BIBLE_BOOKS = [
+            {n:"Genesis", a:"Gen", c:50, t:"ot"}, {n:"Exodus", a:"Exo", c:40, t:"ot"}, {n:"Leviticus", a:"Lev", c:27, t:"ot"}, {n:"Numbers", a:"Num", c:36, t:"ot"}, {n:"Deuteronomy", a:"Deu", c:34, t:"ot"},
+            {n:"Joshua", a:"Jos", c:24, t:"ot"}, {n:"Judges", a:"Jdg", c:21, t:"ot"}, {n:"Ruth", a:"Rth", c:4, t:"ot"}, {n:"1 Samuel", a:"1Sa", c:31, t:"ot"}, {n:"2 Samuel", a:"2Sa", c:24, t:"ot"},
+            {n:"1 Kings", a:"1Ki", c:22, t:"ot"}, {n:"2 Kings", a:"2Ki", c:25, t:"ot"}, {n:"1 Chronicles", a:"1Ch", c:29, t:"ot"}, {n:"2 Chronicles", a:"2Ch", c:36, t:"ot"}, {n:"Ezra", a:"Ezr", c:10, t:"ot"},
+            {n:"Nehemiah", a:"Neh", c:13, t:"ot"}, {n:"Esther", a:"Est", c:10, t:"ot"}, {n:"Job", a:"Job", c:42, t:"ot"}, {n:"Psalms", a:"Psa", c:150, t:"ot"}, {n:"Proverbs", a:"Pro", c:31, t:"ot"},
+            {n:"Ecclesiastes", a:"Ecc", c:12, t:"ot"}, {n:"Song of Solomon", a:"Sng", c:8, t:"ot"}, {n:"Isaiah", a:"Isa", c:66, t:"ot"}, {n:"Jeremiah", a:"Jer", c:52, t:"ot"}, {n:"Lamentations", a:"Lam", c:5, t:"ot"},
+            {n:"Ezekiel", a:"Eze", c:48, t:"ot"}, {n:"Daniel", a:"Dan", c:12, t:"ot"}, {n:"Hosea", a:"Hos", c:14, t:"ot"}, {n:"Joel", a:"Joe", c:3, t:"ot"}, {n:"Amos", a:"Amo", c:9, t:"ot"},
+            {n:"Obadiah", a:"Oba", c:1, t:"ot"}, {n:"Jonah", a:"Jon", c:4, t:"ot"}, {n:"Micah", a:"Mic", c:7, t:"ot"}, {n:"Nahum", a:"Nah", c:3, t:"ot"}, {n:"Habakkuk", a:"Hab", c:3, t:"ot"},
+            {n:"Zephaniah", a:"Zep", c:3, t:"ot"}, {n:"Haggai", a:"Hag", c:2, t:"ot"}, {n:"Zechariah", a:"Zec", c:14, t:"ot"}, {n:"Malachi", a:"Mal", c:4, t:"ot"},
+            {n:"Matthew", a:"Mat", c:28, t:"nt"}, {n:"Mark", a:"Mrk", c:16, t:"nt"}, {n:"Luke", a:"Luk", c:24, t:"nt"}, {n:"John", a:"Jhn", c:21, t:"nt"}, {n:"Acts", a:"Act", c:28, t:"nt"},
+            {n:"Romans", a:"Rom", c:16, t:"nt"}, {n:"1 Corinthians", a:"1Co", c:16, t:"nt"}, {n:"2 Corinthians", a:"2Co", c:13, t:"nt"}, {n:"Galatians", a:"Gal", c:6, t:"nt"},
+            {n:"Ephesians", a:"Eph", c:6, t:"nt"}, {n:"Philippians", a:"Php", c:4, t:"nt"}, {n:"Colossians", a:"Col", c:4, t:"nt"}, {n:"1 Thessalonians", a:"1Th", c:5, t:"nt"},
+            {n:"2 Thessalonians", a:"2Th", c:3, t:"nt"}, {n:"1 Timothy", a:"1Ti", c:6, t:"nt"}, {n:"2 Timothy", a:"2Ti", c:4, t:"nt"}, {n:"Titus", a:"Tit", c:3, t:"nt"},
+            {n:"Philemon", a:"Phm", c:1, t:"nt"}, {n:"Hebrews", a:"Heb", c:13, t:"nt"}, {n:"James", a:"Jas", c:5, t:"nt"}, {n:"1 Peter", a:"1Pe", c:5, t:"nt"},
+            {n:"2 Peter", a:"2Pe", c:3, t:"nt"}, {n:"1 John", a:"1Jn", c:5, t:"nt"}, {n:"2 John", a:"2Jn", c:1, t:"nt"}, {n:"3 John", a:"3Jn", c:1, t:"nt"},
+            {n:"Jude", a:"Jud", c:1, t:"nt"}, {n:"Revelation", a:"Rev", c:22, t:"nt"}
+        ];
+        var selectedBooks = new Set();
 
         // --- Media Session Integration ---
         if ('mediaSession' in navigator) {
@@ -569,7 +637,8 @@
                 player.currentTime = Math.max(player.currentTime - 10, 0);
             });
 
-            player.addEventListener('play', updateMediaSessionMetadata());
+            // Update metadata when track changes
+            player.addEventListener('play', updateMediaSessionMetadata);
             player.addEventListener('loadedmetadata', updateMediaSessionMetadata);
         }
 
@@ -597,14 +666,55 @@
             localStorage.setItem('esv_dark', document.body.classList.contains('dark'));
         }
 
+        /* Modal Logic */
         function openPlaylistModal() {
             renderModalPlaylistList();
+            document.getElementById('planStart').valueAsDate = new Date();
             document.getElementById('playlistModal').style.display = 'flex';
         }
         function closePlaylistModal(e) {
             if (e && e.stopPropagation) e.stopPropagation();
             document.getElementById('playlistModal').style.display = 'none';
         }
+        function switchTab(tab) {
+            document.getElementById('tabManage').style.display = tab === 'manage' ? 'block' : 'none';
+            document.getElementById('tabPlan').style.display = tab === 'plan' ? 'block' : 'none';
+            document.getElementById('tabBtnManage').classList.toggle('active', tab === 'manage');
+            document.getElementById('tabBtnPlan').classList.toggle('active', tab === 'plan');
+        }
+
+        /* Bible Grid Logic */
+        function initBibleGrid() {
+            const grid = document.getElementById('bibleGrid');
+            grid.innerHTML = BIBLE_BOOKS.map((b, i) => 
+                `<button class="book-btn" id="bk-${i}" title="${b.n}" onclick="toggleBook(${i})">${b.a}</button>`
+            ).join('');
+        }
+        function toggleBook(i) {
+            const btn = document.getElementById(`bk-${i}`);
+            if (selectedBooks.has(i)) {
+                selectedBooks.delete(i);
+                btn.classList.remove('selected');
+            } else {
+                selectedBooks.add(i);
+                btn.classList.add('selected');
+            }
+        }
+        function selectAllBooks(val) {
+            BIBLE_BOOKS.forEach((_, i) => {
+                if (val) selectedBooks.add(i); else selectedBooks.delete(i);
+                document.getElementById(`bk-${i}`).classList.toggle('selected', val);
+            });
+        }
+        function selectTestament(t) {
+            BIBLE_BOOKS.forEach((b, i) => {
+                if (b.t === t) {
+                    selectedBooks.add(i);
+                    document.getElementById(`bk-${i}`).classList.add('selected');
+                }
+            });
+        }
+        initBibleGrid();
 
         function createPlaylistFromModal() {
             const name = document.getElementById('modalNewPlaylist').value.trim();
@@ -692,6 +802,18 @@
             closePlaylistModal();
             renderTracks();
             renderHeader();
+
+            // Auto-scroll to today if it's a plan
+            setTimeout(() => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayIndex = audioSources.findIndex(t => t.date === todayStr);
+                if (todayIndex !== -1) {
+                    const listItems = document.querySelectorAll('#list .list-group-item');
+                    if (listItems[todayIndex]) {
+                        listItems[todayIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }, 300);
         }
 
         /* Add track (ESV API) */
@@ -717,7 +839,6 @@
                     playlists[currentPlaylist] = audioSources;
                     savePlaylists();
                     renderTracks();
-                    //cacheTrackForOffline(src);
                     document.getElementById('input').value = '';
                     renderHeader();
                 })
@@ -795,6 +916,94 @@
             document.getElementById('bulkTextContainer').style.display = 'none';
         }
 
+        /* CUSTOM PLAN GENERATOR LOGIC */
+        async function generateCustomPlan() {
+            const days = parseInt(document.getElementById('planDays').value);
+            const startDateStr = document.getElementById('planStart').value;
+            if (selectedBooks.size === 0 || !days || !startDateStr) return alert("Please select books, days, and a start date.");
+
+            const status = document.getElementById('planGenStatus');
+            status.textContent = "Calculating passages...";
+
+            let allChapters = [];
+            Array.from(selectedBooks).sort((a,b) => a-b).forEach(idx => {
+                const b = BIBLE_BOOKS[idx];
+                for (let c=1; c<=b.c; c++) allChapters.push(`${b.n} ${c}`);
+            });
+
+            const perDay = Math.ceil(allChapters.length / days);
+            const baseDate = new Date(startDateStr + 'T12:00:00'); // Use noon to avoid timezone shift
+
+            const planPassages = [];
+            for (let d=0; d<days; d++) {
+                const slice = allChapters.slice(d * perDay, (d + 1) * perDay);
+                if (slice.length === 0) break;
+
+                const dayDate = new Date(baseDate);
+                dayDate.setDate(baseDate.getDate() + d);
+                const dateStr = dayDate.toISOString().split('T')[0];
+
+                const first = slice[0];
+                const last = slice[slice.length-1];
+                const label = slice.length > 1 ? `${first.split(' ').slice(0,-1).join(' ')} ${first.split(' ').pop()}-${last.split(' ').pop()}` : first;
+                
+                planPassages.push({ query: label, date: dateStr });
+            }
+
+            const planName = `Reading Plan (${new Date().toLocaleDateString()})`;
+            if (!playlists[planName]) playlists[planName] = [];
+            const targetArray = playlists[planName];
+
+            for (let i = 0; i < planPassages.length; i++) {
+                status.textContent = `Fetching Day ${i + 1}/${planPassages.length}...`;
+                try {
+                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planPassages[i].query);
+                    const response = await fetch(url, a);
+                    const r = await response.json();
+                    
+                    if (r.parsed && r.parsed[0]) {
+                        let start = r.parsed[0][0];
+                        let end = r.parsed[0][1];
+                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
+                        const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
+                        
+                        targetArray.push({ _id: trackId, url: src, label: r.canonical, date: planPassages[i].date, done: false });
+                        silentCaptureDownload(src);
+                    }
+                } catch (err) {
+                    console.error('Plan fetch failed for:', planPassages[i].query, err);
+                }
+            }
+
+            status.textContent = 'Plan Complete!';
+            currentPlaylist = planName;
+            savePlaylists();
+            selectPlaylist(planName);
+            setTimeout(() => { status.textContent = ''; closePlaylistModal(); }, 1000);
+        }
+
+        /* PLAN PROGRESS TRACKING */
+        function updatePlanProgress() {
+            const hasDates = audioSources.some(t => t.date);
+            const card = document.getElementById('planProgressCard');
+            if (!hasDates || audioSources.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+            card.style.display = 'block';
+            const doneCount = audioSources.filter(t => t.done).length;
+            const pct = (doneCount / audioSources.length) * 100;
+            document.getElementById('planStatDetail').textContent = `${doneCount} / ${audioSources.length} (${Math.round(pct)}%)`;
+            document.getElementById('planProgressBar').style.width = `${pct}%`;
+        }
+        function toggleDone(index) {
+            if (audioSources[index]) {
+                audioSources[index].done = !audioSources[index].done;
+                savePlaylists();
+                renderTracks();
+            }
+        }
+
         /* move Up/Down */
         function moveTrackUp(index) {
             if (index === 0) return;
@@ -842,13 +1051,13 @@
         /* drag & drop */
         let dragStartIndex = null;
 
-
-
         /* render tracks */
         function renderTracks() {
             const list = document.getElementById('list');
             list.innerHTML = '';
             audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+
+            updatePlanProgress();
 
             if (!currentPlaylist) {
                 list.innerHTML = '<li class="list-group-item small-muted">No playlist selected. Open Playlists or Create one.</li>';
@@ -857,6 +1066,8 @@
             }
 
             document.getElementById('playlistCount').textContent = audioSources.length === 0 ? 'No tracks' : audioSources.length + ' track' + (audioSources.length === 1 ? '' : 's');
+
+            const todayStr = new Date().toISOString().split('T')[0];
 
             audioSources.forEach((track, index) => {
                 const li = document.createElement('li');
@@ -876,15 +1087,15 @@
                 const playIcon = isPlaying ? 'pause' : 'play_arrow';
                 const offline = !navigator.onLine;
 
-                // <button class="btn" title="Move up" onclick="moveTrackUp(${index})">
-                //     <span class="material-symbols-outlined">arrow_upward</span>
-                // </button>
-                // <button class="btn" title="Move down" onclick="moveTrackDown(${index})">
-                //     <span class="material-symbols-outlined">arrow_downward</span>
-                // </button>
+                // Plan visual logic
+                const isPlan = track.date !== undefined;
+                const isToday = isPlan && track.date === todayStr;
+                const dateHtml = isPlan ? `<div style="font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 3px;">${isToday ? 'TODAY' : track.date}</div>` : '';
+                const doneStyle = track.done ? 'text-decoration: line-through; opacity: 0.5;' : '';
+                const checkIcon = (isPlan && track.done) ? `<span class="material-symbols-outlined" style="color: var(--now); font-size: 18px; margin-right: 6px; vertical-align: middle;">check_circle</span>` : '';
 
                 li.innerHTML = `
-                    <div class="track-row">
+                    <div class="track-row" style="${isToday ? 'border-left: 4px solid var(--accent); background: rgba(13, 110, 253, 0.05);' : ''}">
                         <div class="track-left">
                             <button class="btn-icon"
                                 onclick="playTrack('${track._id}')"
@@ -892,8 +1103,9 @@
                                 ${offline ? 'data-offline-check="true"' : ''}>
                                 <span class="material-symbols-outlined">${playIcon}</span>
                             </button>
-                            <div class="track-label">
-                                ${track.label}
+                            <div class="track-label" style="${doneStyle}">
+                                ${dateHtml}
+                                ${checkIcon}${track.label}
                                 ${repeatTrackIndex === index ? '<span class="material-symbols-outlined" title="Repeating" style="font-size:16px; vertical-align:middle;">repeat</span>' : ''}
                             </div>
                         </div>
@@ -947,6 +1159,7 @@
             menu.className = 'track-menu';
 
             menu.innerHTML = `
+                ${track.date ? `<button onclick="toggleDone(${index}); closeAllTrackMenus();">${track.done ? 'Mark Unread' : 'Mark as Read'}</button>` : ''}
                 <button onclick="toggleRepeat(${index}); closeAllTrackMenus();">
                     ${repeatTrackIndex === index ? 'Cancel Repeat' : 'Repeat'}
                 </button>
@@ -1003,10 +1216,8 @@
                 return;
             }
             player.src = audioSources[idx].url;
-            //cacheTrackForOffline(audioSources[idx].url);
             player.dataset.index = idx;
             player.dataset.silent = "false";
-
             applySavedSpeed();
             player.play();
             renderTracks();
@@ -1031,15 +1242,6 @@
             if (player.duration) progressBar.style.width = (player.currentTime / player.duration) * 100 + '%';
             currentTimeLabel.textContent = formatTime(player.currentTime);
             durationLabel.textContent = formatTime(player.duration);
-            
-            // if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-            //     navigator.mediaSession.setPositionState({
-            //         duration: player.duration || 0,
-            //         playbackRate: player.playbackRate,
-            //         position: player.currentTime
-            //     });
-            // }
-
         });
 
         progressContainer.addEventListener('click', (e) => {
@@ -1069,10 +1271,17 @@
             localStorage.setItem('esv_speed', player.playbackRate);
         });
 
-        /* ended event with repeat support */
+        /* ended event with repeat support and plan marking */
         player.addEventListener('ended', function () {
             if (!audioSources || audioSources.length === 0) return;
             let idx = parseInt(player.dataset.index || 0);
+            
+            // Mark plan as done automatically
+            if (audioSources[idx] && audioSources[idx].date) {
+                audioSources[idx].done = true;
+                savePlaylists();
+            }
+
             if (repeatTrackIndex !== null) {
                 playByIndex(repeatTrackIndex);
             } else {
@@ -1118,11 +1327,9 @@
 
         function updateOnlineStatus() {
             offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
-            // Get the input element by its ID
             let userInputFld = document.getElementById("input");
             userInputFld.placeholder = navigator.onLine ? 'Add track (e.g. John 1:1-5)' : 'Add track not available offline.';
             userInputFld.disabled = !navigator.onLine;
-             
         }
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
@@ -1168,7 +1375,6 @@
         async function silentCaptureDownload(trackUrl) {
             if (!('serviceWorker' in navigator)) return;
 
-            // If already cached, do nothing
             if ('caches' in window) {
                 const cacheNames = await caches.keys();
                 for (const name of cacheNames) {
@@ -1177,7 +1383,6 @@
                 }
             }
 
-            // Create a hidden audio element to trigger SW caching
             const audio = document.createElement('audio');
             audio.src = trackUrl;
             audio.muted = true;
@@ -1188,8 +1393,6 @@
 
             try {
                 await audio.play();
-
-                // Give the browser a moment to fetch headers + data
                 setTimeout(() => {
                     audio.pause();
                     audio.src = '';
@@ -1197,39 +1400,23 @@
                     renderTracks(); // refresh offline indicator
                 }, 1200);
             } catch (err) {
-                // Autoplay policies may block — user interaction fixes this
                 audio.remove();
             }
         }
 
         async function removeOfflineCache(url) {
             if (!('caches' in window)) return;
-
             try {
                 const keys = await caches.keys();
                 for (const key of keys) {
                     const cache = await caches.open(key);
-                    // Try both exact match and Request object
-                    console.log(url);
                     await cache.delete(url);
-                    //await cache.delete(new Request(url, { mode: 'no-cors' }));
                 }
             } catch (err) {
                 console.warn('Failed to remove cached track:', err);
             }
             updateStorageIndicator();
-            renderTracks(); // refresh offline indicators
-        }
-        
-
-        async function isTrackCached(url) {
-            if (!('caches' in window)) return false;
-            const keys = await caches.keys();
-            for (const key of keys) {
-                const cache = await caches.open(key);
-                if (await cache.match(url)) return true;
-            }
-            return false;
+            renderTracks(); 
         }
 
         /* ================= STORAGE USAGE INDICATOR ================= */
@@ -1251,19 +1438,21 @@
         modalList.parentElement.appendChild(storageDiv);
         updateStorageIndicator();
 
-        /* ================= SERVICE WORKER REGISTRATION ================= */
+        /* ================= SERVICE WORKER REGISTRATION w/ VERSION CHECK ================= */
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js', { scope: './' })
                     .then(registration => {
-                        // Once registered/active, ask for the version
+                        // Request version from active service worker
                         const messageChannel = new MessageChannel();
                         messageChannel.port1.onmessage = (event) => {
-                            document.getElementById('appVersion').textContent = `App Version: ${event.data.version}`;
+                            if (event.data && event.data.version) {
+                                const versionSpan = document.getElementById('appVersion');
+                                if (versionSpan) versionSpan.textContent = `App Version: ${event.data.version}`;
+                            }
                         };
 
-                        // Send the request to the active service worker
                         if (navigator.serviceWorker.controller) {
                             navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [messageChannel.port2]);
                         }
@@ -1271,7 +1460,6 @@
                     .catch(err => console.warn('SW failed:', err));
             });
         }
-
     </script>
 </body>
 
