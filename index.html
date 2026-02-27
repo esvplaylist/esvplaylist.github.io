@@ -590,7 +590,7 @@
         ];
         var a = {
             headers: {
-                authorization: t
+                Authorization: 'Token ' + t
                     .map((e) => String.fromCharCode(e))
                     .join('')
                     .replace(/,/g, ''),
