@@ -569,7 +569,33 @@
                 player.currentTime = Math.max(player.currentTime - 10, 0);
             });
 
-            player.addEventListener('play', updateMediaSessionMetadata());
+            //player.addEventListener('play', updateMediaSessionMetadata());
+            let wakeLock = null;
+
+            player.addEventListener('play', async () => {
+                // Request a wake lock to prevent the JS engine from being throttled
+                try {
+                    if ('wakeLock' in navigator) {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                    }
+                } catch (err) { console.warn('WakeLock failed'); }
+
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = "playing";
+                }
+                updateMediaSessionMetadata();
+            });
+
+            player.addEventListener('pause', () => {
+                if (wakeLock) {
+                    wakeLock.release();
+                    wakeLock = null;
+                }
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = "paused";
+                }
+            });
+
             player.addEventListener('loadedmetadata', updateMediaSessionMetadata);
         }
 
