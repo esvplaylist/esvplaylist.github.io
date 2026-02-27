@@ -517,8 +517,9 @@
                 <div style="margin: 5px 0;">
                     <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectAllBooks(true)">All</button>
                     <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectAllBooks(false)">None</button>
-                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('nt')">NT</button>
                     <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('ot')">OT</button>
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('nt')">NT</button>
+                    <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="selectTestament('paul')">Paul</button>
                 </div>
                 <div id="bibleGrid" class="bible-grid"></div>
 
@@ -706,13 +707,24 @@
                 document.getElementById(`bk-${i}`).classList.toggle('selected', val);
             });
         }
-        function selectTestament(t) {
+        function selectTestament(type) {
+            // Clear current selection first
+            selectedBooks.clear();
+
             BIBLE_BOOKS.forEach((b, i) => {
-                if (b.t === t) {
+                if (type === 'ot' && b.t === 'ot') {
                     selectedBooks.add(i);
-                    document.getElementById(`bk-${i}`).classList.add('selected');
+                } else if (type === 'nt' && b.t === 'nt') {
+                    selectedBooks.add(i);
+                } else if (type === 'paul') {
+                    // Pauline Epistles: Romans through Philemon
+                    const pauline = ["Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", 
+                                    "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", 
+                                    "1 Timothy", "2 Timothy", "Titus", "Philemon"];
+                    if (pauline.includes(b.n)) selectedBooks.add(i);
                 }
             });
+            renderBibleGrid();
         }
         initBibleGrid();
 
