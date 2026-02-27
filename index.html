@@ -1006,118 +1006,103 @@
         }
 
         /* INTELLIGENT PLAN GENERATOR */
+        /* CUSTOM PLAN GENERATOR LOGIC - FIXED */
         async function generateCustomPlan() {
             const days = parseInt(document.getElementById('planDays').value);
             const startDateStr = document.getElementById('planStart').value;
-            if (selectedBooks.size === 0 || !days || !startDateStr) return alert("Please select books, days, and a start date.");
-
-            const status = document.getElementById('planGenStatus');
-            const planBooks = BIBLE_BOOKS.filter(b => selectedBooks.has(b.a));
-
-            // 1. Flatten into an array of all selected chapters with verse counts
-            let allChapters = [];
-            planBooks.forEach(b => {
-                const bookTotalVerses = b.v.reduce((sum, val) => sum + val, 0);
-                b.v.forEach((verses, idx) => {
-                    allChapters.push({
-                        bookName: b.n,
-                        abbr: b.a,
-                        chapter: idx + 1,
-                        verseCount: verses,
-                        bookTotalVerses: bookTotalVerses
-                    });
-                });
-            });
-
-            const totalVerses = allChapters.reduce((sum, ch) => sum + ch.verseCount, 0);
-            const targetVersesPerDay = Math.ceil(totalVerses / days);
-
-            const planTracks = [];
-            let currentDate = new Date(startDateStr + 'T12:00:00');
-
-            // 2. Group chapters into Days, then split Days into Tracks based on API limits
-            for (let d = 0; d < days; d++) {
-                let dayVerses = 0;
-                let dayChapters = [];
-
-                // Grab chapters for this day until target is reached
-                while (allChapters.length > 0 && (dayVerses < targetVersesPerDay || d === days - 1)) {
-                    const nextCh = allChapters[0];
-                    // Don't overshoot target too much unless necessary
-                    if (dayVerses > 0 && (dayVerses + nextCh.verseCount) > (targetVersesPerDay * 1.2) && d < days - 1) break;
-
-                    dayChapters.push(allChapters.shift());
-                    dayVerses += nextCh.verseCount;
-                }
-
-                if (dayChapters.length === 0) break;
-
-                // 3. Sub-divide dayChapters into "Tracks" to stay under 500 verses / 50% book
-                let currentTrackChapters = [];
-                let currentTrackVerses = 0;
-                const dateStr = currentDate.toISOString().split('T')[0];
-
-                const pushTrack = (chapters) => {
-                    if (chapters.length === 0) return;
-                    const first = chapters[0];
-                    const last = chapters[chapters.length - 1];
-                    let query = first.bookName + " " + first.chapter;
-                    if (chapters.length > 1) {
-                        query = (first.bookName === last.bookName)
-                            ? `${first.bookName} ${first.chapter}-${last.chapter}`
-                            : `${first.bookName} ${first.chapter} - ${last.bookName} ${last.chapter}`;
-                    }
-                    planTracks.push({ query, date: dateStr });
-                };
-
-                dayChapters.forEach((ch, idx) => {
-                    const limitVerses = 500;
-                    const limitHalfBook = ch.bookTotalVerses / 2;
-                    const maxAllowed = Math.min(limitVerses, limitHalfBook);
-
-                    // If adding this chapter exceeds the limit, push current track and start new one
-                    if (currentTrackChapters.length > 0 && (currentTrackVerses + ch.verseCount) > maxAllowed) {
-                        pushTrack(currentTrackChapters);
-                        currentTrackChapters = [];
-                        currentTrackVerses = 0;
-                    }
-
-                    currentTrackChapters.push(ch);
-                    currentTrackVerses += ch.verseCount;
-                });
-                pushTrack(currentTrackChapters); // Push final track for the day
-
-                currentDate.setDate(currentDate.getDate() + 1);
+            if (selectedBooks.size === 0 || !days || !startDateStr) {
+                return alert("Please select books, days, and a start date.");
             }
 
-            // 4. Process the generated planTracks (Fetch API metadata)
-            const timestamp = new Date().toLocaleString().replace(/[\/,:]/g, '-');
-            const planName = `Plan ${timestamp}`;
+            const status = document.getElementById('planGenStatus');
+            status.textContent = "Calculating passages...";
+
+            // 1. Gather all selected chapters
+            let allChapters = [];
+            Array.from(selectedBooks).sort((a, b) => a - b).forEach(idx => {
+                const b = BIBLE_BOOKS[idx];
+                for (let c = 1; c <= b.c; c++) allChapters.push({ book: b.n, chapter: c });
+            });
+
+            if (allChapters.length === 0) return;
+
+            const perDay = Math.ceil(allChapters.length / days);
+            const baseDate = new Date(startDateStr + 'T12:00:00');
+
+            // 2. Group chapters into daily ranges
+            const planPassages = [];
+            for (let d = 0; d < days; d++) {
+                const slice = allChapters.slice(d * perDay, (d + 1) * perDay);
+                if (slice.length === 0) break;
+
+                const dayDate = new Date(baseDate);
+                dayDate.setDate(baseDate.getDate() + d);
+                const dateStr = dayDate.toISOString().split('T')[0];
+
+                const first = slice[0];
+                const last = slice[slice.length - 1];
+
+                // Better range logic: Handles spans across different books
+                let query = "";
+                if (first.book === last.book) {
+                    query = first.chapter === last.chapter ? `${first.book} ${first.chapter}` : `${first.book} ${first.chapter}-${last.chapter}`;
+                } else {
+                    query = `${first.book} ${first.chapter} - ${last.book} ${last.chapter}`;
+                }
+
+                planPassages.push({ query: query, date: dateStr });
+            }
+
+            // 3. Create playlist and fetch data
+            const timestamp = new Date().getTime();
+            const planName = `Plan ${new Date().toLocaleDateString()} (${timestamp})`;
             playlists[planName] = [];
             const targetArray = playlists[planName];
 
-            for (let i = 0; i < planTracks.length; i++) {
-                status.textContent = `Fetching Track ${i + 1}/${planTracks.length}...`;
+            for (let i = 0; i < planPassages.length; i++) {
+                status.textContent = `Fetching Day ${i + 1}/${planPassages.length}: ${planPassages[i].query}`;
+
                 try {
-                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planTracks[i].query);
+                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planPassages[i].query);
                     const response = await fetch(url, a);
                     const r = await response.json();
+
                     if (r.parsed && r.parsed[0]) {
                         let start = r.parsed[0][0];
                         let end = r.parsed[0][1];
-                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 1000);
+                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
                         const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-                        targetArray.push({ _id: trackId, url: src, label: r.canonical, date: planTracks[i].date, done: false });
+
+                        targetArray.push({
+                            _id: trackId,
+                            url: src,
+                            label: r.canonical,
+                            date: planPassages[i].date,
+                            done: false
+                        });
+
+                        // Silent download helps with offline mode
                         silentCaptureDownload(src);
+                    } else {
+                        console.warn("API returned no parsed data for:", planPassages[i].query, r);
                     }
-                } catch (err) { console.error('Plan error:', err); }
+                } catch (err) {
+                    console.error('Plan fetch failed for:', planPassages[i].query, err);
+                }
+
+                // 200ms delay to prevent rate limiting (429 errors)
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
 
             status.textContent = 'Plan Complete!';
             currentPlaylist = planName;
             savePlaylists();
             selectPlaylist(planName);
-            setTimeout(() => { status.textContent = ''; closePlaylistModal(); }, 1000);
+
+            setTimeout(() => {
+                status.textContent = '';
+                closePlaylistModal();
+            }, 1500);
         }
 
         /* PLAN PROGRESS TRACKING */
