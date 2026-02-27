@@ -765,6 +765,7 @@
         /* Modal Logic */
         function openPlaylistModal() {
             renderModalPlaylistList();
+            initBibleGrid(); // Initialize/Refresh the grid every time the modal opens
             document.getElementById('planStart').valueAsDate = new Date();
             document.getElementById('playlistModal').style.display = 'flex';
         }
@@ -782,15 +783,33 @@
         /* Bible Grid Logic */
         function initBibleGrid() {
             const grid = document.getElementById('bibleGrid');
-            grid.innerHTML = BIBLE_BOOKS.map(b => `
-                <button class="book-btn ${selectedBooks.has(b.a) ? 'selected' : ''}" 
-                        onclick="toggleBookSelection('${b.a}')">
-                    ${b.a}<br>${b.v.length}ch
-                </button>
-            `).join('');
+            if (!grid) return;
+
+            // Clear the grid first
+            grid.innerHTML = '';
+
+            BIBLE_BOOKS.forEach((b, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'book-btn';
+                if (selectedBooks.has(i)) btn.classList.add('selected'); // Maintain selection state
+                btn.id = `bk-${i}`;
+                btn.title = b.n;
+                btn.textContent = b.a;
+
+                // Use a proper event listener instead of an inline onclick string
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleBook(i);
+                });
+
+                grid.appendChild(btn);
+            });
         }
         function toggleBook(i) {
             const btn = document.getElementById(`bk-${i}`);
+            if (!btn) return;
+
             if (selectedBooks.has(i)) {
                 selectedBooks.delete(i);
                 btn.classList.remove('selected');
