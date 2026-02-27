@@ -98,7 +98,7 @@
             background: transparent;
             color: inherit;
         }
-        
+
         #bulkPassages {
             font-family: inherit;
             resize: vertical;
@@ -382,11 +382,53 @@
         }
 
         /* PLAN GENERATOR UI ADDITIONS */
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; border-bottom: 2px solid transparent; cursor: pointer; color: var(--muted); font-size: 15px; font-weight: 600; transition: all 0.2s; }
-        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .bible-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 5px; margin: 15px 0; max-height: 250px; overflow-y: auto; padding: 5px; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; }
-        .book-btn { font-size: 10px; padding: 8px 2px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; background: var(--btn-bg); cursor: pointer; text-align: center; color: inherit; transition: 0.1s; }
-        .book-btn.selected { background: var(--accent); color: white; border-color: var(--accent); }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .bible-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 5px;
+            margin: 15px 0;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+
+        .book-btn {
+            font-size: 10px;
+            padding: 8px 2px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            background: var(--btn-bg);
+            cursor: pointer;
+            text-align: center;
+            color: inherit;
+            transition: 0.1s;
+        }
+
+        .book-btn.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
     </style>
 </head>
 
@@ -401,7 +443,7 @@
                 <div class="create-row mb-2">
                     <input id="input" placeholder="Add track (e.g. John 1:1-5)" />
                     <button class="btn btn-outline" onclick="openPlaylistModal()" title="Open playlists"><span
-                        class="material-symbols-outlined">playlist_play</span>Playlists</button>
+                            class="material-symbols-outlined">playlist_play</span>Playlists</button>
                 </div>
             </div>
         </div>
@@ -451,7 +493,9 @@
                     <span id="planStatDetail" style="color: var(--now); font-weight: bold;">0%</span>
                 </div>
                 <div style="width: 100%; height: 6px; background: var(--btn-bg); border-radius: 3px; overflow: hidden;">
-                    <div id="planProgressBar" style="height: 100%; width: 0%; background: var(--now); border-radius: 3px; transition: width 0.3s;"></div>
+                    <div id="planProgressBar"
+                        style="height: 100%; width: 0%; background: var(--now); border-radius: 3px; transition: width 0.3s;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -476,7 +520,7 @@
 
     <div id="playlistModal" class="modal-overlay" onclick="closePlaylistModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
-            
+
             <div style="display: flex; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 15px;">
                 <button id="tabBtnManage" class="tab-btn active" onclick="switchTab('manage')">Playlists</button>
                 <button id="tabBtnPlan" class="tab-btn" onclick="switchTab('plan')">Reading Plan</button>
@@ -487,16 +531,19 @@
 
                 <div style="display: flex; gap: 8px; margin-top: 8px">
                     <input id="modalNewPlaylist" placeholder="New playlist" />
-                    <button class="btn btn-primary" onclick="createPlaylistFromModal()" title="Create empty playlist"><span
-                            class="material-symbols-outlined">add</span></button>
+                    <button class="btn btn-primary" onclick="createPlaylistFromModal()"
+                        title="Create empty playlist"><span class="material-symbols-outlined">add</span></button>
                 </div>
 
                 <hr style="opacity: 0.1; margin: 15px 0;">
                 <div id="bulkSection">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div style="display: flex; gap: 5px;">
-                            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
-                            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()" title="Upload CSV File">
+                            <input type="file" id="csvFileInput" accept=".csv" style="display: none;"
+                                onchange="handleCsvUpload(event)">
+                            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()"
+                                title="Upload CSV File">
                                 <span class="material-symbols-outlined">upload_file</span>
                             </button>
                             <button class="btn btn-outline" onclick="toggleBulkText()" title="Import As Text">
@@ -505,8 +552,10 @@
                         </div>
                     </div>
                     <div id="bulkTextContainer" style="display: none;">
-                        <textarea id="bulkPassages" rows="4" style="width: 95%;" placeholder="Enter passages (one per line)"></textarea>
-                        <button class="btn btn-primary" style="width: 100%;" onclick="addBulkFromText()">Add Bulk Passages</button>
+                        <textarea id="bulkPassages" rows="4" style="width: 95%;"
+                            placeholder="Enter passages (one per line)"></textarea>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="addBulkFromText()">Add Bulk
+                            Passages</button>
                     </div>
                     <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px;"></div>
                 </div>
@@ -521,12 +570,14 @@
                     <input type="number" id="planDays" placeholder="Days" value="30" style="flex:1;">
                     <input type="date" id="planStart" style="flex:1;">
                 </div>
-                
-                <button class="btn btn-primary" style="margin-top: 15px;" onclick="generateCustomPlan()">Generate Plan</button>
+
+                <button class="btn btn-primary" style="margin-top: 15px;" onclick="generateCustomPlan()">Generate
+                    Plan</button>
                 <div id="planGenStatus" class="small-muted" style="text-align: center; margin-top: 8px;"></div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
+            <div
+                style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
                 <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
             </div>
         </div>
@@ -556,22 +607,73 @@
 
         /* ================= BIBLE DATA (For Plan Generator) ================= */
         const BIBLE_BOOKS = [
-            {n:"Genesis", a:"Gen", c:50, t:"ot"}, {n:"Exodus", a:"Exo", c:40, t:"ot"}, {n:"Leviticus", a:"Lev", c:27, t:"ot"}, {n:"Numbers", a:"Num", c:36, t:"ot"}, {n:"Deuteronomy", a:"Deu", c:34, t:"ot"},
-            {n:"Joshua", a:"Jos", c:24, t:"ot"}, {n:"Judges", a:"Jdg", c:21, t:"ot"}, {n:"Ruth", a:"Rth", c:4, t:"ot"}, {n:"1 Samuel", a:"1Sa", c:31, t:"ot"}, {n:"2 Samuel", a:"2Sa", c:24, t:"ot"},
-            {n:"1 Kings", a:"1Ki", c:22, t:"ot"}, {n:"2 Kings", a:"2Ki", c:25, t:"ot"}, {n:"1 Chronicles", a:"1Ch", c:29, t:"ot"}, {n:"2 Chronicles", a:"2Ch", c:36, t:"ot"}, {n:"Ezra", a:"Ezr", c:10, t:"ot"},
-            {n:"Nehemiah", a:"Neh", c:13, t:"ot"}, {n:"Esther", a:"Est", c:10, t:"ot"}, {n:"Job", a:"Job", c:42, t:"ot"}, {n:"Psalms", a:"Psa", c:150, t:"ot"}, {n:"Proverbs", a:"Pro", c:31, t:"ot"},
-            {n:"Ecclesiastes", a:"Ecc", c:12, t:"ot"}, {n:"Song of Solomon", a:"Sng", c:8, t:"ot"}, {n:"Isaiah", a:"Isa", c:66, t:"ot"}, {n:"Jeremiah", a:"Jer", c:52, t:"ot"}, {n:"Lamentations", a:"Lam", c:5, t:"ot"},
-            {n:"Ezekiel", a:"Eze", c:48, t:"ot"}, {n:"Daniel", a:"Dan", c:12, t:"ot"}, {n:"Hosea", a:"Hos", c:14, t:"ot"}, {n:"Joel", a:"Joe", c:3, t:"ot"}, {n:"Amos", a:"Amo", c:9, t:"ot"},
-            {n:"Obadiah", a:"Oba", c:1, t:"ot"}, {n:"Jonah", a:"Jon", c:4, t:"ot"}, {n:"Micah", a:"Mic", c:7, t:"ot"}, {n:"Nahum", a:"Nah", c:3, t:"ot"}, {n:"Habakkuk", a:"Hab", c:3, t:"ot"},
-            {n:"Zephaniah", a:"Zep", c:3, t:"ot"}, {n:"Haggai", a:"Hag", c:2, t:"ot"}, {n:"Zechariah", a:"Zec", c:14, t:"ot"}, {n:"Malachi", a:"Mal", c:4, t:"ot"},
-            {n:"Matthew", a:"Mat", c:28, t:"nt"}, {n:"Mark", a:"Mrk", c:16, t:"nt"}, {n:"Luke", a:"Luk", c:24, t:"nt"}, {n:"John", a:"Jhn", c:21, t:"nt"}, {n:"Acts", a:"Act", c:28, t:"nt"},
-            {n:"Romans", a:"Rom", c:16, t:"nt"}, {n:"1 Corinthians", a:"1Co", c:16, t:"nt"}, {n:"2 Corinthians", a:"2Co", c:13, t:"nt"}, {n:"Galatians", a:"Gal", c:6, t:"nt"},
-            {n:"Ephesians", a:"Eph", c:6, t:"nt"}, {n:"Philippians", a:"Php", c:4, t:"nt"}, {n:"Colossians", a:"Col", c:4, t:"nt"}, {n:"1 Thessalonians", a:"1Th", c:5, t:"nt"},
-            {n:"2 Thessalonians", a:"2Th", c:3, t:"nt"}, {n:"1 Timothy", a:"1Ti", c:6, t:"nt"}, {n:"2 Timothy", a:"2Ti", c:4, t:"nt"}, {n:"Titus", a:"Tit", c:3, t:"nt"},
-            {n:"Philemon", a:"Phm", c:1, t:"nt"}, {n:"Hebrews", a:"Heb", c:13, t:"nt"}, {n:"James", a:"Jas", c:5, t:"nt"}, {n:"1 Peter", a:"1Pe", c:5, t:"nt"},
-            {n:"2 Peter", a:"2Pe", c:3, t:"nt"}, {n:"1 John", a:"1Jn", c:5, t:"nt"}, {n:"2 John", a:"2Jn", c:1, t:"nt"}, {n:"3 John", a:"3Jn", c:1, t:"nt"},
-            {n:"Jude", a:"Jud", c:1, t:"nt"}, {n:"Revelation", a:"Rev", c:22, t:"nt"}
-        ];
+            ["Genesis", "Gen", [31, 25, 24, 26, 32, 22, 24, 22, 29, 32, 32, 20, 18, 24, 21, 16, 27, 33, 38, 18, 34, 24, 20, 67, 34, 35, 46, 22, 35, 43, 55, 32, 20, 31, 29, 43, 36, 30, 23, 23, 57, 38, 34, 34, 28, 26, 31, 22, 33, 26], "ot"],
+            ["Exodus", "Exo", [22, 25, 22, 31, 23, 30, 25, 32, 35, 29, 10, 51, 22, 31, 27, 36, 16, 27, 25, 26, 36, 31, 33, 18, 40, 37, 21, 43, 46, 38, 18, 35, 23, 35, 35, 38, 29, 31, 43, 38], "ot"],
+            ["Leviticus", "Lev", [17, 16, 17, 35, 19, 30, 38, 36, 24, 20, 47, 8, 59, 57, 33, 34, 16, 30, 37, 27, 24, 33, 44, 23, 55, 46, 34], "ot"],
+            ["Numbers", "Num", [54, 34, 51, 49, 31, 27, 89, 26, 23, 36, 35, 16, 33, 45, 41, 50, 13, 32, 22, 29, 35, 41, 30, 25, 18, 65, 23, 31, 40, 16, 54, 42, 56, 29, 34, 13], "ot"],
+            ["Deuteronomy", "Deu", [46, 37, 29, 49, 33, 25, 26, 20, 29, 22, 32, 32, 18, 29, 23, 22, 20, 22, 21, 20, 23, 30, 25, 22, 19, 19, 26, 68, 29, 20, 30, 52, 29, 12], "ot"],
+            ["Joshua", "Jos", [18, 24, 17, 24, 15, 27, 26, 35, 27, 43, 23, 24, 33, 15, 63, 10, 18, 28, 51, 9, 45, 34, 16, 33], "ot"],
+            ["Judges", "Jdg", [36, 23, 31, 24, 31, 40, 25, 35, 57, 18, 40, 15, 25, 20, 20, 31, 13, 31, 30, 48, 25], "ot"],
+            ["Ruth", "Rth", [22, 23, 18, 22], "ot"],
+            ["1 Samuel", "1Sa", [28, 36, 21, 22, 12, 21, 17, 22, 27, 27, 15, 25, 23, 52, 35, 23, 58, 30, 24, 42, 15, 23, 28, 22, 44, 25, 12, 25, 11, 31, 13], "ot"],
+            ["2 Samuel", "2Sa", [27, 32, 39, 12, 25, 23, 29, 18, 13, 19, 27, 31, 39, 33, 37, 23, 29, 33, 43, 26, 22, 51, 39, 25], "ot"],
+            ["1 Kings", "1Ki", [53, 46, 28, 34, 18, 38, 51, 66, 28, 29, 43, 33, 34, 31, 34, 34, 24, 46, 21, 42, 29, 53], "ot"],
+            ["2 Kings", "2Ki", [18, 25, 27, 44, 27, 33, 20, 29, 37, 36, 21, 21, 25, 29, 38, 20, 41, 37, 37, 21, 26, 20, 37, 20, 30], "ot"],
+            ["1 Chronicles", "1Ch", [54, 55, 24, 43, 26, 81, 40, 40, 44, 14, 47, 40, 14, 17, 29, 43, 27, 17, 19, 8, 30, 19, 32, 31, 31, 32, 34, 21, 30], "ot"],
+            ["2 Chronicles", "2Ch", [17, 18, 17, 22, 14, 42, 22, 18, 31, 19, 23, 16, 22, 15, 19, 14, 19, 34, 11, 37, 20, 12, 21, 27, 28, 23, 9, 27, 36, 27, 21, 33, 25, 33, 27, 23], "ot"],
+            ["Ezra", "Ezr", [11, 70, 13, 24, 17, 22, 28, 36, 15, 44], "ot"],
+            ["Nehemiah", "Neh", [11, 20, 32, 23, 19, 19, 73, 18, 38, 39, 36, 47, 31], "ot"],
+            ["Esther", "Est", [22, 23, 15, 17, 14, 14, 10, 17, 32, 3], "ot"],
+            ["Job", "Job", [22, 13, 26, 21, 27, 30, 21, 22, 35, 22, 20, 25, 28, 22, 35, 22, 16, 21, 29, 29, 34, 30, 17, 25, 6, 14, 23, 28, 25, 31, 40, 22, 33, 37, 16, 33, 24, 41, 30, 24, 34, 17], "ot"],
+            ["Psalms", "Psa", [6, 12, 8, 8, 12, 10, 17, 9, 20, 18, 7, 8, 6, 7, 5, 11, 15, 50, 14, 9, 13, 31, 6, 10, 22, 12, 14, 9, 11, 12, 24, 11, 22, 22, 28, 12, 40, 22, 13, 17, 13, 11, 5, 26, 17, 11, 9, 14, 20, 23, 19, 9, 6, 7, 23, 13, 11, 11, 17, 12, 8, 12, 11, 10, 13, 20, 7, 35, 36, 5, 24, 20, 28, 23, 10, 12, 20, 72, 13, 19, 16, 8, 18, 12, 13, 17, 7, 18, 52, 17, 16, 15, 5, 23, 11, 13, 12, 9, 9, 5, 8, 28, 22, 35, 45, 48, 43, 13, 31, 7, 10, 10, 9, 8, 18, 19, 2, 29, 176, 7, 8, 9, 4, 8, 5, 6, 5, 6, 8, 8, 3, 18, 3, 3, 21, 26, 9, 8, 24, 13, 10, 7, 12, 15, 21, 10, 20, 14, 9, 6], "ot"],
+            ["Proverbs", "Pro", [33, 22, 35, 27, 23, 35, 27, 36, 18, 32, 31, 28, 25, 35, 33, 33, 28, 24, 29, 30, 31, 29, 35, 34, 28, 28, 27, 28, 27, 33, 31], "ot"],
+            ["Ecclesiastes", "Ecc", [18, 26, 22, 16, 20, 12, 29, 17, 18, 20, 10, 14], "ot"],
+            ["Song of Solomon", "Sng", [17, 17, 11, 16, 16, 13, 13, 14], "ot"],
+            ["Isaiah", "Isa", [31, 22, 26, 6, 30, 13, 25, 22, 21, 34, 16, 6, 22, 32, 9, 14, 14, 7, 25, 6, 17, 25, 18, 23, 12, 21, 13, 29, 24, 33, 9, 20, 24, 17, 10, 22, 38, 22, 8, 31, 29, 25, 28, 28, 25, 13, 15, 22, 26, 11, 23, 15, 12, 17, 13, 12, 21, 14, 21, 22, 11, 12, 19, 12, 25, 24], "ot"],
+            ["Jeremiah", "Jer", [19, 37, 25, 31, 31, 30, 34, 22, 26, 25, 23, 17, 27, 22, 21, 21, 27, 23, 15, 18, 14, 30, 40, 10, 38, 24, 22, 17, 32, 24, 40, 44, 26, 22, 19, 32, 21, 28, 18, 16, 18, 22, 13, 30, 5, 28, 7, 47, 39, 46, 64, 34], "ot"],
+            ["Lamentations", "Lam", [22, 22, 66, 22, 22], "ot"],
+            ["Ezekiel", "Eze", [28, 10, 27, 17, 17, 14, 27, 18, 11, 22, 25, 28, 23, 23, 8, 63, 24, 32, 14, 49, 32, 31, 49, 27, 17, 21, 36, 26, 21, 26, 18, 32, 33, 31, 15, 38, 28, 23, 29, 49, 26, 20, 27, 31, 25, 24, 23, 35], "ot"],
+            ["Daniel", "Dan", [21, 49, 30, 37, 31, 28, 28, 27, 27, 21, 45, 13], "ot"],
+            ["Hosea", "Hos", [11, 23, 5, 19, 15, 11, 16, 14, 17, 15, 12, 14, 16, 9], "ot"],
+            ["Joel", "Joe", [20, 32, 21], "ot"],
+            ["Amos", "Amo", [15, 16, 15, 13, 27, 14, 17, 14, 15], "ot"],
+            ["Obadiah", "Oba", [21], "ot"],
+            ["Jonah", "Jon", [17, 10, 10, 11], "ot"],
+            ["Micah", "Mic", [16, 13, 12, 13, 15, 16, 20], "ot"],
+            ["Nahum", "Nah", [15, 13, 19], "ot"],
+            ["Habakkuk", "Hab", [17, 20, 19], "ot"],
+            ["Zephaniah", "Zep", [18, 15, 20], "ot"],
+            ["Haggai", "Hag", [15, 23], "ot"],
+            ["Zechariah", "Zec", [21, 13, 10, 14, 11, 15, 14, 23, 17, 12, 17, 14, 9, 21], "ot"],
+            ["Malachi", "Mal", [14, 17, 18, 6], "ot"],
+            ["Matthew", "Mat", [25, 23, 17, 25, 48, 34, 29, 34, 38, 42, 30, 50, 58, 36, 39, 28, 27, 35, 30, 34, 46, 46, 39, 51, 46, 75, 66, 20], "nt"],
+            ["Mark", "Mrk", [45, 28, 35, 41, 43, 56, 37, 38, 50, 52, 33, 44, 37, 72, 47, 8], "nt"],
+            ["Luke", "Luk", [80, 52, 38, 44, 39, 49, 50, 56, 62, 42, 54, 59, 35, 35, 32, 31, 37, 43, 48, 47, 38, 71, 56, 53], "nt"],
+            ["John", "Jhn", [51, 25, 36, 54, 47, 71, 53, 59, 41, 42, 57, 50, 38, 31, 27, 33, 26, 40, 42, 31, 25], "nt"],
+            ["Acts", "Act", [26, 47, 26, 37, 42, 15, 60, 40, 43, 48, 30, 25, 52, 28, 41, 40, 34, 28, 41, 38, 40, 30, 35, 27, 27, 32, 44, 31], "nt"],
+            ["Romans", "Rom", [32, 29, 31, 25, 21, 23, 25, 39, 33, 21, 36, 21, 14, 23, 33, 27], "nt"],
+            ["1 Corinthians", "1Co", [31, 16, 23, 21, 13, 20, 40, 13, 27, 33, 34, 31, 13, 40, 58, 24], "nt"],
+            ["2 Corinthians", "2Co", [24, 17, 18, 18, 21, 18, 16, 24, 15, 18, 33, 21, 14], "nt"],
+            ["Galatians", "Gal", [24, 21, 29, 31, 26, 18], "nt"],
+            ["Ephesians", "Eph", [23, 22, 21, 32, 33, 24], "nt"],
+            ["Philippians", "Php", [30, 30, 21, 23], "nt"],
+            ["Colossians", "Col", [29, 23, 25, 18], "nt"],
+            ["1 Thessalonians", "1Th", [10, 20, 13, 18, 28], "nt"],
+            ["2 Thessalonians", "2Th", [12, 17, 18], "nt"],
+            ["1 Timothy", "1Ti", [20, 15, 16, 16, 25, 21], "nt"],
+            ["2 Timothy", "2Ti", [18, 26, 17, 22], "nt"],
+            ["Titus", "Tit", [16, 15, 15], "nt"],
+            ["Philemon", "Phm", [25], "nt"],
+            ["Hebrews", "Heb", [14, 18, 19, 16, 14, 20, 28, 13, 28, 39, 40, 29, 25], "nt"],
+            ["James", "Jas", [27, 26, 18, 17, 20], "nt"],
+            ["1 Peter", "1Pe", [25, 25, 22, 19, 14], "nt"],
+            ["2 Peter", "2Pe", [21, 22, 18], "nt"],
+            ["1 John", "1Jn", [10, 29, 24, 21, 21], "nt"],
+            ["2 John", "2Jn", [13], "nt"],
+            ["3 John", "3Jn", [14], "nt"],
+            ["Jude", "Jud", [25], "nt"],
+            ["Revelation", "Rev", [20, 29, 22, 11, 14, 17, 17, 13, 21, 11, 19, 17, 18, 20, 8, 21, 18, 24, 21, 15, 27, 21], "nt"]
+        ].map(b => ({ n: b[0], a: b[1], v: b[2], t: b[3], c: b[2].length }));
         var selectedBooks = new Set();
 
         // --- Media Session Integration ---
@@ -680,9 +782,12 @@
         /* Bible Grid Logic */
         function initBibleGrid() {
             const grid = document.getElementById('bibleGrid');
-            grid.innerHTML = BIBLE_BOOKS.map((b, i) => 
-                `<button class="book-btn" id="bk-${i}" title="${b.n}" onclick="toggleBook(${i})">${b.a}</button>`
-            ).join('');
+            grid.innerHTML = BIBLE_BOOKS.map(b => `
+                <button class="book-btn ${selectedBooks.has(b.a) ? 'selected' : ''}" 
+                        onclick="toggleBookSelection('${b.a}')">
+                    ${b.a}<br>${b.v.length}ch
+                </button>
+            `).join('');
         }
         function toggleBook(i) {
             const btn = document.getElementById(`bk-${i}`);
@@ -840,7 +945,7 @@
 
             const playlistName = file.name.replace(/\.csv$/i, '');
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const text = e.target.result;
                 const passages = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
                 processBulkPassages(playlistName, passages);
@@ -852,7 +957,7 @@
             const text = document.getElementById('bulkPassages').value;
             const passages = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
             if (passages.length === 0) return alert('Please enter at least one passage.');
-            
+
             const timestamp = new Date().toLocaleString().replace(/[\/,:]/g, '-');
             const playlistName = `Playlist ${timestamp}`;
             processBulkPassages(playlistName, passages);
@@ -861,25 +966,25 @@
         async function processBulkPassages(name, passageList) {
             const status = document.getElementById('bulkStatus');
             status.textContent = `Processing 0/${passageList.length}...`;
-            
+
             if (!playlists[name]) playlists[name] = [];
             const targetArray = playlists[name];
 
             for (let i = 0; i < passageList.length; i++) {
                 const passage = passageList[i];
                 status.textContent = `Processing ${i + 1}/${passageList.length}: ${passage}`;
-                
+
                 try {
                     const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(passage);
                     const response = await fetch(url, a);
                     const r = await response.json();
-                    
+
                     if (r.parsed && r.parsed[0]) {
                         let start = r.parsed[0][0];
                         let end = r.parsed[0][1];
                         const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
                         const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-                        
+
                         targetArray.push({ _id: trackId, url: src, label: r.canonical });
                         silentCaptureDownload(src);
                     }
@@ -896,63 +1001,112 @@
             document.getElementById('bulkTextContainer').style.display = 'none';
         }
 
-        /* CUSTOM PLAN GENERATOR LOGIC */
+        /* INTELLIGENT PLAN GENERATOR */
         async function generateCustomPlan() {
             const days = parseInt(document.getElementById('planDays').value);
             const startDateStr = document.getElementById('planStart').value;
             if (selectedBooks.size === 0 || !days || !startDateStr) return alert("Please select books, days, and a start date.");
 
             const status = document.getElementById('planGenStatus');
-            status.textContent = "Calculating passages...";
+            const planBooks = BIBLE_BOOKS.filter(b => selectedBooks.has(b.a));
 
+            // 1. Flatten into an array of all selected chapters with verse counts
             let allChapters = [];
-            Array.from(selectedBooks).sort((a,b) => a-b).forEach(idx => {
-                const b = BIBLE_BOOKS[idx];
-                for (let c=1; c<=b.c; c++) allChapters.push(`${b.n} ${c}`);
+            planBooks.forEach(b => {
+                const bookTotalVerses = b.v.reduce((sum, val) => sum + val, 0);
+                b.v.forEach((verses, idx) => {
+                    allChapters.push({
+                        bookName: b.n,
+                        abbr: b.a,
+                        chapter: idx + 1,
+                        verseCount: verses,
+                        bookTotalVerses: bookTotalVerses
+                    });
+                });
             });
 
-            const perDay = Math.ceil(allChapters.length / days);
-            const baseDate = new Date(startDateStr + 'T12:00:00'); // Use noon to avoid timezone shift
+            const totalVerses = allChapters.reduce((sum, ch) => sum + ch.verseCount, 0);
+            const targetVersesPerDay = Math.ceil(totalVerses / days);
 
-            const planPassages = [];
-            for (let d=0; d<days; d++) {
-                const slice = allChapters.slice(d * perDay, (d + 1) * perDay);
-                if (slice.length === 0) break;
+            const planTracks = [];
+            let currentDate = new Date(startDateStr + 'T12:00:00');
 
-                const dayDate = new Date(baseDate);
-                dayDate.setDate(baseDate.getDate() + d);
-                const dateStr = dayDate.toISOString().split('T')[0];
+            // 2. Group chapters into Days, then split Days into Tracks based on API limits
+            for (let d = 0; d < days; d++) {
+                let dayVerses = 0;
+                let dayChapters = [];
 
-                const first = slice[0];
-                const last = slice[slice.length-1];
-                const label = slice.length > 1 ? `${first.split(' ').slice(0,-1).join(' ')} ${first.split(' ').pop()}-${last.split(' ').pop()}` : first;
-                
-                planPassages.push({ query: label, date: dateStr });
+                // Grab chapters for this day until target is reached
+                while (allChapters.length > 0 && (dayVerses < targetVersesPerDay || d === days - 1)) {
+                    const nextCh = allChapters[0];
+                    // Don't overshoot target too much unless necessary
+                    if (dayVerses > 0 && (dayVerses + nextCh.verseCount) > (targetVersesPerDay * 1.2) && d < days - 1) break;
+
+                    dayChapters.push(allChapters.shift());
+                    dayVerses += nextCh.verseCount;
+                }
+
+                if (dayChapters.length === 0) break;
+
+                // 3. Sub-divide dayChapters into "Tracks" to stay under 500 verses / 50% book
+                let currentTrackChapters = [];
+                let currentTrackVerses = 0;
+                const dateStr = currentDate.toISOString().split('T')[0];
+
+                const pushTrack = (chapters) => {
+                    if (chapters.length === 0) return;
+                    const first = chapters[0];
+                    const last = chapters[chapters.length - 1];
+                    let query = first.bookName + " " + first.chapter;
+                    if (chapters.length > 1) {
+                        query = (first.bookName === last.bookName)
+                            ? `${first.bookName} ${first.chapter}-${last.chapter}`
+                            : `${first.bookName} ${first.chapter} - ${last.bookName} ${last.chapter}`;
+                    }
+                    planTracks.push({ query, date: dateStr });
+                };
+
+                dayChapters.forEach((ch, idx) => {
+                    const limitVerses = 500;
+                    const limitHalfBook = ch.bookTotalVerses / 2;
+                    const maxAllowed = Math.min(limitVerses, limitHalfBook);
+
+                    // If adding this chapter exceeds the limit, push current track and start new one
+                    if (currentTrackChapters.length > 0 && (currentTrackVerses + ch.verseCount) > maxAllowed) {
+                        pushTrack(currentTrackChapters);
+                        currentTrackChapters = [];
+                        currentTrackVerses = 0;
+                    }
+
+                    currentTrackChapters.push(ch);
+                    currentTrackVerses += ch.verseCount;
+                });
+                pushTrack(currentTrackChapters); // Push final track for the day
+
+                currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            const planName = `Reading Plan (${new Date().toLocaleDateString()})`;
-            if (!playlists[planName]) playlists[planName] = [];
+            // 4. Process the generated planTracks (Fetch API metadata)
+            const timestamp = new Date().toLocaleString().replace(/[\/,:]/g, '-');
+            const planName = `Plan ${timestamp}`;
+            playlists[planName] = [];
             const targetArray = playlists[planName];
 
-            for (let i = 0; i < planPassages.length; i++) {
-                status.textContent = `Fetching Day ${i + 1}/${planPassages.length}...`;
+            for (let i = 0; i < planTracks.length; i++) {
+                status.textContent = `Fetching Track ${i + 1}/${planTracks.length}...`;
                 try {
-                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planPassages[i].query);
+                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(planTracks[i].query);
                     const response = await fetch(url, a);
                     const r = await response.json();
-                    
                     if (r.parsed && r.parsed[0]) {
                         let start = r.parsed[0][0];
                         let end = r.parsed[0][1];
-                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
+                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 1000);
                         const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-                        
-                        targetArray.push({ _id: trackId, url: src, label: r.canonical, date: planPassages[i].date, done: false });
+                        targetArray.push({ _id: trackId, url: src, label: r.canonical, date: planTracks[i].date, done: false });
                         silentCaptureDownload(src);
                     }
-                } catch (err) {
-                    console.error('Plan fetch failed for:', planPassages[i].query, err);
-                }
+                } catch (err) { console.error('Plan error:', err); }
             }
 
             status.textContent = 'Plan Complete!';
@@ -1008,7 +1162,7 @@
             const deletedTrack = audioSources[index];
             audioSources.splice(index, 1);
             playlists[currentPlaylist] = audioSources;
-            
+
             // Remove cached file
             if (deletedTrack && deletedTrack.url) {
                 removeOfflineCache(deletedTrack.url); // fire-and-forget
@@ -1170,11 +1324,11 @@
         function toggleRepeat(index) {
             if (repeatTrackIndex === index) {
                 repeatTrackIndex = null;
-            } 
+            }
             else {
                 repeatTrackIndex = index;
             }
-            renderTracks(); 
+            renderTracks();
         }
 
         /* play/pause */
@@ -1255,7 +1409,7 @@
         player.addEventListener('ended', function () {
             if (!audioSources || audioSources.length === 0) return;
             let idx = parseInt(player.dataset.index || 0);
-            
+
             // Mark plan as done automatically
             if (audioSources[idx] && audioSources[idx].date) {
                 audioSources[idx].done = true;
@@ -1396,7 +1550,7 @@
                 console.warn('Failed to remove cached track:', err);
             }
             updateStorageIndicator();
-            renderTracks(); 
+            renderTracks();
         }
 
         /* ================= STORAGE USAGE INDICATOR ================= */
