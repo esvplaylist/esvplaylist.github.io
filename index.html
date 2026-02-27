@@ -569,21 +569,7 @@
                 player.currentTime = Math.max(player.currentTime - 10, 0);
             });
 
-            // Update metadata when track changes
-            player.addEventListener('play', () => {
-                if ('mediaSession' in navigator) {
-                    // This tells Android the buttons are now active
-                    navigator.mediaSession.playbackState = "playing"; 
-                }
-                updateMediaSessionMetadata();
-            });
-
-            player.addEventListener('pause', () => {
-                if ('mediaSession' in navigator) {
-                    // This tells Android to switch the icon to a Play symbol
-                    navigator.mediaSession.playbackState = "paused";
-                }
-            });
+            player.addEventListener('play', updateMediaSessionMetadata());
             player.addEventListener('loadedmetadata', updateMediaSessionMetadata);
         }
 
