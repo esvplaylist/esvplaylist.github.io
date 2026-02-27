@@ -785,40 +785,25 @@
             const grid = document.getElementById('bibleGrid');
             if (!grid) return;
 
-            // Clear the grid first
-            grid.innerHTML = '';
-
-            BIBLE_BOOKS.forEach((b, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'book-btn';
-                if (selectedBooks.has(i)) btn.classList.add('selected'); // Maintain selection state
-                btn.id = `bk-${i}`;
-                btn.title = b.n;
-                btn.textContent = b.a;
-
-                // Use a proper event listener instead of an inline onclick string
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleBook(i);
-                });
-
-                grid.appendChild(btn);
-            });
+            // Using type="button" prevents accidental form submission/reloads
+            // Passing 'this' directly avoids ID lookup errors
+            grid.innerHTML = BIBLE_BOOKS.map((b, i) =>
+                `<button type="button" class="book-btn" id="bk-${i}" title="${b.n}" onclick="toggleBook(this, ${i})">${b.a}</button>`
+            ).join('');
         }
-        function toggleBook(i) {
-            const btn = document.getElementById(`bk-${i}`);
-            if (!btn) return;
 
-            if (selectedBooks.has(i)) {
-                selectedBooks.delete(i);
+        function toggleBook(btn, i) {
+            // Ensure i is treated as a number for consistency in the Set
+            const index = parseInt(i);
+
+            if (selectedBooks.has(index)) {
+                selectedBooks.delete(index);
                 btn.classList.remove('selected');
             } else {
-                selectedBooks.add(i);
+                selectedBooks.add(index);
                 btn.classList.add('selected');
             }
         }
-        initBibleGrid();
 
         function createPlaylistFromModal() {
             const name = document.getElementById('modalNewPlaylist').value.trim();
