@@ -996,7 +996,7 @@
             if (!elem) return;
 
             if (!currentPlaylist) {
-                currentPlaylist = 'Playlist ' + newDate().toLocaleString();
+                currentPlaylist = 'Playlist ' + new Date().toLocaleString();
                 playlists[currentPlaylist] = [];
             }
 
