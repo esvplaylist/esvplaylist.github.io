@@ -40,14 +40,6 @@
                 color 0.2s;
         }
 
-        body.dark {
-            --bg: #0f1113;
-            --card: #121314;
-            --muted: #9aa0a6;
-            --btn-bg: #1b1b1d;
-            --text: #eef2ff;
-        }
-
         .app {
             max-width: 920px;
             margin: 0 auto;
@@ -857,11 +849,6 @@
             updateNowPlayingMini();
         }
 
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('esv_dark', document.body.classList.contains('dark'));
-        }
-
         /* Modal Logic */
         function openPlaylistModal() {
             renderModalPlaylistList();
@@ -1537,18 +1524,11 @@
         }
 
         function applySavedSpeed() {
-            // 1. Get the speed from storage, default to 1 if it doesn't exist
-            let speed = localStorage.getItem('esv_speed');
-
-            // 2. If no speed is saved, set it to 1
-            if (speed === null) {
-                speed = 1;
-            } else {
-                speed = parseFloat(speed);
-            }
-
-            // 3. Apply to the audio player and the dropdown menu
-            player.playbackRate = speed;
+            // Get speed from storage; default to "1" if never set
+            let speed = localStorage.getItem('esv_speed') || "1";
+            
+            // Apply to the audio player and the dropdown menu
+            player.playbackRate = parseFloat(speed);
             document.getElementById('speedSelect').value = speed;
         }
         speedSelect.addEventListener('change', () => {
@@ -1597,7 +1577,6 @@
         });
 
         function restoreMemory() {
-            if (localStorage.getItem('esv_dark') === 'true') document.body.classList.add('dark');
             audioSources = currentPlaylist && playlists[currentPlaylist] ? playlists[currentPlaylist] : [];
             renderModalPlaylistList();
             renderTracks();
