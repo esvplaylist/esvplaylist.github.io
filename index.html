@@ -1579,6 +1579,7 @@
         function restoreMemory() {
             audioSources = currentPlaylist && playlists[currentPlaylist] ? playlists[currentPlaylist] : [];
             renderModalPlaylistList();
+            applySavedSpeed();
             renderTracks();
             renderHeader();
         }
