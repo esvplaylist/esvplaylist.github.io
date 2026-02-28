@@ -8,7 +8,7 @@ var APP_PREFIX = 'esvp_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '3.0.4';
+var VERSION = '3.0.5';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
@@ -48,19 +48,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-
-    // 1. DO NOT cache audio files (MP3s)
-    // We let these "pass through" to the network normally.
-    if (event.request.destination === 'audio' || url.pathname.endsWith('.mp3')) {
-        return; // Service worker does nothing; browser handles it normally
-    }
-
-    // 2. Standard caching for UI assets (HTML, JS, CSS, Icons)
     event.respondWith(
         caches.match(event.request).then((cached) => {
             if (cached) return cached;
-            
+
             return fetch(event.request).then((res) => {
                 // Dynamically cache UI files so the app works offline
                 return caches.open(CACHE_NAME).then((cache) => {
