@@ -467,10 +467,19 @@
     <div class="app">
         <div class="card mb-3">
             <div class="card-body">
-                <div class="create-row mb-2">
+                <!-- <div class="create-row mb-2">
                     <input id="input" placeholder="Add track (e.g. John 1:1-5)" />
                     <button class="btn btn-outline" onclick="openPlaylistModal()" title="Open playlists"><span
                             class="material-symbols-outlined">playlist_play</span>Playlists</button>
+                </div> -->
+                <div class="input-group mb-2">
+                    <input id="input" placeholder="Add track (e.g. John 1:1-5)" />
+                    <div class="input-group-append">
+                        <button class="btn btn-playlist" onclick="openPlaylistModal()" title="Open playlists">
+                            <span class="material-symbols-outlined">playlist_play</span>
+                            Playlists
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -999,9 +1008,7 @@
             if (!elem) return;
 
             if (!currentPlaylist) {
-                const date = new Date();
-                const formattedDate = (date.getMonth() + 1).toString().padStart(2, '0') + '/' + date.getDate().toString().padStart(2, '0') + '/' + date.getFullYear();
-                currentPlaylist = 'Playlist ' + formattedDate;
+                currentPlaylist = 'Playlist ' + newDate().toLocaleString();
                 playlists[currentPlaylist] = [];
             }
 
@@ -1526,7 +1533,7 @@
         function applySavedSpeed() {
             // Get speed from storage; default to "1" if never set
             let speed = localStorage.getItem('esv_speed') || "1";
-            
+
             // Apply to the audio player and the dropdown menu
             player.playbackRate = parseFloat(speed);
             document.getElementById('speedSelect').value = speed;
