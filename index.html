@@ -1521,9 +1521,19 @@
             }
 
             function applySavedSpeed() {
-                let speed = parseFloat(localStorage.getItem('esv_speed')) || 1;
+                // 1. Get the speed from storage, default to 1 if it doesn't exist
+                let speed = localStorage.getItem('esv_speed');
+                
+                // 2. If no speed is saved, set it to 1
+                if (speed === null) {
+                    speed = 1;
+                } else {
+                    speed = parseFloat(speed);
+                }
+
+                // 3. Apply to the audio player and the dropdown menu
                 player.playbackRate = speed;
-                speedSelect.value = speed;
+                document.getElementById('speedSelect').value = speed;
             }
             speedSelect.addEventListener('change', () => {
                 player.playbackRate = parseFloat(speedSelect.value);
