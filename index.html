@@ -1254,6 +1254,7 @@
 
         /* PLAN PROGRESS TRACKING */
         function updatePlanProgress() {
+            if (!audioSources) return;
             const hasDates = audioSources.some((t) => t.date);
             const card = document.getElementById('planProgressCard');
             if (!hasDates || audioSources.length === 0) {
