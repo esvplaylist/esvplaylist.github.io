@@ -1134,7 +1134,7 @@
                 const totalVerses = allVerses.length;
                 const targetVpd = Math.ceil(totalVerses / days);
                 const baseDate = new Date(startDateStr + 'T12:00:00');
-                const planName = `Plan ${new Date().toLocaleDateString()}`;
+                const planName = `Plan ${new Date().toLocaleString()}`;
                 playlists[planName] = [];
                 const targetArray = playlists[planName];
 
