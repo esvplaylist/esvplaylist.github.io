@@ -849,9 +849,11 @@
             /* Modal Logic */
             function openPlaylistModal() {
                 renderModalPlaylistList();
+                selectedBooks.clear();
                 initBibleGrid();
                 document.getElementById('planStart').valueAsDate = new Date();
                 document.getElementById('playlistModal').style.display = 'flex';
+                document.getElementById('planDays').value = 30;
             }
             function closePlaylistModal(e) {
                 if (e && e.stopPropagation) e.stopPropagation();
