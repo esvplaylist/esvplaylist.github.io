@@ -1100,6 +1100,10 @@
             selectPlaylist(name);
             document.getElementById('bulkPassages').value = '';
             document.getElementById('bulkTextContainer').style.display = 'none';
+            setTimeout(() => {
+                status.textContent = '';
+                closePlaylistModal();
+            }, 1500);
         }
 
         async function generateCustomPlan() {
