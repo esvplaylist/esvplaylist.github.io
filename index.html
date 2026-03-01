@@ -625,6 +625,60 @@
             },
         };
 
+        class ResilientPlayer {
+            constructor(audioElement) {
+                this.audio = audioElement;
+                this.retryCount = 0;
+                this.MAX_RETRIES = 3;
+                this.retryTimeoutId = null;
+            }
+
+            cleanup() {
+                if (this.retryTimeoutId) {
+                    clearTimeout(this.retryTimeoutId);
+                    this.retryTimeoutId = null;
+                }
+            }
+
+            async safePlay(url, onFail) {
+                this.cleanup();
+
+                // Reset the audio source if it's a new URL or we are retrying
+                if (this.audio.src !== url) {
+                    this.audio.src = url;
+                    this.audio.load();
+                }
+
+                try {
+                    await this.audio.play();
+                    this.retryCount = 0; // Success
+                    console.log("Playback started.");
+                } catch (err) {
+                    console.warn("Playback failed:", err);
+                    this.handleError(url, onFail);
+                }
+            }
+
+            handleError(url, onFail) {
+                if (this.retryCount < this.MAX_RETRIES) {
+                    this.retryCount++;
+                    const delay = 1500 * this.retryCount;
+                    console.log(`Retrying in ${delay}ms (Attempt ${this.retryCount})...`);
+
+                    this.retryTimeoutId = setTimeout(() => {
+                        this.safePlay(url, onFail);
+                    }, delay);
+                } else {
+                    console.error("Max retries reached.");
+                    this.retryCount = 0;
+                    if (onFail) onFail();
+                }
+            }
+        }
+
+        // Initialize the manager
+        const manager = new ResilientPlayer(player);
+
         var player = document.getElementById('playerAudio');
         player.src = 'https://audio.esv.org/david-cochran-heath/mq/01001001-01001001.mp3';
         player.dataset.silent = 'true';
@@ -1496,11 +1550,20 @@
                 resetPlayer();
                 return;
             }
-            player.src = audioSources[idx].url;
+
+            // Prepare state
             player.dataset.index = idx;
             player.dataset.silent = 'false';
             applySavedSpeed();
-            player.play();
+
+            // Use the manager for resilient playback
+            manager.safePlay(audioSources[idx].url, () => {
+                // This 'onFail' callback runs if all 3 retries fail
+                // It skips to the next track automatically
+                let nextIdx = (idx + 1) % audioSources.length;
+                if (nextIdx !== 0) playByIndex(nextIdx);
+            });
+
             renderTracks();
             updateNowPlayingMini();
         }
@@ -1554,7 +1617,7 @@
             let idx = parseInt(player.dataset.index || 0);
             let currentTrack = audioSources[idx];
 
-            // 1. Mark current track as done if it's a plan item
+            // 1. Mark current track as done
             if (currentTrack && currentTrack.date) {
                 currentTrack.done = true;
                 if (currentTrack.chapters) {
@@ -1569,21 +1632,21 @@
                 return;
             }
 
-            // 3. Determine if we should auto-play the next track
+            // 3. Determine next track
             let nextIdx = (idx + 1) % audioSources.length;
             let nextTrack = audioSources[nextIdx];
 
             if (currentTrack && currentTrack.date) {
-                // If it's a plan: Only auto-play if the next track is the SAME day
+                // Plan logic: only auto-play if same day
                 if (nextTrack && nextTrack.date === currentTrack.date && nextIdx !== 0) {
                     playByIndex(nextIdx);
                 } else {
-                    // End of the daily reading: stop and refresh UI
                     renderTracks();
                     updateNowPlayingMini();
+                    manager.cleanup(); // Clean up any lingering retry timers
                 }
             } else {
-                // If it's a regular playlist: Keep standard auto-play behavior
+                // Regular playlist: standard auto-play
                 playByIndex(nextIdx);
             }
         });
