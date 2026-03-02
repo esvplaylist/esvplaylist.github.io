@@ -8,24 +8,30 @@ var APP_PREFIX = 'esvp_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '3.0.8';
+var VERSION = '3.1.0';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
 var URLS = [    
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
-  `${GHPATH}/headphone-symbol.png`,
-  `${GHPATH}/manifest.json`,
-  `${GHPATH}/service-worker.js`,
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined'
+  `${GHPATH}/headphone-symbol.png`
 ]
 
-const CACHE_NAME = APP_PREFIX + VERSION;
+const CACHE_NAME = 'esvplaylist-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/headphone-symbol.png',
+  '/service-worker.js',
+  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
+  // add more assets if needed
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
@@ -55,7 +61,7 @@ self.addEventListener('fetch', (event) => {
             }).catch(() => {
                 // Offline fallback for page navigation
                 if (event.request.mode === 'navigate') {
-                    return caches.match(`${GHPATH}/index.html`);
+                    return caches.match('/index.html');
                 }
             });
         })
