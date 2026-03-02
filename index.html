@@ -855,7 +855,7 @@
             renderModalPlaylistList();
             selectedBooks.clear();
             initBibleGrid();
-            document.getElementById('planStart').valueAsDate = new Date(new Date().toLocaleString());
+            document.getElementById('planStart').valueAsDate = new Date();
             document.getElementById('playlistModal').style.display = 'flex';
             document.getElementById('planDays').value = 30;
         }
@@ -884,7 +884,6 @@
                     html += `<div style="grid-column: 1 / -1; font-weight: bold; font-size: 12px; margin-top: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 2px;">${b.group}</div>`;
                     lastGroup = b.group;
                 }
-
                 // Add the book button
                 html += `<button type="button" class="book-btn" id="bk-${i}" title="${b.n}" onclick="toggleBook(this, ${i})">${b.a}</button>`;
             });
@@ -929,18 +928,18 @@
                 const isPlan = playlists[name] && playlists[name].some(track => track.date !== undefined);
 
                 div.innerHTML = `
-        <div style="flex:1; min-width:0; margin-right:8px; display: flex; align-items: center; gap: 8px;">
-            ${isPlan ? '<span class="material-symbols-outlined" style="font-size: 18px; color: var(--accent);" title="Reading Plan">calendar_month</span>' : ''}
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
-        </div>
-        <div style="display:flex; gap:6px;">
-            <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
-                <span class="material-symbols-outlined">edit</span>
-            </button>
-            <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
-                <span class="material-symbols-outlined">delete</span>
-            </button>
-        </div>`;
+                    <div style="flex:1; min-width:0; margin-right:8px; display: flex; align-items: center; gap: 8px;">
+                        ${isPlan ? '<span class="material-symbols-outlined" style="font-size: 18px; color: var(--accent);" title="Reading Plan">calendar_month</span>' : ''}
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
+                            <span class="material-symbols-outlined">edit</span>
+                        </button>
+                        <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>`;
 
                 div.onclick = () => selectPlaylist(name);
                 container.appendChild(div);

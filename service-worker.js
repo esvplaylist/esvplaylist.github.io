@@ -2,13 +2,13 @@
 var GHPATH = '/esvplaylist.github.io';
  
 // Choose a different app prefix name
-var APP_PREFIX = 'esvp_';
+var APP_PREFIX = 'esvplaylist_';
  
 // The version of the cache. Every time you change any of the files
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '3.1.0';
+var VERSION = '3.1.1';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
@@ -18,7 +18,7 @@ var URLS = [
   `${GHPATH}/headphone-symbol.png`
 ]
 
-const CACHE_NAME = 'esvplaylist-v1';
+const CACHE_NAME = `${APP_PREFIX}-${VERSION}`;
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
