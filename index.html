@@ -441,6 +441,24 @@
             border-color: var(--accent);
         }
 
+        .chapter-select-btn {
+            font-size: 14px;
+            padding: 8px 2px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 6px;
+            background: var(--btn-bg);
+            cursor: pointer;
+            text-align: center;
+            color: inherit;
+            transition: 0.1s;
+        }
+
+        .chapter-select-btn.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
         .chapter-chip {
             display: inline-flex;
             align-items: center;
@@ -591,7 +609,13 @@
             </div>
 
             <div id="tabPlan" style="display: none">
-                <label class="small-muted">1. Select Books:</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <label class="small-muted">1. Select Books:</label>
+                    <label style="font-size: 13px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="chapterModeCheckbox" />
+                        Chapter based
+                    </label>
+                </div>
                 <div id="bibleGrid" class="bible-grid"></div>
 
                 <label class="small-muted">2. Plan Details:</label>
@@ -608,6 +632,20 @@
             <div
                 style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 15px">
                 <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chapterModal" class="modal-overlay" style="z-index: 10000;" onclick="closeChapterModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h4 id="chapterModalTitle" style="margin-top:0; margin-bottom: 10px;"></h4>
+            <div id="chapterGrid" class="bible-grid" style="max-height: 300px;"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top: 1px solid rgba(0,0,0,0.1);">
+                <div style="display:flex; gap: 8px;">
+                    <button class="btn btn-outline" onclick="selectAllChapters()">All</button>
+                    <button class="btn btn-outline" onclick="clearAllChapters()">Clear</button>
+                </div>
+                <button class="btn btn-primary" onclick="closeChapterModal(event)">Done</button>
             </div>
         </div>
     </div>
@@ -763,11 +801,14 @@
             else if (i < 44) group = 'Gospels & Acts';
             else if (i < 57) group = 'Pauls Epistles';
             else if (i < 65) group = 'General Epistles';
-            else group = 'Revelation';
+            else group = 'Apocalyptic';
 
             return { n: b[0], a: b[1], v: b[2], t: b[3], c: b[2].length, group: group };
         });
+        
         var selectedBooks = new Set();
+        var selectedChapters = {}; 
+        var currentChapterModalBook = -1;
 
         // --- Media Session Integration ---
         if ('mediaSession' in navigator) {
@@ -861,6 +902,8 @@
         function openPlaylistModal() {
             renderModalPlaylistList();
             selectedBooks.clear();
+            selectedChapters = {};
+            document.getElementById('chapterModeCheckbox').checked = false;
             initBibleGrid();
             document.getElementById('planStart').valueAsDate = new Date();
             document.getElementById('playlistModal').style.display = 'flex';
@@ -900,12 +943,92 @@
 
         function toggleBook(btn, i) {
             const index = parseInt(i);
-            if (selectedBooks.has(index)) {
-                selectedBooks.delete(index);
-                btn.classList.remove('selected');
+            const isChapterMode = document.getElementById('chapterModeCheckbox').checked;
+
+            if (isChapterMode) {
+                openChapterModal(index);
             } else {
-                selectedBooks.add(index);
+                if (selectedBooks.has(index)) {
+                    selectedBooks.delete(index);
+                    delete selectedChapters[index];
+                    btn.classList.remove('selected');
+                } else {
+                    selectedBooks.add(index);
+                    selectedChapters[index] = new Set(Array.from({length: BIBLE_BOOKS[index].c}, (_, i) => i + 1));
+                    btn.classList.add('selected');
+                }
+            }
+        }
+
+        /* Chapter Selection Modal Logic */
+        function openChapterModal(idx) {
+            currentChapterModalBook = idx;
+            const b = BIBLE_BOOKS[idx];
+            document.getElementById('chapterModalTitle').textContent = b.n;
+
+            if (!selectedChapters[idx]) {
+                selectedChapters[idx] = new Set();
+            }
+
+            renderChapterGrid();
+            document.getElementById('chapterModal').style.display = 'flex';
+        }
+
+        function renderChapterGrid() {
+            const idx = currentChapterModalBook;
+            const b = BIBLE_BOOKS[idx];
+            const grid = document.getElementById('chapterGrid');
+            let html = '';
+            for (let c = 1; c <= b.c; c++) {
+                const isSel = selectedChapters[idx].has(c) ? 'selected' : '';
+                html += `<button type="button" class="chapter-select-btn ${isSel}" onclick="toggleChapter(${c})">${c}</button>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function toggleChapter(c) {
+            const idx = currentChapterModalBook;
+            if (selectedChapters[idx].has(c)) {
+                selectedChapters[idx].delete(c);
+            } else {
+                selectedChapters[idx].add(c);
+            }
+            renderChapterGrid();
+            updateMainBookButton(idx);
+        }
+
+        function selectAllChapters() {
+            const idx = currentChapterModalBook;
+            const b = BIBLE_BOOKS[idx];
+            for (let c = 1; c <= b.c; c++) {
+                selectedChapters[idx].add(c);
+            }
+            renderChapterGrid();
+            updateMainBookButton(idx);
+        }
+
+        function clearAllChapters() {
+            const idx = currentChapterModalBook;
+            selectedChapters[idx].clear();
+            renderChapterGrid();
+            updateMainBookButton(idx);
+        }
+
+        function closeChapterModal(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            document.getElementById('chapterModal').style.display = 'none';
+            currentChapterModalBook = -1;
+        }
+
+        function updateMainBookButton(idx) {
+            const btn = document.getElementById('bk-' + idx);
+            if (!btn) return;
+            if (selectedChapters[idx] && selectedChapters[idx].size > 0) {
+                selectedBooks.add(idx);
                 btn.classList.add('selected');
+            } else {
+                selectedBooks.delete(idx);
+                btn.classList.remove('selected');
             }
         }
 
@@ -1138,7 +1261,10 @@
                 .sort((a, b) => a - b)
                 .forEach((idx) => {
                     const b = BIBLE_BOOKS[idx];
+                    const chaptersToInclude = selectedChapters[idx] || new Set();
                     for (let c = 1; c <= b.c; c++) {
+                        if (!chaptersToInclude.has(c)) continue;
+                        
                         const vCount = b.v[c - 1];
                         for (let v = 1; v <= vCount; v++) {
                             allVerses.push({
@@ -1152,8 +1278,12 @@
                     }
                 });
 
+            if (allVerses.length === 0) {
+                status.textContent = '';
+                return alert('No chapters were selected for the plan.');
+            }
+
             const totalVerses = allVerses.length;
-            const targetVpd = Math.ceil(totalVerses / days);
             const baseDate = new Date(startDateStr + 'T12:00:00');
             const planName = `Plan ${new Date().toLocaleString()}`;
             playlists[planName] = [];
@@ -1164,8 +1294,13 @@
             for (let i = 0; i < days; i++) {
                 if (currentVerseIdx >= totalVerses) break;
 
+                // DYNAMIC CALCULATION: Recalculate target verses for the remaining days
+                let remainingDays = days - i;
+                let remainingVerses = totalVerses - currentVerseIdx;
+                let currentTargetVpd = Math.ceil(remainingVerses / remainingDays);
+
                 let startIdx = currentVerseIdx;
-                let targetEndIdx = Math.min(startIdx + targetVpd, totalVerses);
+                let targetEndIdx = Math.min(startIdx + currentTargetVpd, totalVerses);
                 let endIdx = targetEndIdx;
 
                 // --- REFINED PREVENT CHAPTER BREAKS ---
