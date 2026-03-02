@@ -1633,11 +1633,17 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js').then((reg) => {
-                    const mc = new MessageChannel();
-                    mc.port1.onmessage = (e) => {
-                        if (e.data?.version) document.getElementById('appVersion').textContent = `App Version: ${e.data.version}`;
+                    const sendVersionRequest = () => {
+                        if (!navigator.serviceWorker.controller) return;
+                        const mc = new MessageChannel();
+                        mc.port1.onmessage = (e) => {
+                            if (e.data && e.data.version) document.getElementById('appVersion').textContent = `App Version: ${e.data.version}`;
+                        };
+                        navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [mc.port2]);
                     };
-                    if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [mc.port2]);
+
+                    sendVersionRequest();
+                    navigator.serviceWorker.addEventListener('controllerchange', sendVersionRequest);
                 });
             });
         }
