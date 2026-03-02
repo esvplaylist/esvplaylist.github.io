@@ -777,9 +777,15 @@
                 if (idx < 0 || !audioSources[idx]) return;
 
                 const track = audioSources[idx];
+                const chapIdx = parseInt(player.dataset.chapterIndex || -1);
+                
+                let title = track.label;
+                if (chapIdx >= 0 && track.chapters && track.chapters[chapIdx]) {
+                    title += ` (Ch ${track.chapters[chapIdx].chapter})`;
+                }
 
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.label,
+                    title: title,
                     artist: 'ESV Audio',
                     album: currentPlaylist || 'ESV Playlist',
                     artwork: [
@@ -844,6 +850,7 @@
             player.currentTime = 0;
             progressBar.style.width = '0%';
             player.dataset.index = -1;
+            player.dataset.chapterIndex = -1;
             player.dataset.silent = 'false';
             player.pause();
             renderTracks();
@@ -981,6 +988,7 @@
             player.currentTime = 0;
             progressBar.style.width = '0%';
             player.dataset.index = -1;
+            player.dataset.chapterIndex = -1;
             player.pause();
             repeatTrackIndex = null;
 
@@ -1222,6 +1230,13 @@
                         }
                     });
 
+                    // Give each chapter segment its own URL
+                    chaptersInSeg.forEach(c => {
+                        const startC = `${pad(c.bookNum, 2)}${pad(c.chapter, 3)}${pad(c.startV, 3)}`;
+                        const endC = `${pad(c.bookNum, 2)}${pad(c.chapter, 3)}${pad(c.endV, 3)}`;
+                        c.url = `https://audio.esv.org/david-cochran-heath/mq/${startC}-${endC}.mp3`;
+                    });
+
                     targetArray.push({
                         _id: Date.now() + '-' + Math.random(),
                         url: `https://audio.esv.org/david-cochran-heath/mq/${startCode}-${endCode}.mp3`,
@@ -1244,27 +1259,36 @@
             }, 1500);
         }
 
+        // Internal playback to avoid duplicate code
+        function playChapterInternal(track, chapIdx) {
+            const chap = track.chapters[chapIdx];
+            let url = chap.url;
+            
+            // Fallback for previously generated plans
+            if (!url) {
+                const pad = (n, w) => n.toString().padStart(w, '0');
+                const startCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.startV, 3)}`;
+                const endCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.endV, 3)}`;
+                url = `https://audio.esv.org/david-cochran-heath/mq/${startCode}-${endCode}.mp3`;
+            }
+
+            player.src = url;
+            player.dataset.chapterIndex = chapIdx;
+            player.dataset.silent = 'false';
+            applySavedSpeed();
+            player.play();
+        }
+
         function playChapter(trackId, chapIdx) {
             const track = audioSources.find((t) => t._id === trackId);
             if (!track || !track.chapters[chapIdx]) return;
 
-            const chap = track.chapters[chapIdx];
-            const pad = (n, w) => n.toString().padStart(w, '0');
-
-            // Update the progress marker for the UI
-            // Note: We don't mark track.done = true here anymore.
-            track.lastChapterIdxDone = chapIdx;
-
-            const startCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.startV, 3)}`;
-            const endCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.endV, 3)}`;
-
-            player.src = `https://audio.esv.org/david-cochran-heath/mq/${startCode}-${endCode}.mp3`;
             player.dataset.index = audioSources.indexOf(track);
-            player.dataset.silent = 'false';
-
+            playChapterInternal(track, chapIdx);
+            
             savePlaylists();
             renderTracks();
-            player.play();
+            updateNowPlayingMini();
         }
 
         /* PLAN PROGRESS TRACKING */
@@ -1290,7 +1314,6 @@
                 } else if (!audioSources[index].done) {
                     audioSources[index].lastChapterIdxDone = -1;
                 }
-                updateTrackUrl(index);
                 savePlaylists();
                 renderTracks();
             }
@@ -1305,29 +1328,8 @@
             else track.lastChapterIdxDone = chapIdx;
 
             track.done = track.lastChapterIdxDone === track.chapters.length - 1;
-            updateTrackUrl(trackIdx);
             savePlaylists();
             renderTracks();
-        }
-
-        function updateTrackUrl(idx) {
-            const track = audioSources[idx];
-            if (!track.chapters) return;
-            const nextIdx = track.lastChapterIdxDone + 1;
-            if (nextIdx >= track.chapters.length) {
-                track.done = true;
-                return;
-            }
-            const pad = (n, w) => n.toString().padStart(w, '0');
-            const start = track.chapters[nextIdx];
-            const startCode = `${pad(start.bookNum, 2)}${pad(start.chapter, 3)}${pad(start.startV, 3)}`;
-            track.url = `${track.baseUrl}${startCode}-${track.endCode}.mp3`;
-
-            if (parseInt(player.dataset.index) === idx) {
-                const wasPaused = player.paused;
-                player.src = track.url;
-                if (!wasPaused) player.play();
-            }
         }
 
         /* move Up/Down */
@@ -1405,31 +1407,22 @@
                         ? `<span class="material-symbols-outlined" style="color: var(--now); font-size: 18px; margin-right: 6px; vertical-align: middle;">check_circle</span>`
                         : '';
 
-                let chapterHtml = '';
-                if (track.chapters && track.chapters.length > 1) {
-                    chapterHtml =
-                        `<div class="chapter-row">` +
-                        track.chapters
-                            .map(
-                                (c, ci) =>
-                                    `<span class="chapter-chip ${ci <= track.lastChapterIdxDone ? 'done' : ''}" onclick="event.stopPropagation(); setChapterProgress(${index}, ${ci})">${c.chapter}</span>`,
-                            )
-                            .join('') +
-                        `</div>`;
-                }
+                const chapterButtons = (track.chapters || []).map((c, chapIdx) => {
+                    const isDone = track.lastChapterIdxDone >= chapIdx;
+                    const isPlayingThisChapter = (parseInt(player.dataset.index) === index && parseInt(player.dataset.chapterIndex) === chapIdx);
+                    
+                    let btnStyle = 'background: var(--btn-bg); color: var(--text);';
+                    if (isPlayingThisChapter) {
+                        btnStyle = 'background: rgba(13, 110, 253, 0.2); color: var(--accent); border: 1px solid var(--accent);';
+                    } else if (isDone) {
+                        btnStyle = 'background: var(--now); color: white; border-color: var(--now);';
+                    }
 
-                // Inside the audioSources.forEach loop in renderTracks():
-                const chapterButtons = (track.chapters || [])
-                    .map((c, chapIdx) => {
-                        const isDone = track.lastChapterIdxDone >= chapIdx;
-                        const btnStyle = isDone ? 'background: var(--now); color: white; border-color: var(--now);' : 'background: var(--btn-bg); color: var(--text);';
-
-                        return `<button class="btn" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; margin-right: 4px; ${btnStyle}" 
-                                onclick="event.stopPropagation(); playChapter('${track._id}', ${chapIdx})">
-                                ${c.chapter}
-                                </button>`;
-                    })
-                    .join('');
+                    return `<button class="btn" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; margin-right: 4px; ${btnStyle}" 
+                            onclick="event.stopPropagation(); playChapter('${track._id}', ${chapIdx})">
+                            ${c.chapter}
+                            </button>`;
+                }).join('');
 
                 li.innerHTML = `
                     <div class="track-row" style="${isToday ? 'border-left: 4px solid var(--accent); background: rgba(13, 110, 253, 0.05);' : ''}">
@@ -1495,11 +1488,23 @@
                 resetPlayer();
                 return;
             }
-            player.src = audioSources[idx].url;
+            const track = audioSources[idx];
             player.dataset.index = idx;
-            player.dataset.silent = 'false';
-            applySavedSpeed();
-            player.play();
+
+            if (track.chapters && track.chapters.length > 0) {
+                // Find first unplayed chapter
+                let chapIdx = track.lastChapterIdxDone + 1;
+                if (chapIdx >= track.chapters.length) chapIdx = 0; // replay from start if all done
+                playChapterInternal(track, chapIdx);
+            } else {
+                // Standard track without chunked sub-chapters
+                player.dataset.chapterIndex = -1;
+                player.src = track.url;
+                player.dataset.silent = 'false';
+                applySavedSpeed();
+                player.play();
+            }
+            
             renderTracks();
             updateNowPlayingMini();
         }
@@ -1552,9 +1557,29 @@
 
             let idx = parseInt(player.dataset.index || 0);
             let currentTrack = audioSources[idx];
+            let chapIdx = parseInt(player.dataset.chapterIndex || -1);
 
-            // 1. Mark current track as done if it's a plan item
-            if (currentTrack && currentTrack.date) {
+            // Handle track with chapter segments
+            if (currentTrack && currentTrack.chapters && currentTrack.chapters.length > 0 && chapIdx >= 0) {
+                currentTrack.lastChapterIdxDone = Math.max(currentTrack.lastChapterIdxDone, chapIdx);
+                savePlaylists();
+
+                let nextChapIdx = chapIdx + 1;
+                if (nextChapIdx < currentTrack.chapters.length) {
+                    playChapterInternal(currentTrack, nextChapIdx);
+                    
+                    // MOVED HERE: Update the UI after dataset.chapterIndex has advanced
+                    renderTracks();
+                    updateNowPlayingMini();
+                    
+                    return; // Prevent it from advancing the main track index
+                } else {
+                    currentTrack.done = true;
+                    savePlaylists();
+                }
+            } 
+            // Handle regular track or single-chapter plan fallback
+            else if (currentTrack && currentTrack.date) {
                 currentTrack.done = true;
                 if (currentTrack.chapters) {
                     currentTrack.lastChapterIdxDone = currentTrack.chapters.length - 1;
@@ -1562,13 +1587,13 @@
                 savePlaylists();
             }
 
-            // 2. Handle Repeat Mode
+            // Handle Repeat Mode
             if (repeatTrackIndex !== null) {
                 playByIndex(repeatTrackIndex);
                 return;
             }
 
-            // 3. Determine if we should auto-play the next track
+            // Determine if we should auto-play the next track
             let nextIdx = (idx + 1) % audioSources.length;
             let nextTrack = audioSources[nextIdx];
 
@@ -1603,8 +1628,19 @@
 
         function updateNowPlayingMini() {
             const idx = parseInt(player.dataset.index || -1);
+            const chapIdx = parseInt(player.dataset.chapterIndex || -1);
             const mini = document.getElementById('nowPlayingMini');
-            mini.textContent = idx >= 0 && audioSources[idx] ? 'Now playing: ' + audioSources[idx].label : 'Not playing';
+            
+            if (idx >= 0 && audioSources[idx]) {
+                const track = audioSources[idx];
+                let text = 'Now playing: ' + track.label;
+                if (chapIdx >= 0 && track.chapters && track.chapters[chapIdx]) {
+                    text += ` (Ch ${track.chapters[chapIdx].chapter})`;
+                }
+                mini.textContent = text;
+            } else {
+                mini.textContent = 'Not playing';
+            }
         }
 
         document.addEventListener('keydown', (e) => {
