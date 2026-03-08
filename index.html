@@ -1764,7 +1764,7 @@
         function renderTracks() {
             const list = document.getElementById('list');
             list.innerHTML = '';
-            audioSources = currentPlaylist ? playlists[currentPlaylist] : [];
+            audioSources = playlists[currentPlaylist] || [];
             updatePlanProgress();
 
             if (!currentPlaylist) {
