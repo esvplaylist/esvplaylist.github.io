@@ -519,7 +519,7 @@
                     </div>
                     <select id="speedSelect" class="btn" style="width: auto">
                         <option value="0.75">0.75x</option>
-                        <option value="1">1x</option>
+                        <option value="1" selected>1x</option>
                         <option value="1.25">1.25x</option>
                         <option value="1.5">1.5x</option>
                         <option value="2">2x</option>
@@ -1654,21 +1654,16 @@
             }, 1500);
         }
 
-        function playChapter(trackId, chapIdx) {
-            const track = audioSources.find((t) => t._id === trackId);
+        function playChapterInternal(track, chapIdx) {
             if (!track || !track.chapters[chapIdx]) return;
 
             const chap = track.chapters[chapIdx];
-            const pad = (n, w) => n.toString().padStart(w, '0');
 
             // Update the progress marker for the UI
             // Note: We don't mark track.done = true here anymore.
             track.lastChapterIdxDone = chapIdx;
 
-            const startCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.startV, 3)}`;
-            const endCode = `${pad(chap.bookNum, 2)}${pad(chap.chapter, 3)}${pad(chap.endV, 3)}`;
-
-            player.src = url;
+            player.src = chap.url;
             player.dataset.chapterIndex = chapIdx;
             player.dataset.silent = 'false';
             applySavedSpeed();
@@ -1943,6 +1938,7 @@
             player.playbackRate = parseFloat(speed);
             document.getElementById('speedSelect').value = speed;
         }
+        const speedSelect = document.getElementById('speedSelect');
         speedSelect.addEventListener('change', () => {
             player.playbackRate = parseFloat(speedSelect.value);
             localStorage.setItem('esv_speed', player.playbackRate);
@@ -2039,10 +2035,6 @@
             }
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && document.activeElement.id === 'input') addTrackToList();
-        });
-
         function updateOnlineStatus() {
             const isOffline = !navigator.onLine;
             const banner = document.getElementById('offlineBanner');
@@ -2051,9 +2043,6 @@
 
             document.querySelectorAll('button').forEach((btn) => (btn.disabled = isOffline));
             document.querySelectorAll('select').forEach((sel) => (sel.disabled = isOffline));
-            const input = document.getElementById('input');
-            input.disabled = isOffline;
-            input.placeholder = isOffline ? 'Offline.' : 'Add track (e.g. John 1:1-5)';
         }
 
         window.addEventListener('online', updateOnlineStatus);
