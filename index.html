@@ -891,11 +891,16 @@
         }
 
         let playlists = JSON.parse(localStorage.getItem('esv_playlists')) || {};
-        let currentPlaylist = localStorage.getItem('esv_currentPlaylist') || null;
+        let currentPlaylist = localStorage.getItem('esv_currentPlaylist');
+        if (currentPlaylist === 'null') currentPlaylist = null;
 
         function savePlaylists() {
             localStorage.setItem('esv_playlists', JSON.stringify(playlists));
-            localStorage.setItem('esv_currentPlaylist', currentPlaylist);
+            if (currentPlaylist) {
+                localStorage.setItem('esv_currentPlaylist', currentPlaylist);
+            } else {
+                localStorage.removeItem('esv_currentPlaylist');
+            }
         }
 
         function resetPlayer() {
@@ -1764,10 +1769,14 @@
         function renderTracks() {
             const list = document.getElementById('list');
             list.innerHTML = '';
-            audioSources = playlists[currentPlaylist] || [];
+            if (currentPlaylist && playlists[currentPlaylist]) {
+                audioSources = playlists[currentPlaylist];
+            } else {
+                audioSources = [];
+            }
             updatePlanProgress();
 
-            if (!currentPlaylist) {
+            if (!currentPlaylist || !playlists[currentPlaylist]) {
                 list.innerHTML = '<li class="list-group-item small-muted">No playlist selected.</li>';
                 return;
             }
@@ -2005,7 +2014,6 @@
         });
 
         function restoreMemory() {
-            audioSources = currentPlaylist && playlists[currentPlaylist] ? playlists[currentPlaylist] : [];
             renderModalPlaylistList();
             applySavedSpeed();
             renderTracks();
