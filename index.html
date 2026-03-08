@@ -91,7 +91,9 @@
         #input,
         #bulkPassages,
         #planDays,
-        #planStart {
+        #planStart,
+        #newPlanName,
+        #newBulkPlaylistName {
             padding: 10px;
             border-radius: 8px;
             border: 1px solid rgba(0, 0, 0, 0.06);
@@ -478,10 +480,13 @@
     <div class="app">
         <div class="card mb-3">
             <div class="card-body">
-                <div class="create-row mb-2">
-                    <input id="input" placeholder="Add track (e.g. John 1:1-5)" />
-                    <button class="btn btn-outline" onclick="openPlaylistModal()" title="Open playlists"><span
-                            class="material-symbols-outlined">playlist_play</span>Playlists</button>
+                <div class="create-row">
+                    <button class="btn btn-outline" onclick="openPlaylistManagerModal()" title="Manage playlists" style="flex: 1;">
+                        <span class="material-symbols-outlined">playlist_play</span>Manage Playlists
+                    </button>
+                    <button class="btn btn-outline" onclick="openCreationModal()" title="Create a new plan or playlist" style="flex: 1;">
+                        <span class="material-symbols-outlined">add</span>Create New
+                    </button>
                 </div>
             </div>
         </div>
@@ -556,48 +561,37 @@
         </footer>
     </div>
 
-    <div id="playlistModal" class="modal-overlay" onclick="closePlaylistModal(event)">
+    <div id="playlistManagerModal" class="modal-overlay" onclick="closePlaylistManagerModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h4 style="margin-top:0; margin-bottom: 15px;">Manage Playlists</h4>
+            
+            <div id="modalPlaylistList" style="margin-bottom: 8px"></div>
+
+            <!-- <div style="display: flex; gap: 8px; margin-top: 8px"> -->
+                <!-- <input id="modalNewPlaylist" placeholder="New playlist" onkeydown="if(event.key==='Enter') createPlaylistFromModal()" /> -->
+                <!-- <button class="btn btn-primary" onclick="createPlaylistFromModal()" -->
+                    <!-- title="Create empty playlist"><span class="material-symbols-outlined">add</span></button> -->
+            <!-- </div> -->
+
+            <div
+                style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 15px">
+                <button class="btn btn-outline" onclick="closePlaylistManagerModal(event)">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="creationModal" class="modal-overlay" onclick="closeCreationModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div style="display: flex; border-bottom: 1px solid rgba(0, 0, 0, 0.1); margin-bottom: 15px">
-                <button id="tabBtnManage" class="tab-btn active" onclick="switchTab('manage')">Playlists</button>
-                <button id="tabBtnPlan" class="tab-btn" onclick="switchTab('plan')">Reading Plan</button>
+                <button id="tabBtnCreationPlan" class="tab-btn active" onclick="switchCreationTab('plan')">Generate List</button>
+                <button id="tabBtnCreationBulk" class="tab-btn" onclick="switchCreationTab('bulk')">Import List</button>
             </div>
 
-            <div id="tabManage">
-                <div id="modalPlaylistList" style="margin-bottom: 8px"></div>
+            <!-- Reading Plan Tab -->
+            <div id="creationTabPlan">
+                <label class="small-muted" style="display: block; margin-top: 15px;">Name:</label>
+                <input id="newPlanName" placeholder="optional" style="margin-top: 5px; margin-bottom: 10px;" />
 
-                <div style="display: flex; gap: 8px; margin-top: 8px">
-                    <input id="modalNewPlaylist" placeholder="New playlist" />
-                    <button class="btn btn-primary" onclick="createPlaylistFromModal()"
-                        title="Create empty playlist"><span class="material-symbols-outlined">add</span></button>
-                </div>
-
-                <hr style="opacity: 0.1; margin: 15px 0" />
-                <div id="bulkSection">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
-                        <div style="display: flex; gap: 5px">
-                            <input type="file" id="csvFileInput" accept=".csv" style="display: none"
-                                onchange="handleCsvUpload(event)" />
-                            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()"
-                                title="Upload CSV File">
-                                <span class="material-symbols-outlined">upload_file</span>
-                            </button>
-                            <button class="btn btn-outline" onclick="toggleBulkText()" title="Import As Text">
-                                <span class="material-symbols-outlined">description</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="bulkTextContainer" style="display: none">
-                        <textarea id="bulkPassages" rows="4" style="width: 95%"
-                            placeholder="Enter passages (one per line)"></textarea>
-                        <button class="btn btn-primary" style="width: 100%" onclick="addBulkFromText()">Add Bulk
-                            Passages</button>
-                    </div>
-                    <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px"></div>
-                </div>
-            </div>
-
-            <div id="tabPlan" style="display: none">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
                         <input type="checkbox" id="useAsPlan" checked onchange="toggleUseAsPlan()"> Use as Plan
@@ -630,23 +624,36 @@
                 <div id="planGenStatus" class="small-muted" style="text-align: center; margin-top: 8px"></div>
             </div>
 
+            <!-- Bulk Import Tab -->
+            <div id="creationTabBulk" style="display: none">
+                <div id="bulkSection">
+                    <label class="small-muted" style="display: block; margin-bottom: 5px;">Name:</label>
+                    <input id="newBulkPlaylistName" placeholder="optional" style="margin-bottom: 15px;" />
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+                        <div style="display: flex; gap: 5px">
+                            <input type="file" id="csvFileInput" accept=".csv" style="display: none"
+                                onchange="handleCsvUpload(event)" />
+                            <button class="btn btn-outline" onclick="document.getElementById('csvFileInput').click()"
+                                title="Upload CSV File">
+                                <span class="material-symbols-outlined">upload_file</span> Upload File
+                            </button>
+                            <button class="btn btn-outline" onclick="toggleBulkText()" title="Import from Text">
+                                <span class="material-symbols-outlined">description</span> Enter Passages
+                            </button>
+                        </div>
+                    </div>
+                    <div id="bulkTextContainer" style="display: none">
+                        <textarea id="bulkPassages" rows="4" style="width: 95%"
+                            placeholder="Enter passages, one per line (e.g., John 3:16-18)"></textarea><button class="btn btn-primary" style="width: 100%" onclick="addBulkFromText()">Add
+                            Passages</button>
+                    </div>
+                    <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px"></div>
+                </div>
+            </div>
+            
             <div
                 style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 15px">
-                <button class="btn btn-outline" onclick="closePlaylistModal(event)">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="chapterModal" class="modal-overlay" style="z-index: 10000;" onclick="closeChapterModal(event)">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <h4 id="chapterModalTitle" style="margin-top:0; margin-bottom: 10px;"></h4>
-            <div id="chapterGrid" class="bible-grid" style="max-height: 300px;"></div>
-            <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top: 1px solid rgba(0,0,0,0.1);">
-                <div style="display:flex; gap: 8px;">
-                    <button class="btn btn-outline" onclick="selectAllChapters()">All</button>
-                    <button class="btn btn-outline" onclick="clearAllChapters()">Clear</button>
-                </div>
-                <button class="btn btn-primary" onclick="closeChapterModal(event)">Done</button>
+                <button class="btn btn-outline" onclick="closeCreationModal(event)">Close</button>
             </div>
         </div>
     </div>
@@ -904,23 +911,32 @@
         }
 
         /* Modal Logic */
-        function openPlaylistModal() {
+        function openPlaylistManagerModal() {
             renderModalPlaylistList();
-            selectedBooks.clear();
+            document.getElementById('playlistManagerModal').style.display = 'flex';
+        }
+        function closePlaylistManagerModal(e) {
+            if (e && e.stopPropagation) e.stopPropagation();
+            document.getElementById('playlistManagerModal').style.display = 'none';
+        }
+
+        function openCreationModal() {
             resetPlanGeneratorUI();
             document.getElementById('planStart').valueAsDate = new Date();
-            document.getElementById('playlistModal').style.display = 'flex';
             document.getElementById('planDays').value = 30;
+            document.getElementById('creationModal').style.display = 'flex';
+            switchCreationTab('plan'); // Default to plan tab
         }
-        function closePlaylistModal(e) {
+        function closeCreationModal(e) {
             if (e && e.stopPropagation) e.stopPropagation();
-            document.getElementById('playlistModal').style.display = 'none';
+            document.getElementById('creationModal').style.display = 'none';
         }
-        function switchTab(tab) {
-            document.getElementById('tabManage').style.display = tab === 'manage' ? 'block' : 'none';
-            document.getElementById('tabPlan').style.display = tab === 'plan' ? 'block' : 'none';
-            document.getElementById('tabBtnManage').classList.toggle('active', tab === 'manage');
-            document.getElementById('tabBtnPlan').classList.toggle('active', tab === 'plan');
+
+        function switchCreationTab(tab) {
+            document.getElementById('creationTabPlan').style.display = tab === 'plan' ? 'block' : 'none';
+            document.getElementById('creationTabBulk').style.display = tab === 'bulk' ? 'block' : 'none';
+            document.getElementById('tabBtnCreationPlan').classList.toggle('active', tab === 'plan');
+            document.getElementById('tabBtnCreationBulk').classList.toggle('active', tab === 'bulk');
         }
 
         /* --- New Plan Generator Logic --- */
@@ -1170,7 +1186,7 @@
             repeatTrackIndex = null;
 
             savePlaylists();
-            closePlaylistModal();
+            closePlaylistManagerModal();
             renderTracks();
             renderHeader();
 
@@ -1257,9 +1273,22 @@
             processBulkPassages(playlistName, passages);
         }
 
-        async function processBulkPassages(name, passageList) {
+        async function processBulkPassages(fallbackName, passageList) {
             const status = document.getElementById('bulkStatus');
             status.textContent = `Processing 0/${passageList.length}...`;
+
+            let name = document.getElementById('newBulkPlaylistName').value.trim();
+            if (!name) {
+                name = fallbackName;
+            }
+
+            if (playlists[name]) {
+                if (document.getElementById('newBulkPlaylistName').value.trim()) {
+                    status.textContent = '';
+                    return alert('A playlist with this name already exists. Please choose another name.');
+                }
+                name += ' (1)';
+            }
 
             if (!playlists[name]) playlists[name] = [];
             const targetArray = playlists[name];
@@ -1290,11 +1319,12 @@
             currentPlaylist = name;
             savePlaylists();
             selectPlaylist(name);
+            document.getElementById('newBulkPlaylistName').value = '';
             document.getElementById('bulkPassages').value = '';
             document.getElementById('bulkTextContainer').style.display = 'none';
             setTimeout(() => {
                 status.textContent = '';
-                closePlaylistModal();
+                closeCreationModal();
             }, 1500);
         }
 
@@ -1378,11 +1408,14 @@
             // If not a plan, treat as one big day (no date assignment)
             const targetVpd = useAsPlan ? Math.ceil(totalVerses / days) : totalVerses;
             const baseDate = useAsPlan ? new Date(startDateStr + 'T12:00:00') : null;
-            
-            let planName = useAsPlan 
-                ? `Plan ${new Date().toLocaleString()}` 
-                : `Selection ${new Date().toLocaleString()}`;
-            
+
+            let planName = document.getElementById('newPlanName').value.trim();
+            if (!planName) {
+                planName = useAsPlan
+                    ? `Plan ${new Date().toLocaleString()}`
+                    : `Selection ${new Date().toLocaleString()}`;
+            }
+
             if (playlists[planName]) planName += ' (1)';
 
             playlists[planName] = [];
@@ -1496,9 +1529,10 @@
             currentPlaylist = planName;
             savePlaylists();
             selectPlaylist(planName);
+            document.getElementById('newPlanName').value = '';
             setTimeout(() => {
                 status.textContent = '';
-                closePlaylistModal();
+                closeCreationModal();
             }, 1500);
         }
 
@@ -1508,8 +1542,12 @@
             const pad = (n, w) => n.toString().padStart(w, '0');
             const ESV_MAX_VERSES = 500;
 
-            let planName = `Selection ${new Date().toLocaleString()}`;
+            let planName = document.getElementById('newPlanName').value.trim();
+            if (!planName) {
+                planName = `Selection ${new Date().toLocaleString()}`;
+            }
             if (playlists[planName]) planName += ' (1)';
+
             playlists[planName] = [];
             const targetArray = playlists[planName];
 
@@ -1609,7 +1647,11 @@
             currentPlaylist = planName;
             savePlaylists();
             selectPlaylist(planName);
-            setTimeout(() => { status.textContent = ''; closePlaylistModal(); }, 1500);
+            document.getElementById('newPlanName').value = '';
+            setTimeout(() => {
+                status.textContent = '';
+                closeCreationModal();
+            }, 1500);
         }
 
         function playChapter(trackId, chapIdx) {
