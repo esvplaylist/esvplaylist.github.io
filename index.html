@@ -2052,18 +2052,17 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').then((reg) => {
-                    const sendVersionRequest = () => {
-                        if (!navigator.serviceWorker.controller) return;
-                        const mc = new MessageChannel();
-                        mc.port1.onmessage = (e) => {
-                            if (e.data && e.data.version) document.getElementById('appVersion').textContent = `App Version: ${e.data.version}`;
-                        };
-                        navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [mc.port2]);
+                navigator.serviceWorker.register('./service-worker.js');
+                navigator.serviceWorker.ready.then((registration) => {
+                    const sw = registration.active;
+                    if (!sw) return;
+                    const mc = new MessageChannel();
+                    mc.port1.onmessage = (e) => {
+                        if (e.data && e.data.version) {
+                            document.getElementById('appVersion').textContent = `App Version: ${e.data.version}`;
+                        }
                     };
-
-                    sendVersionRequest();
-                    navigator.serviceWorker.addEventListener('controllerchange', sendVersionRequest);
+                    sw.postMessage({ type: 'GET_VERSION' }, [mc.port2]);
                 });
             });
         }
