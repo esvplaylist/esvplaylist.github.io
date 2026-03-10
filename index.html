@@ -1328,6 +1328,7 @@
                     const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
                     const newTrack = { _id: trackId, url: src, label: r.canonical };
                     audioSources.push(newTrack);
+                    cacheNewTracks([newTrack]);
                     playlists[currentPlaylist] = audioSources;
                     savePlaylists();
                     renderTracks();
@@ -1339,6 +1340,28 @@
                     alert('Unable to retrieve passage.');
                 });
         }
+
+        /* Background Caching Helper */
+function cacheNewTracks(tracks) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        let urlsToCache = [];
+        tracks.forEach(track => {
+            if (track.url) urlsToCache.push(track.url);
+            if (track.chapters) {
+                track.chapters.forEach(chap => {
+                    if (chap.url) urlsToCache.push(chap.url);
+                });
+            }
+        });
+
+        if (urlsToCache.length > 0) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'CACHE_TRACKS',
+                urls: urlsToCache
+            });
+        }
+    }
+}
 
         function toggleBulkText() {
             const container = document.getElementById('bulkTextContainer');
@@ -1417,6 +1440,7 @@
                 }
             }
 
+            cacheNewTracks(targetArray);
             status.textContent = 'Complete!';
             currentPlaylist = name;
             savePlaylists();
@@ -1627,6 +1651,7 @@
                 }
             }
 
+            cacheNewTracks(targetArray);
             status.textContent = 'Plan Complete!';
             currentPlaylist = planName;
             savePlaylists();
@@ -1745,6 +1770,7 @@
                 createTracksFromVerseList(verseList);
             }
 
+            cacheNewTracks(targetArray);
             status.textContent = 'Playlist Created!';
             currentPlaylist = planName;
             savePlaylists();
