@@ -2166,7 +2166,7 @@
             const isOffline = !navigator.onLine;
             const banner = document.getElementById('offlineBanner');
             banner.style.display = isOffline ? 'block' : 'none';
-            banner.textContent = 'Offline (Cached tracks can still be played)';
+            banner.textContent = 'Offline';
 
             // Only disable buttons that require an active internet connection (ESV API)
             const networkButtons = [
