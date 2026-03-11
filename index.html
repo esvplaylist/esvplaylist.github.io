@@ -9,6 +9,10 @@
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
     <link rel="manifest" crossorigin="use-credentials" href="manifest.json" />
     <link rel="icon" type="image/x-icon" href="/headphone-symbol.png" />
@@ -534,6 +538,9 @@
                     <button class="btn btn-outline" onclick="openCreationModal()" title="Create a new plan or playlist" style="flex: 1;">
                         <span class="material-symbols-outlined">add</span>Create New
                     </button>
+                    <button class="btn btn-outline" onclick="openSyncModal()" title="Sync across devices" style="flex: 1;">
+                        <span class="material-symbols-outlined">sync</span>Sync
+                    </button>
                 </div>
             </div>
         </div>
@@ -696,6 +703,31 @@
             </div>
         </div>
     </div>
+
+    <div id="syncModal" class="modal-overlay" onclick="closeSyncModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <h4 style="margin-top:0; margin-bottom: 15px;">Sync Across Devices</h4>
+        <div id="syncStatus" class="small-muted" style="margin-bottom: 10px;">Initializing...</div>
+        
+        <div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0; background: white; padding: 10px; border-radius: 8px; width: fit-content; margin-left: auto; margin-right: auto;"></div>
+        
+        <div class="small-muted" style="margin-bottom: 5px;">Your Peer ID:</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <input id="peerIdDisplay" readonly style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--btn-bg);" />
+            <button class="btn btn-outline" onclick="copyPeerId()">Copy</button>
+        </div>
+
+        <div class="small-muted" style="margin-bottom: 5px;">Connect to another device:</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input id="remotePeerId" placeholder="Enter Peer ID" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card);" />
+            <button class="btn btn-primary" onclick="connectToPeer()">Connect</button>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+            <button class="btn btn-outline" onclick="closeSyncModal(event)">Close</button>
+        </div>
+    </div>
+</div>
 
     <script>
         var t = [54, 57, 56, 52, 100, 100, 55, 99, 55, 49, 99, 52, 49, 52, 102, 48, 53, 53, 54, 50, 54, 55, 49, 50, 51, 56, 54, 98, 55, 102, 53, 50, 56, 48, 98, 53, 48, 53, 53, 101];
@@ -2228,6 +2260,108 @@ function cacheNewTracks(tracks) {
                 });
             });
         }
+
+
+        /* ================= SYNC FUNCTIONALITY (PeerJS & QRCode) ================= */
+let peer = null;
+let connections = [];
+let qrCodeGenerator = null;
+
+function initPeer() {
+    if (peer) return;
+    
+    peer = new Peer();
+
+    peer.on('open', (id) => {
+        document.getElementById('peerIdDisplay').value = id;
+        document.getElementById('syncStatus').textContent = "Ready for connections";
+        generateSyncQR(id);
+        
+        // Check if URL has a connection ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const connectId = urlParams.get('connect');
+        if (connectId) connectToPeer(connectId);
+    });
+
+    peer.on('connection', (conn) => {
+        setupConnection(conn);
+        document.getElementById('syncStatus').textContent = "Device connected!";
+    });
+
+    peer.on('error', (err) => {
+        console.error('PeerJS Error:', err);
+        document.getElementById('syncStatus').textContent = "Error: " + err.type;
+    });
+}
+
+function setupConnection(conn) {
+    connections.push(conn);
+    
+    conn.on('data', (data) => {
+        if (data.type === 'SYNC_DATA') {
+            // Apply the incoming data to your app state
+            // Example: audioSources = data.audioSources; currentPlaylistName = data.name;
+            // You should call your existing update/save functions here
+            if (typeof updateUI === 'function') updateUI();
+            document.getElementById('syncStatus').textContent = "Data synced from peer";
+        }
+    });
+
+    conn.on('open', () => {
+        // Send current data to the new connection
+        broadcastSyncData();
+    });
+}
+
+function connectToPeer(targetId) {
+    const id = targetId || document.getElementById('remotePeerId').value;
+    if (!id || connections.some(c => c.peer === id)) return;
+    
+    const conn = peer.connect(id);
+    setupConnection(conn);
+}
+
+function broadcastSyncData() {
+    const syncPayload = {
+        type: 'SYNC_DATA',
+        // Update these keys to match your exact storage variables
+        audioSources: audioSources,
+        currentPlaylistName: document.getElementById('currentPlaylistName').textContent
+    };
+    
+    connections.forEach(conn => {
+        if (conn.open) conn.send(syncPayload);
+    });
+}
+
+function generateSyncQR(id) {
+    const connectUrl = `${window.location.origin}${window.location.pathname}?connect=${id}`;
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = "";
+    qrCodeGenerator = new QRCode(qrContainer, {
+        text: connectUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+function openSyncModal() {
+    document.getElementById('syncModal').style.display = 'flex';
+    initPeer();
+}
+
+function closeSyncModal(e) {
+    document.getElementById('syncModal').style.display = 'none';
+}
+
+function copyPeerId() {
+    const copyText = document.getElementById('peerIdDisplay');
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+}
     </script>
 </body>
 
