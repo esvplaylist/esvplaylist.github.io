@@ -2299,11 +2299,26 @@ function setupConnection(conn) {
     
     conn.on('data', (data) => {
         if (data.type === 'SYNC_DATA') {
-            // Apply the incoming data to your app state
-            // Example: audioSources = data.audioSources; currentPlaylistName = data.name;
-            // You should call your existing update/save functions here
+            
+            // Merge incoming playlists with existing ones. 
+            // If there's a name collision, the incoming list overwrites the local one.
+            if (data.playlists) {
+                playlists = { ...playlists, ...data.playlists };
+            }
+            
+            // Update the current playlist to match the sending device
+            if (data.currentPlaylist) {
+                currentPlaylist = data.currentPlaylist;
+            }
+
+            // Save to localStorage and update the UI completely
+            savePlaylists();
+            loadPlaylistState();
+            renderModalPlaylistList();
             renderTracks();
-            document.getElementById('syncStatus').textContent = "Data synced from peer";
+            renderHeader();
+
+            document.getElementById('syncStatus').textContent = "Data synced successfully!";
         }
     });
 
@@ -2324,8 +2339,9 @@ function connectToPeer(targetId) {
 function broadcastSyncData() {
     const syncPayload = {
         type: 'SYNC_DATA',
-        audioSources: audioSources,
-        currentPlaylistName: document.getElementById('currentPlaylistName').textContent
+        // Send the entire dictionary of all playlists and plans
+        playlists: playlists, 
+        currentPlaylist: currentPlaylist
     };
     
     connections.forEach(conn => {
