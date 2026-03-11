@@ -2302,7 +2302,7 @@ function setupConnection(conn) {
             // Apply the incoming data to your app state
             // Example: audioSources = data.audioSources; currentPlaylistName = data.name;
             // You should call your existing update/save functions here
-            if (typeof updateUI === 'function') updateUI();
+            renderTracks();
             document.getElementById('syncStatus').textContent = "Data synced from peer";
         }
     });
@@ -2324,7 +2324,6 @@ function connectToPeer(targetId) {
 function broadcastSyncData() {
     const syncPayload = {
         type: 'SYNC_DATA',
-        // Update these keys to match your exact storage variables
         audioSources: audioSources,
         currentPlaylistName: document.getElementById('currentPlaylistName').textContent
     };
