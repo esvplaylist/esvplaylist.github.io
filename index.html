@@ -125,10 +125,11 @@
         #planDays,
         #planStart,
         /* Fix Name input alignment and width */
-        #newPlanName, 
+        #newPlanName,
         #newBulkPlaylistName {
             width: 100%;
-            box-sizing: border-box; /* Ensures padding doesn't push width past 100% */
+            box-sizing: border-box;
+            /* Ensures padding doesn't push width past 100% */
             display: block;
             margin-left: 0;
             margin-right: 0;
@@ -143,7 +144,8 @@
 
         #planDetailsWrapper input {
             flex: 1;
-            min-width: 0; /* Prevents overflow in flexbox */
+            min-width: 0;
+            /* Prevents overflow in flexbox */
         }
 
         #bulkPassages {
@@ -532,13 +534,16 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="create-row">
-                    <button class="btn btn-outline" onclick="openPlaylistManagerModal()" title="Manage Playlists" style="flex: 1;">
+                    <button class="btn btn-outline" onclick="openPlaylistManagerModal()" title="Manage Playlists"
+                        style="flex: 1;">
                         <span class="material-symbols-outlined">playlist_play</span>Lists
                     </button>
-                    <button class="btn btn-outline" onclick="openCreationModal()" title="Create a new plan or playlist" style="flex: 1;">
+                    <button class="btn btn-outline" onclick="openCreationModal()" title="Create a new plan or playlist"
+                        style="flex: 1;">
                         <span class="material-symbols-outlined">add</span>New
                     </button>
-                    <button class="btn btn-outline" onclick="openSyncModal()" title="Sync across devices" style="flex: 1;">
+                    <button class="btn btn-outline" onclick="openSyncModal()" title="Sync across devices"
+                        style="flex: 1;">
                         <span class="material-symbols-outlined">sync</span>Sync
                     </button>
                 </div>
@@ -618,7 +623,7 @@
     <div id="playlistManagerModal" class="modal-overlay" onclick="closePlaylistManagerModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h4 style="margin-top:0; margin-bottom: 15px;">Manage Playlists</h4>
-            
+
             <div id="modalPlaylistList" style="margin-bottom: 8px"></div>
 
             <div
@@ -631,7 +636,8 @@
     <div id="creationModal" class="modal-overlay" onclick="closeCreationModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px">
-                <button id="tabBtnCreationPlan" class="tab-btn active" onclick="switchCreationTab('plan')">Generate List</button>
+                <button id="tabBtnCreationPlan" class="tab-btn active" onclick="switchCreationTab('plan')">Generate
+                    List</button>
                 <button id="tabBtnCreationBulk" class="tab-btn" onclick="switchCreationTab('bulk')">Import List</button>
             </div>
 
@@ -643,16 +649,20 @@
                     <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
                         <input type="checkbox" id="useAsPlan" checked onchange="toggleUseAsPlan()"> Use as Plan
                     </label>
-                    <select id="planSelectionMode" class="btn btn-outline" style="padding: 4px 8px;" onchange="setPlanSelectionMode(this.value)">
+                    <select id="planSelectionMode" class="btn btn-outline" style="padding: 4px 8px;"
+                        onchange="setPlanSelectionMode(this.value)">
                         <option value="book">Select Books</option>
                         <option value="chapter">Select Chapters</option>
                     </select>
                 </div>
 
-                <div id="planNavControls" style="display: none; align-items: center; gap: 8px; margin-bottom: 8px; background: var(--btn-bg); padding: 8px; border-radius: 8px;">
-                    <button class="btn btn-outline" id="planBackBtn" onclick="planGoBack()" style="padding: 2px 8px; height: 24px; font-size: 12px;">Back</button>
+                <div id="planNavControls"
+                    style="display: none; align-items: center; gap: 8px; margin-bottom: 8px; background: var(--btn-bg); padding: 8px; border-radius: 8px;">
+                    <button class="btn btn-outline" id="planBackBtn" onclick="planGoBack()"
+                        style="padding: 2px 8px; height: 24px; font-size: 12px;">Back</button>
                     <span id="planBreadcrumb" style="font-weight: 600; font-size: 13px;"></span>
-                    <label id="verseSelectOption" style="margin-left: auto; font-size: 13px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <label id="verseSelectOption"
+                        style="margin-left: auto; font-size: 13px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
                         <input type="checkbox" id="allowVerseSelection"> Select Verses
                     </label>
                 </div>
@@ -667,7 +677,8 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="generateCustomPlan()" id="planGenerateBtn">Generate Plan</button>
+                <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="generateCustomPlan()"
+                    id="planGenerateBtn">Generate Plan</button>
                 <div id="planGenStatus" class="small-muted" style="text-align: center; margin-top: 8px"></div>
             </div>
 
@@ -690,13 +701,14 @@
                     </div>
                     <div id="bulkTextContainer" style="display: none">
                         <textarea id="bulkPassages" rows="4" style="width: 95%"
-                            placeholder="Enter passages, one per line (e.g., John 3:16-18)"></textarea><button class="btn btn-primary" style="width: 100%" onclick="addBulkFromText()">Add
+                            placeholder="Enter passages, one per line (e.g., John 3:16-18)"></textarea><button
+                            class="btn btn-primary" style="width: 100%" onclick="addBulkFromText()">Add
                             Passages</button>
                     </div>
                     <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px"></div>
                 </div>
             </div>
-            
+
             <div
                 style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px">
                 <button class="btn btn-outline" onclick="closeCreationModal(event)">Close</button>
@@ -705,29 +717,34 @@
     </div>
 
     <div id="syncModal" class="modal-overlay" onclick="closeSyncModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-        <h4 style="margin-top:0; margin-bottom: 15px;">Sync Across Devices</h4>
-        <div id="syncStatus" class="small-muted" style="margin-bottom: 10px;">Initializing...</div>
-        
-        <div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0; background: white; padding: 10px; border-radius: 8px; width: fit-content; margin-left: auto; margin-right: auto;"></div>
-        
-        <div class="small-muted" style="margin-bottom: 5px;">Your Peer ID:</div>
-        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <input id="peerIdDisplay" readonly style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--btn-bg);" />
-            <button class="btn btn-outline" onclick="copyPeerId()">Copy</button>
-        </div>
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h4 style="margin-top:0; margin-bottom: 15px;">Sync Across Devices</h4>
+            <div id="syncStatus" class="small-muted" style="margin-bottom: 10px;">Initializing...</div>
 
-        <div class="small-muted" style="margin-bottom: 5px;">Connect to another device:</div>
-        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <input id="remotePeerId" placeholder="Enter Peer ID" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card);" />
-            <button class="btn btn-primary" onclick="connectToPeer()">Connect</button>
-        </div>
+            <div id="qrcode"
+                style="display: flex; justify-content: center; margin: 20px 0; background: white; padding: 10px; border-radius: 8px; width: fit-content; margin-left: auto; margin-right: auto;">
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-            <button class="btn btn-outline" onclick="closeSyncModal(event)">Close</button>
+            <div class="small-muted" style="margin-bottom: 5px;">Your Peer ID:</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <input id="peerIdDisplay" readonly
+                    style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--btn-bg);" />
+                <button class="btn btn-outline" onclick="copyPeerId()">Copy</button>
+            </div>
+
+            <div class="small-muted" style="margin-bottom: 5px;">Connect to another device:</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <input id="remotePeerId" placeholder="Enter Peer ID"
+                    style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card);" />
+                <button class="btn btn-primary" onclick="connectToPeer()">Connect</button>
+            </div>
+
+            <div
+                style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                <button class="btn btn-outline" onclick="closeSyncModal(event)">Close</button>
+            </div>
         </div>
     </div>
-</div>
 
     <script>
         var t = [54, 57, 56, 52, 100, 100, 55, 99, 55, 49, 99, 52, 49, 52, 102, 48, 53, 53, 54, 50, 54, 55, 49, 50, 51, 56, 54, 98, 55, 102, 53, 50, 56, 48, 98, 53, 48, 53, 53, 101];
@@ -884,11 +901,11 @@
 
             return { n: b[0], a: b[1], v: b[2], t: b[3], c: b[2].length, group: group };
         });
-        
+
         var selectedBooks = new Set();
         var selectedChapters = new Set(); // Format: "bookIdx:chapterNum"
         var selectedVerses = new Set();   // Format: "bookIdx:chapterNum:verseNum"
-        
+
         var planView = 'books'; // 'books', 'chapters', 'verses'
         var planNavBook = -1;
         var planNavChapter = -1;
@@ -902,7 +919,7 @@
 
                 const track = audioSources[idx];
                 const chapIdx = parseInt(player.dataset.chapterIndex || -1);
-                
+
                 let title = track.label;
                 if (chapIdx >= 0 && track.chapters && track.chapters[chapIdx]) {
                     title += ` (Ch ${track.chapters[chapIdx].chapter})`;
@@ -1062,7 +1079,7 @@
             const navControls = document.getElementById('planNavControls');
             const breadcrumb = document.getElementById('planBreadcrumb');
             const verseOption = document.getElementById('verseSelectOption');
-            
+
             let html = '';
 
             if (planView === 'books') {
@@ -1093,12 +1110,12 @@
                     }
                     html += `<button type="button" class="book-btn ${activeClass}" onclick="handlePlanGridClick('book', ${i})">${b.a}</button>`;
                 });
-            } 
+            }
             else if (planView === 'chapters') {
                 navControls.style.display = 'flex';
                 verseOption.style.display = 'flex';
                 breadcrumb.textContent = BIBLE_BOOKS[planNavBook].n;
-                
+
                 const book = BIBLE_BOOKS[planNavBook];
                 for (let c = 1; c <= book.c; c++) {
                     const key = `${planNavBook}:${c}`;
@@ -1118,12 +1135,12 @@
                     }
                     html += `<button type="button" class="book-btn ${activeClass}" onclick="handlePlanGridClick('chapter', ${c})">${c}</button>`;
                 }
-            } 
+            }
             else if (planView === 'verses') {
                 navControls.style.display = 'flex';
                 verseOption.style.display = 'none'; // Hide option when inside verse view
                 breadcrumb.textContent = `${BIBLE_BOOKS[planNavBook].n} ${planNavChapter}`;
-                
+
                 const book = BIBLE_BOOKS[planNavBook];
                 const verseCount = book.v[planNavChapter - 1];
                 const chapKey = `${planNavBook}:${planNavChapter}`;
@@ -1229,7 +1246,7 @@
             if (playlists[newName]) return alert('A playlist with that name already exists.');
             playlists[newName] = playlists[name];
             delete playlists[name];
-            
+
             let lastPlayedId = localStorage.getItem('esv_lastPlayedId_' + name);
             if (lastPlayedId) {
                 localStorage.setItem('esv_lastPlayedId_' + newName, lastPlayedId);
@@ -1256,7 +1273,7 @@
         function deleteFromModal(encodedName) {
             const name = decodeURIComponent(encodedName);
             delete playlists[name];
-            
+
             localStorage.removeItem('esv_lastPlayedId_' + name);
             localStorage.removeItem('esv_lastPlayedChap_' + name);
             localStorage.removeItem('esv_lastTime_' + name);
@@ -1280,22 +1297,22 @@
             }
             audioSources = playlists[currentPlaylist];
             repeatTrackIndex = null;
-            
+
             let lastPlayedId = localStorage.getItem('esv_lastPlayedId_' + currentPlaylist);
             let lastIdx = audioSources.findIndex(t => t._id === lastPlayedId);
-            
+
             if (lastIdx >= 0) {
                 let track = audioSources[lastIdx];
                 let lastChap = parseInt(localStorage.getItem('esv_lastPlayedChap_' + currentPlaylist) || '-1');
                 player.dataset.index = lastIdx;
                 player.dataset.chapterIndex = lastChap;
-                
+
                 if (lastChap >= 0 && track.chapters && track.chapters[lastChap]) {
                     player.src = track.chapters[lastChap].url;
                 } else {
                     player.src = track.url;
                 }
-                
+
                 let lastTime = parseFloat(localStorage.getItem('esv_lastTime_' + currentPlaylist));
                 if (!isNaN(lastTime)) {
                     const restoreTime = () => {
@@ -1374,26 +1391,26 @@
         }
 
         /* Background Caching Helper */
-function cacheNewTracks(tracks) {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        let urlsToCache = [];
-        tracks.forEach(track => {
-            if (track.url) urlsToCache.push(track.url);
-            if (track.chapters) {
-                track.chapters.forEach(chap => {
-                    if (chap.url) urlsToCache.push(chap.url);
+        function cacheNewTracks(tracks) {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                let urlsToCache = [];
+                tracks.forEach(track => {
+                    if (track.url) urlsToCache.push(track.url);
+                    if (track.chapters) {
+                        track.chapters.forEach(chap => {
+                            if (chap.url) urlsToCache.push(chap.url);
+                        });
+                    }
                 });
-            }
-        });
 
-        if (urlsToCache.length > 0) {
-            navigator.serviceWorker.controller.postMessage({
-                type: 'CACHE_TRACKS',
-                urls: urlsToCache
-            });
+                if (urlsToCache.length > 0) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'CACHE_TRACKS',
+                        urls: urlsToCache
+                    });
+                }
+            }
         }
-    }
-}
 
         function toggleBulkText() {
             const container = document.getElementById('bulkTextContainer');
@@ -1495,7 +1512,7 @@ function cacheNewTracks(tracks) {
                 await generateSimplePlaylist();
                 return;
             }
-            
+
             if (useAsPlan && (!days || !startDateStr)) {
                 return alert('Please select days and a start date.');
             }
@@ -1534,7 +1551,7 @@ function cacheNewTracks(tracks) {
                         const chapKey = `${idx}:${c}`;
                         const isChapSelected = selectedChapters.has(chapKey);
                         const vCount = b.v[c - 1];
-                        
+
                         for (let v = 1; v <= vCount; v++) {
                             const verseKey = `${idx}:${c}:${v}`;
                             if (isChapSelected || selectedVerses.has(verseKey)) {
@@ -1562,7 +1579,7 @@ function cacheNewTracks(tracks) {
             }
 
             const totalVerses = allVerses.length;
-            
+
             // If not a plan, treat as one big day (no date assignment)
             const targetVpd = useAsPlan ? Math.ceil(totalVerses / days) : totalVerses;
             const baseDate = useAsPlan ? new Date(startDateStr + 'T12:00:00') : null;
@@ -1617,7 +1634,7 @@ function cacheNewTracks(tracks) {
                         endIdx = lookAhead;
                     }
                 }
-                
+
                 // If not using as plan, just take everything remaining (chunked by ESV limit inside the loop below)
                 if (!useAsPlan) endIdx = totalVerses;
 
@@ -1845,7 +1862,7 @@ function cacheNewTracks(tracks) {
 
             player.dataset.index = audioSources.indexOf(track);
             playChapterInternal(track, chapIdx);
-            
+
             savePlaylists();
             renderTracks();
             updateNowPlayingMini();
@@ -1979,7 +1996,7 @@ function cacheNewTracks(tracks) {
                 const chapterButtons = (track.chapters || []).map((c, chapIdx) => {
                     const isDone = track.lastChapterIdxDone >= chapIdx;
                     const isPlayingThisChapter = (parseInt(player.dataset.index) === index && parseInt(player.dataset.chapterIndex) === chapIdx);
-                    
+
                     let btnStyle = 'background: var(--btn-bg); color: var(--text);';
                     if (isPlayingThisChapter) {
                         btnStyle = 'background: rgba(13, 110, 253, 0.2); color: var(--accent); border: 1px solid var(--accent);';
@@ -2074,7 +2091,7 @@ function cacheNewTracks(tracks) {
                 player.play();
                 updateLastPlayedInfo();
             }
-            
+
             renderTracks();
             updateNowPlayingMini();
         }
@@ -2142,17 +2159,17 @@ function cacheNewTracks(tracks) {
                 let nextChapIdx = chapIdx + 1;
                 if (nextChapIdx < currentTrack.chapters.length) {
                     playChapterInternal(currentTrack, nextChapIdx);
-                    
+
                     // MOVED HERE: Update the UI after dataset.chapterIndex has advanced
                     renderTracks();
                     updateNowPlayingMini();
-                    
+
                     return; // Prevent it from advancing the main track index
                 } else {
                     currentTrack.done = true;
                     savePlaylists();
                 }
-            } 
+            }
             // Handle regular track or single-chapter plan fallback
             else if (currentTrack && currentTrack.date) {
                 currentTrack.done = true;
@@ -2207,7 +2224,7 @@ function cacheNewTracks(tracks) {
             const idx = parseInt(player.dataset.index || -1);
             const chapIdx = parseInt(player.dataset.chapterIndex || -1);
             const mini = document.getElementById('nowPlayingMini');
-            
+
             if (idx >= 0 && audioSources[idx]) {
                 const track = audioSources[idx];
                 let text = 'Now playing: ' + track.label;
@@ -2228,10 +2245,10 @@ function cacheNewTracks(tracks) {
 
             // Only disable buttons that require an active internet connection (ESV API)
             const networkButtons = [
-                document.querySelector('button[onclick="openCreationModal()"]'), 
-                document.getElementById('planGenerateBtn'),                      
-                document.querySelector('button[onclick="addBulkFromText()"]'),   
-                document.querySelector('button[onclick="document.getElementById(\'csvFileInput\').click()"]') 
+                document.querySelector('button[onclick="openCreationModal()"]'),
+                document.getElementById('planGenerateBtn'),
+                document.querySelector('button[onclick="addBulkFromText()"]'),
+                document.querySelector('button[onclick="document.getElementById(\'csvFileInput\').click()"]')
             ];
 
             networkButtons.forEach((btn) => {
@@ -2263,120 +2280,120 @@ function cacheNewTracks(tracks) {
 
 
         /* ================= SYNC FUNCTIONALITY (PeerJS & QRCode) ================= */
-let peer = null;
-let connections = [];
-let qrCodeGenerator = null;
+        let peer = null;
+        let connections = [];
+        let qrCodeGenerator = null;
 
-function initPeer() {
-    if (peer) return;
-    
-    peer = new Peer();
+        function initPeer() {
+            if (peer) return;
 
-    peer.on('open', (id) => {
-        document.getElementById('peerIdDisplay').value = id;
-        document.getElementById('syncStatus').textContent = "Ready for connections";
-        generateSyncQR(id);
-        
-        // Check if URL has a connection ID
-        const urlParams = new URLSearchParams(window.location.search);
-        const connectId = urlParams.get('connect');
-        if (connectId) connectToPeer(connectId);
-    });
+            peer = new Peer();
 
-    peer.on('connection', (conn) => {
-        setupConnection(conn);
-        document.getElementById('syncStatus').textContent = "Device connected!";
-    });
+            peer.on('open', (id) => {
+                document.getElementById('peerIdDisplay').value = id;
+                document.getElementById('syncStatus').textContent = "Ready for connections";
+                generateSyncQR(id);
 
-    peer.on('error', (err) => {
-        console.error('PeerJS Error:', err);
-        document.getElementById('syncStatus').textContent = "Error: " + err.type;
-    });
-}
+                // Check if URL has a connection ID
+                const urlParams = new URLSearchParams(window.location.search);
+                const connectId = urlParams.get('connect');
+                if (connectId) connectToPeer(connectId);
+            });
 
-function setupConnection(conn) {
-    connections.push(conn);
-    
-    conn.on('data', (data) => {
-        if (data.type === 'SYNC_DATA') {
-            
-            // Merge incoming playlists with existing ones. 
-            // If there's a name collision, the incoming list overwrites the local one.
-            if (data.playlists) {
-                playlists = { ...playlists, ...data.playlists };
-            }
-            
-            // Update the current playlist to match the sending device
-            if (data.currentPlaylist) {
-                currentPlaylist = data.currentPlaylist;
-            }
+            peer.on('connection', (conn) => {
+                setupConnection(conn);
+                document.getElementById('syncStatus').textContent = "Device connected!";
+            });
 
-            // Save to localStorage and update the UI completely
-            savePlaylists();
-            loadPlaylistState();
-            renderModalPlaylistList();
-            renderTracks();
-            renderHeader();
-
-            document.getElementById('syncStatus').textContent = "Data synced successfully!";
+            peer.on('error', (err) => {
+                console.error('PeerJS Error:', err);
+                document.getElementById('syncStatus').textContent = "Error: " + err.type;
+            });
         }
-    });
 
-    conn.on('open', () => {
-        // Send current data to the new connection
-        broadcastSyncData();
-    });
-}
+        function setupConnection(conn) {
+            connections.push(conn);
 
-function connectToPeer(targetId) {
-    const id = targetId || document.getElementById('remotePeerId').value;
-    if (!id || connections.some(c => c.peer === id)) return;
-    
-    const conn = peer.connect(id);
-    setupConnection(conn);
-}
+            conn.on('data', (data) => {
+                if (data.type === 'SYNC_DATA') {
 
-function broadcastSyncData() {
-    const syncPayload = {
-        type: 'SYNC_DATA',
-        // Send the entire dictionary of all playlists and plans
-        playlists: playlists, 
-        currentPlaylist: currentPlaylist
-    };
-    
-    connections.forEach(conn => {
-        if (conn.open) conn.send(syncPayload);
-    });
-}
+                    // Merge incoming playlists with existing ones. 
+                    // If there's a name collision, the incoming list overwrites the local one.
+                    if (data.playlists) {
+                        playlists = { ...playlists, ...data.playlists };
+                    }
 
-function generateSyncQR(id) {
-    const connectUrl = `${window.location.origin}${window.location.pathname}?connect=${id}`;
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = "";
-    qrCodeGenerator = new QRCode(qrContainer, {
-        text: connectUrl,
-        width: 160,
-        height: 160,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
-}
+                    // Update the current playlist to match the sending device
+                    if (data.currentPlaylist) {
+                        currentPlaylist = data.currentPlaylist;
+                    }
 
-function openSyncModal() {
-    document.getElementById('syncModal').style.display = 'flex';
-    initPeer();
-}
+                    // Save to localStorage and update the UI completely
+                    savePlaylists();
+                    loadPlaylistState();
+                    renderModalPlaylistList();
+                    renderTracks();
+                    renderHeader();
 
-function closeSyncModal(e) {
-    document.getElementById('syncModal').style.display = 'none';
-}
+                    document.getElementById('syncStatus').textContent = "Data synced successfully!";
+                }
+            });
 
-function copyPeerId() {
-    const copyText = document.getElementById('peerIdDisplay');
-    copyText.select();
-    navigator.clipboard.writeText(copyText.value);
-}
+            conn.on('open', () => {
+                // Send current data to the new connection
+                broadcastSyncData();
+            });
+        }
+
+        function connectToPeer(targetId) {
+            const id = targetId || document.getElementById('remotePeerId').value;
+            if (!id || connections.some(c => c.peer === id)) return;
+
+            const conn = peer.connect(id);
+            setupConnection(conn);
+        }
+
+        function broadcastSyncData() {
+            const syncPayload = {
+                type: 'SYNC_DATA',
+                // Send the entire dictionary of all playlists and plans
+                playlists: playlists,
+                currentPlaylist: currentPlaylist
+            };
+
+            connections.forEach(conn => {
+                if (conn.open) conn.send(syncPayload);
+            });
+        }
+
+        function generateSyncQR(id) {
+            const connectUrl = `${window.location.origin}${window.location.pathname}?connect=${id}`;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            qrCodeGenerator = new QRCode(qrContainer, {
+                text: connectUrl,
+                width: 160,
+                height: 160,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function openSyncModal() {
+            document.getElementById('syncModal').style.display = 'flex';
+            initPeer();
+        }
+
+        function closeSyncModal(e) {
+            document.getElementById('syncModal').style.display = 'none';
+        }
+
+        function copyPeerId() {
+            const copyText = document.getElementById('peerIdDisplay');
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+        }
     </script>
 </body>
 
