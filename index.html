@@ -747,18 +747,6 @@
     </div>
 
     <script>
-        var t = [54, 57, 56, 52, 100, 100, 55, 99, 55, 49, 99, 52, 49, 52, 102, 48, 53, 53, 54, 50, 54, 55, 49, 50, 51, 56, 54, 98, 55, 102, 53, 50, 56, 48, 98, 53, 48, 53, 53, 101];
-        var a = {
-            headers: {
-                Authorization:
-                    'Token ' +
-                    t
-                        .map((e) => String.fromCharCode(e))
-                        .join('')
-                        .replace(/,/g, ''),
-            },
-        };
-
         var player = document.getElementById('playerAudio');
         player.src = 'https://audio.esv.org/david-cochran-heath/mq/01001001-01001001.mp3';
         player.dataset.silent = 'true';
@@ -1365,29 +1353,20 @@
 
             if (elem.includes(',')) elem = elem.substring(0, elem.indexOf(','));
 
-            var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(elem);
+            const parsed = parsePassageString(elem);
+            if (!parsed) return alert("Couldn't parse passage. Please check the format (e.g., John 3:16).");
 
-            fetch(url, a)
-                .then((res) => res.json())
-                .then((r) => {
-                    if (!r.parsed || !r.parsed[0]) return alert("Couldn't parse passage.");
-                    let start = r.parsed[0][0];
-                    let end = r.parsed[0][1];
-                    const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
-                    const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-                    const newTrack = { _id: trackId, url: src, label: r.canonical };
-                    audioSources.push(newTrack);
-                    cacheNewTracks([newTrack]);
-                    playlists[currentPlaylist] = audioSources;
-                    savePlaylists();
-                    renderTracks();
-                    document.getElementById('input').value = '';
-                    renderHeader();
-                })
-                .catch((err) => {
-                    console.error('Error fetching ESV passage:', err);
-                    alert('Unable to retrieve passage.');
-                });
+            const trackId = Date.now() + '-' + parsed.startCode + '-' + parsed.endCode + '-' + Math.floor(Math.random() * 10000);
+            const src = `https://audio.esv.org/david-cochran-heath/mq/${parsed.startCode}-${parsed.endCode}.mp3`;
+            const newTrack = { _id: trackId, url: src, label: parsed.label };
+            
+            audioSources.push(newTrack);
+            cacheNewTracks([newTrack]);
+            playlists[currentPlaylist] = audioSources;
+            savePlaylists();
+            renderTracks();
+            document.getElementById('input').value = '';
+            renderHeader();
         }
 
         /* Background Caching Helper */
@@ -1471,21 +1450,13 @@
                 const passage = passageList[i];
                 status.textContent = `Processing ${i + 1}/${passageList.length}: ${passage}`;
 
-                try {
-                    const url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(passage);
-                    const response = await fetch(url, a);
-                    const r = await response.json();
-
-                    if (r.parsed && r.parsed[0]) {
-                        let start = r.parsed[0][0];
-                        let end = r.parsed[0][1];
-                        const trackId = Date.now() + '-' + start + '-' + end + '-' + Math.floor(Math.random() * 10000);
-                        const src = `https://audio.esv.org/david-cochran-heath/mq/${start}-${end}.mp3`;
-
-                        targetArray.push({ _id: trackId, url: src, label: r.canonical });
-                    }
-                } catch (err) {
-                    console.error('Bulk failed for:', passage, err);
+                const parsed = parsePassageString(passage);
+                if (parsed) {
+                    const trackId = Date.now() + '-' + parsed.startCode + '-' + parsed.endCode + '-' + Math.floor(Math.random() * 10000);
+                    const src = `https://audio.esv.org/david-cochran-heath/mq/${parsed.startCode}-${parsed.endCode}.mp3`;
+                    targetArray.push({ _id: trackId, url: src, label: parsed.label });
+                } else {
+                    console.warn('Bulk failed to parse passage:', passage);
                 }
             }
 
@@ -2235,6 +2206,115 @@
             } else {
                 mini.textContent = 'Not playing';
             }
+        }
+
+        function parsePassageString(input) {
+            input = input.trim();
+            // Match book name (handles leading numbers like "1 John") and the reference string
+            const match = input.match(/^(\d?\s*[a-zA-Z\s]+)\s+(\d.*)$/);
+            if (!match) return null;
+
+            let bookStr = match[1].trim().toLowerCase();
+            let refStr = match[2].trim();
+
+            // Map common abbreviations that might fail a standard 'startsWith' check
+            const altNames = {
+                'gn': 'genesis', 'ex': 'exodus', 'lv': 'leviticus', 'nm': 'numbers', 'dt': 'deuteronomy',
+                'js': 'joshua', 'jg': 'judges', 'rt': 'ruth', '1 sm': '1 samuel', '1 sam': '1 samuel',
+                '2 sm': '2 samuel', '2 sam': '2 samuel', '1 k': '1 kings', '1 kgs': '1 kings',
+                '2 k': '2 kings', '2 kgs': '2 kings', '1 ch': '1 chronicles', '1 chr': '1 chronicles',
+                '2 ch': '2 chronicles', '2 chr': '2 chronicles', 'ez': 'ezra', 'nh': 'nehemiah',
+                'es': 'esther', 'jb': 'job', 'ps': 'psalms', 'pr': 'proverbs', 'prov': 'proverbs',
+                'ec': 'ecclesiastes', 'ecc': 'ecclesiastes', 'so': 'song of solomon', 'song': 'song of solomon',
+                'is': 'isaiah', 'isa': 'isaiah', 'jr': 'jeremiah', 'jer': 'jeremiah', 'lm': 'lamentations',
+                'ek': 'ezekiel', 'eze': 'ezekiel', 'dn': 'daniel', 'dan': 'daniel', 'ho': 'hosea',
+                'jl': 'joel', 'am': 'amos', 'ob': 'obadiah', 'jn': 'john', 'jon': 'jonah',
+                'mc': 'micah', 'na': 'nahum', 'hb': 'habakkuk', 'hab': 'habakkuk', 'zp': 'zephaniah',
+                'hg': 'haggai', 'zc': 'zechariah', 'zech': 'zechariah', 'ml': 'malachi', 'mal': 'malachi',
+                'mt': 'matthew', 'matt': 'matthew', 'mk': 'mark', 'lk': 'luke', 'ac': 'acts',
+                'rm': 'romans', 'rom': 'romans', '1 co': '1 corinthians', '1 cor': '1 corinthians',
+                '2 co': '2 corinthians', '2 cor': '2 corinthians', 'gl': 'galatians', 'gal': 'galatians',
+                'ep': 'ephesians', 'eph': 'ephesians', 'ph': 'philippians', 'phil': 'philippians',
+                'cl': 'colossians', 'col': 'colossians', '1 th': '1 thessalonians', '1 thess': '1 thessalonians',
+                '2 th': '2 thessalonians', '2 thess': '2 thessalonians', '1 tm': '1 timothy', '1 tim': '1 timothy',
+                '2 tm': '2 timothy', '2 tim': '2 timothy', 'tt': 'titus', 'pm': 'philemon',
+                'heb': 'hebrews', 'jm': 'james', 'jas': 'james', '1 pt': '1 peter', '1 pet': '1 peter',
+                '2 pt': '2 peter', '2 pet': '2 peter', '1 jn': '1 john', '2 jn': '2 john',
+                '3 jn': '3 john', 'jd': 'jude', 'rv': 'revelation', 'rev': 'revelation'
+            };
+
+            if (altNames[bookStr]) {
+                bookStr = altNames[bookStr];
+            }
+
+            // Find Book index by exact name or abbreviation, falling back to fuzzy matching
+            let bookIndex = BIBLE_BOOKS.findIndex(b => b.n.toLowerCase() === bookStr || b.a.toLowerCase() === bookStr);
+            if (bookIndex === -1) {
+                bookIndex = BIBLE_BOOKS.findIndex(b => b.n.toLowerCase().startsWith(bookStr));
+            }
+            if (bookIndex === -1) return null;
+
+            const book = BIBLE_BOOKS[bookIndex];
+            const bookNum = bookIndex + 1;
+
+            // Normalize alternative punctuation: replace periods and commas with colons
+            refStr = refStr.replace(/[.,]/g, ':');
+
+            // Regex to parse combinations of chapters and verses
+            const refMatch = refStr.match(/^(\d+)(?::(\d+))?(?:\s*-\s*(?:(\d+):)?(\d+))?$/);
+            if (!refMatch) return null;
+
+            let startChap = parseInt(refMatch[1]);
+            let startVerse = refMatch[2] ? parseInt(refMatch[2]) : 1;
+            
+            let endChap = startChap;
+            let endVerse = startVerse;
+
+            if (refMatch[4]) {
+                if (refMatch[3]) {
+                    // Format "3:16-4:2"
+                    endChap = parseInt(refMatch[3]);
+                    endVerse = parseInt(refMatch[4]);
+                } else if (refMatch[2]) {
+                    // Format "3:16-18"
+                    endVerse = parseInt(refMatch[4]);
+                } else {
+                    // Format "3-4"
+                    endChap = parseInt(refMatch[4]);
+                    endVerse = book.v[endChap - 1] || 1;
+                }
+            } else if (!refMatch[2]) {
+                // Format "3" (Whole chapter)
+                endVerse = book.v[startChap - 1] || 1;
+            }
+
+            // Boundary checks
+            startChap = Math.max(1, Math.min(startChap, book.c));
+            endChap = Math.max(startChap, Math.min(endChap, book.c));
+            if (endChap < startChap) endChap = startChap;
+            
+            startVerse = Math.max(1, Math.min(startVerse, book.v[startChap - 1] || 1));
+            endVerse = Math.max(1, Math.min(endVerse, book.v[endChap - 1] || 1));
+
+            // Format codes (BBCCCVVV)
+            const pad = (n, w) => n.toString().padStart(w, '0');
+            const startCode = `${pad(bookNum, 2)}${pad(startChap, 3)}${pad(startVerse, 3)}`;
+            const endCode = `${pad(bookNum, 2)}${pad(endChap, 3)}${pad(endVerse, 3)}`;
+
+            // Build a clean label
+            let label = `${book.n} ${startChap}`;
+            if (refMatch[2]) label += `:${startVerse}`;
+            if (startChap !== endChap || startVerse !== endVerse) {
+                if (startChap === endChap && !refMatch[2] && !refMatch[4]) {
+                     // Keep label simple for whole chapters (e.g., "Genesis 1")
+                } else {
+                     label += `-`;
+                     if (startChap !== endChap) label += `${endChap}:`;
+                     label += `${endVerse}`;
+                }
+            }
+
+            return { startCode, endCode, label };
         }
 
         function updateOnlineStatus() {
