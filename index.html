@@ -662,9 +662,12 @@
 
                     <div id="planDetailsWrapper">
                         <label class="small-muted">Plan Details:</label>
-                        <div style="display: flex; gap: 10px; margin-top: 5px">
-                            <input type="number" id="planDays" placeholder="Days" value="30" style="flex: 1" />
+                        <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap">
+                            <input type="number" id="planDays" placeholder="Days" value="30" min="1" style="flex: 1" />
                             <input type="date" id="planStart" style="flex: 1" />
+                            <label style="width: 100%; display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 4px; cursor: pointer">
+                                <input type="checkbox" id="planSkipWeekends" /> Skip Weekends
+                            </label>
                         </div>
                     </div>
 
@@ -1513,9 +1516,11 @@
                 }
 
                 const totalVerses = allVerses.length;
+                const skipWeekends = document.getElementById('planSkipWeekends') ? document.getElementById('planSkipWeekends').checked : false;
 
-                // If not a plan, treat as one big day (no date assignment)
-                const targetVpd = useAsPlan ? Math.ceil(totalVerses / days) : totalVerses;
+                // Cap the days so we never try to schedule more days than there are verses
+                let actualDays = useAsPlan ? Math.min(days, totalVerses) : 1;
+
                 const baseDate = useAsPlan ? new Date(startDateStr + 'T12:00:00') : null;
 
                 let planName = document.getElementById('newPlanName').value.trim();
@@ -1530,14 +1535,15 @@
 
                 let currentVerseIdx = 0;
 
-                // Loop logic: if useAsPlan, loop 'days' times. If not, loop once (or until done).
-                const loopLimit = useAsPlan ? days : 1;
+                // Loop logic
+                const loopLimit = useAsPlan ? actualDays : 1;
+                let currentCalendarOffset = 0;
 
                 for (let i = 0; i < loopLimit; i++) {
                     if (currentVerseIdx >= totalVerses) break;
 
                     // DYNAMIC CALCULATION: Recalculate target verses for the remaining days
-                    let remainingDays = days - i;
+                    let remainingDays = actualDays - i;
                     let remainingVerses = totalVerses - currentVerseIdx;
                     let currentTargetVpd = Math.ceil(remainingVerses / remainingDays);
 
@@ -1545,8 +1551,12 @@
                     let targetEndIdx = Math.min(startIdx + currentTargetVpd, totalVerses);
                     let endIdx = targetEndIdx;
 
-                    // --- REFINED PREVENT CHAPTER BREAKS (Only for Plans) ---
-                    if (useAsPlan && endIdx < totalVerses) {
+                    // --- REFINED PREVENT CHAPTER BREAKS ---
+                    // Only snap to chapters if the reading load is reasonably large (> 12 verses/day).
+                    // This prevents collapsing 60 days of Jude into 1 day.
+                    const snapToChapters = useAsPlan && (currentTargetVpd >= 12);
+
+                    if (snapToChapters && endIdx < totalVerses) {
                         // Find the end of the chapter we landed in (look ahead)
                         let lookAhead = endIdx;
                         while (lookAhead < totalVerses && allVerses[lookAhead - 1].verse !== allVerses[lookAhead - 1].vMax) {
@@ -1575,9 +1585,20 @@
 
                     let dateStr = undefined;
                     if (useAsPlan) {
-                        const dayDate = new Date(baseDate);
-                        dayDate.setDate(baseDate.getDate() + i);
+                        let dayDate = new Date(baseDate);
+                        dayDate.setDate(baseDate.getDate() + currentCalendarOffset);
+
+                        if (skipWeekends) {
+                            // If it lands on Sunday (0) or Saturday (6), increment offset and try again
+                            while (dayDate.getDay() === 0 || dayDate.getDay() === 6) {
+                                currentCalendarOffset++;
+                                dayDate = new Date(baseDate);
+                                dayDate.setDate(baseDate.getDate() + currentCalendarOffset);
+                            }
+                        }
+
                         dateStr = dayDate.toISOString().split('T')[0];
+                        currentCalendarOffset++; // Advance for the next day loop
                     }
 
                     for (let j = 0; j < dayVerses.length; j += ESV_MAX_VERSES) {
@@ -1928,6 +1949,11 @@
                         ? `<span style="font-size: 10px; background: rgba(13, 110, 253, 0.1); color: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; vertical-align: middle;">Last Played</span>`
                         : '';
 
+                    const repeatIcon =
+                        repeatTrackIndex === index
+                            ? `<span class="material-symbols-outlined" style="color: var(--accent); font-size: 16px; margin-left: 6px; vertical-align: middle;" title="Repeat Track">repeat</span>`
+                            : '';
+
                     const dateHtml = isPlan ? `<div style="font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 3px;">${isToday ? 'TODAY' : track.date}</div>` : '';
                     const doneStyle = track.done ? 'text-decoration: line-through; opacity: 0.5;' : '';
                     const checkIcon =
@@ -1961,7 +1987,7 @@
                                 <span class="material-symbols-outlined">${playIcon}</span>
                             </button>
                             <div class="track-label" style="${doneStyle}">
-                                ${dateHtml}${checkIcon}${track.label}${lastPlayedBadge}
+                                ${dateHtml}${checkIcon}${track.label}${lastPlayedBadge}${repeatIcon}
                                 <div class="chapter-btns" style="display: flex; flex-wrap: wrap;">${chapterButtons}</div>
                             </div>
                         </div>
@@ -2164,7 +2190,12 @@
                 updateNowPlayingMini();
                 const addTrackBtn = document.getElementById('addTrackBtn');
                 if (addTrackBtn) {
-                    addTrackBtn.style.display = currentPlaylist ? 'flex' : 'none';
+                    let isPlan = false;
+                    if (currentPlaylist && playlists[currentPlaylist]) {
+                        isPlan = playlists[currentPlaylist].some((t) => t.date !== undefined);
+                    }
+                    // Only show if a playlist is selected AND it is not a plan
+                    addTrackBtn.style.display = currentPlaylist && !isPlan ? 'flex' : 'none';
                 }
             }
 
