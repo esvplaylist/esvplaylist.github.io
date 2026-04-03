@@ -637,7 +637,7 @@
                 <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px">
                     <button id="tabBtnCreationPlan" class="tab-btn active" onclick="switchCreationTab('plan')">Generate List</button>
                     <button id="tabBtnCreationBulk" class="tab-btn" onclick="switchCreationTab('bulk')">Import List</button>
-                    <button id="tabBtnCreationIO" class="tab-btn" onclick="switchCreationTab('io')">Import/Export</button>
+                    <button id="tabBtnCreationIO" class="tab-btn" onclick="switchCreationTab('io')">Backup</button>
                 </div>
 
                 <div id="creationTabPlan">
@@ -693,11 +693,11 @@
 
                 <div id="creationTabIO" style="display: none">
                     <div style="margin-bottom: 20px;">
-                        <label class="small-muted" style="display: block; margin-bottom: 8px">Export Configuration:</label>
+                        <label class="small-muted" style="display: block; margin-bottom: 8px">Download Configuration:</label>
                         <button class="btn btn-outline" style="width: 100%" onclick="exportConfig()">Download Backup (.txt)</button>
                     </div>
                     <div>
-                        <label class="small-muted" style="display: block; margin-bottom: 8px">Import Configuration:</label>
+                        <label class="small-muted" style="display: block; margin-bottom: 8px">Upload Configuration:</label>
                         <input type="file" id="importConfigFile" accept=".txt" style="display: none" onchange="importConfig(event)" />
                         <button class="btn btn-primary" style="width: 100%" onclick="document.getElementById('importConfigFile').click()">Upload Backup (.txt)</button>
                         <div class="small-muted" style="margin-top: 6px; font-size: 11px;">Warning: This will overwrite your existing playlists and settings.</div>
