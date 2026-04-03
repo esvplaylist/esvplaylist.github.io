@@ -559,19 +559,22 @@
                             <span class="material-symbols-outlined">play_arrow</span>
                         </button>
                         <div style="flex: 1; display: flex; flex-direction: column">
-                            <div id="progressContainer" style="width: 100%; height: 6px; background: var(--btn-bg); border-radius: 3px; cursor: pointer; position: relative">
+                            <!-- <div id="progressContainer" style="width: 100%; height: 6px; background: var(--btn-bg); border-radius: 3px; cursor: pointer; position: relative">
                                 <div id="progressBar" style="height: 100%; width: 0%; background: var(--accent); border-radius: 3px"></div>
-                            </div>
+                            </div> -->
+                            <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: var(--accent); margin: 0;" />
                             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 2px">
                                 <span id="currentTime">0:00</span>
                                 <span id="duration">0:00</span>
                             </div>
                         </div>
                         <select id="speedSelect" class="btn" style="width: auto">
-                            <option value="0.75">0.75x</option>
+                            <option value="0.8">0.8x</option>
                             <option value="1" selected>1x</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.5x</option>
+                            <option value="1.2">1.2x</option>
+                            <option value="1.4">1.4x</option>
+                            <option value="1.6">1.6x</option>
+                            <option value="1.8">1.8x</option>
                             <option value="2">2x</option>
                         </select>
                     </div>
@@ -634,6 +637,7 @@
                 <div style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px">
                     <button id="tabBtnCreationPlan" class="tab-btn active" onclick="switchCreationTab('plan')">Generate List</button>
                     <button id="tabBtnCreationBulk" class="tab-btn" onclick="switchCreationTab('bulk')">Import List</button>
+                    <button id="tabBtnCreationIO" class="tab-btn" onclick="switchCreationTab('io')">Import/Export</button>
                 </div>
 
                 <div id="creationTabPlan">
@@ -685,6 +689,20 @@
                         </div>
                         <div id="bulkStatus" class="small-muted" style="text-align: center; margin-top: 5px"></div>
                     </div>
+                </div>
+
+                <div id="creationTabIO" style="display: none">
+                    <div style="margin-bottom: 20px;">
+                        <label class="small-muted" style="display: block; margin-bottom: 8px">Export Configuration:</label>
+                        <button class="btn btn-outline" style="width: 100%" onclick="exportConfig()">Download Backup (.txt)</button>
+                    </div>
+                    <div>
+                        <label class="small-muted" style="display: block; margin-bottom: 8px">Import Configuration:</label>
+                        <input type="file" id="importConfigFile" accept=".txt" style="display: none" onchange="importConfig(event)" />
+                        <button class="btn btn-primary" style="width: 100%" onclick="document.getElementById('importConfigFile').click()">Upload Backup (.txt)</button>
+                        <div class="small-muted" style="margin-top: 6px; font-size: 11px;">Warning: This will overwrite your existing playlists and settings.</div>
+                    </div>
+                    <div id="ioStatus" class="small-muted" style="text-align: center; margin-top: 12px; font-weight: bold;"></div>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px">
@@ -973,7 +991,8 @@
             function resetPlayer() {
                 player.src = '';
                 player.currentTime = 0;
-                progressBar.style.width = '0%';
+                //progressBar.style.width = '0%';
+                progressSlider.value = 0;
                 player.dataset.index = -1;
                 player.dataset.chapterIndex = -1;
                 player.dataset.silent = 'false';
@@ -1007,8 +1026,67 @@
             function switchCreationTab(tab) {
                 document.getElementById('creationTabPlan').style.display = tab === 'plan' ? 'block' : 'none';
                 document.getElementById('creationTabBulk').style.display = tab === 'bulk' ? 'block' : 'none';
+                document.getElementById('creationTabIO').style.display = tab === 'io' ? 'block' : 'none';
                 document.getElementById('tabBtnCreationPlan').classList.toggle('active', tab === 'plan');
                 document.getElementById('tabBtnCreationBulk').classList.toggle('active', tab === 'bulk');
+                document.getElementById('tabBtnCreationIO').classList.toggle('active', tab === 'io');
+            }
+
+            function exportConfig() {
+                const config = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('esv_')) {
+                        config[key] = localStorage.getItem(key);
+                    }
+                }
+                const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(config));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                const dateStr = new Date().toISOString().split('T')[0];
+                downloadAnchorNode.setAttribute("download", `esvplaylist-config-${dateStr}.txt`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                const status = document.getElementById('ioStatus');
+                status.style.color = "var(--now)";
+                status.textContent = "Backup downloaded successfully!";
+                setTimeout(() => status.textContent = "", 3000);
+            }
+
+            function importConfig(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                const status = document.getElementById('ioStatus');
+                
+                reader.onload = function(e) {
+                    try {
+                        const config = JSON.parse(e.target.result);
+                        
+                        // Clear existing esv_ keys
+                        const keysToRemove = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            if (localStorage.key(i).startsWith('esv_')) keysToRemove.push(localStorage.key(i));
+                        }
+                        keysToRemove.forEach(k => localStorage.removeItem(k));
+                        
+                        // Import new keys
+                        for (const key in config) {
+                            localStorage.setItem(key, config[key]);
+                        }
+                        
+                        status.style.color = "var(--now)";
+                        status.textContent = "Import successful! Reloading app...";
+                        setTimeout(() => window.location.reload(), 1500);
+                    } catch (err) {
+                        status.style.color = "#dc3545";
+                        status.textContent = "Error: Invalid configuration file.";
+                        event.target.value = ''; // Reset input
+                    }
+                };
+                reader.readAsText(file);
             }
 
             /* --- New Plan Generator Logic --- */
@@ -1299,11 +1377,13 @@
                         player.addEventListener('loadedmetadata', restoreTime);
                     }
                     player.pause();
-                    progressBar.style.width = '0%';
+                    //progressBar.style.width = '0%';
+                    progressSlider.value = 0;
                 } else {
                     player.src = '';
                     player.currentTime = 0;
-                    progressBar.style.width = '0%';
+                    //progressBar.style.width = '0%';
+                    progressSlider.value = 0;
                     player.dataset.index = -1;
                     player.dataset.chapterIndex = -1;
                     player.pause();
@@ -1359,26 +1439,26 @@
             }
 
             /* Background Caching Helper */
-            function cacheNewTracks(tracks) {
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    let urlsToCache = [];
-                    tracks.forEach((track) => {
-                        if (track.url) urlsToCache.push(track.url);
-                        if (track.chapters) {
-                            track.chapters.forEach((chap) => {
-                                if (chap.url) urlsToCache.push(chap.url);
-                            });
-                        }
-                    });
+            // function cacheNewTracks(tracks) {
+            //     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            //         let urlsToCache = [];
+            //         tracks.forEach((track) => {
+            //             if (track.url) urlsToCache.push(track.url);
+            //             if (track.chapters) {
+            //                 track.chapters.forEach((chap) => {
+            //                     if (chap.url) urlsToCache.push(chap.url);
+            //                 });
+            //             }
+            //         });
 
-                    if (urlsToCache.length > 0) {
-                        navigator.serviceWorker.controller.postMessage({
-                            type: 'CACHE_TRACKS',
-                            urls: urlsToCache,
-                        });
-                    }
-                }
-            }
+            //         if (urlsToCache.length > 0) {
+            //             navigator.serviceWorker.controller.postMessage({
+            //                 type: 'CACHE_TRACKS',
+            //                 urls: urlsToCache,
+            //             });
+            //         }
+            //     }
+            // }
 
             function addBulkFromText() {
                 const text = document.getElementById('bulkPassages').value;
@@ -1427,7 +1507,7 @@
                     }
                 }
 
-                cacheNewTracks(targetArray);
+                //cacheNewTracks(targetArray);
                 status.textContent = 'Complete!';
                 currentPlaylist = name;
                 savePlaylists();
@@ -1653,7 +1733,7 @@
                     }
                 }
 
-                cacheNewTracks(targetArray);
+                //cacheNewTracks(targetArray);
                 status.textContent = 'Plan Complete!';
                 currentPlaylist = planName;
                 savePlaylists();
@@ -1780,7 +1860,7 @@
                     createTracksFromVerseList(verseList);
                 }
 
-                cacheNewTracks(targetArray);
+                //cacheNewTracks(targetArray);
                 status.textContent = 'Playlist Created!';
                 currentPlaylist = planName;
                 savePlaylists();
@@ -2073,24 +2153,52 @@
             player.addEventListener('play', () => (playBtn.querySelector('span').textContent = 'pause'));
             player.addEventListener('pause', () => (playBtn.querySelector('span').textContent = 'play_arrow'));
 
-            const progressBar = document.getElementById('progressBar');
-            const progressContainer = document.getElementById('progressContainer');
+            // const progressBar = document.getElementById('progressBar');
+            // const progressContainer = document.getElementById('progressContainer');
+            const progressSlider = document.getElementById('progressSlider');
             const currentTimeLabel = document.getElementById('currentTime');
             const durationLabel = document.getElementById('duration');
 
+            // player.addEventListener('timeupdate', () => {
+            //     if (player.duration) progressBar.style.width = (player.currentTime / player.duration) * 100 + '%';
+            //     currentTimeLabel.textContent = formatTime(player.currentTime);
+            //     durationLabel.textContent = formatTime(player.duration);
+
+            //     if (currentPlaylist && !player.paused && player.currentTime > 0) {
+            //         localStorage.setItem('esv_lastTime_' + currentPlaylist, player.currentTime);
+            //     }
+            // });
+
+            // progressContainer.addEventListener('click', (e) => {
+            //     const rect = progressContainer.getBoundingClientRect();
+            //     player.currentTime = ((e.clientX - rect.left) / rect.width) * player.duration;
+            // });
+
+            let isDraggingSlider = false;
+
+            progressSlider.addEventListener('mousedown', () => isDraggingSlider = true);
+            progressSlider.addEventListener('touchstart', () => isDraggingSlider = true, {passive: true});
+            
+            progressSlider.addEventListener('mouseup', () => isDraggingSlider = false);
+            progressSlider.addEventListener('touchend', () => isDraggingSlider = false);
+
+            progressSlider.addEventListener('input', () => {
+                if (player.duration) {
+                    player.currentTime = (progressSlider.value / 100) * player.duration;
+                }
+            });
+
             player.addEventListener('timeupdate', () => {
-                if (player.duration) progressBar.style.width = (player.currentTime / player.duration) * 100 + '%';
+                // Only update the slider visually if the user isn't currently dragging it
+                if (player.duration && !isDraggingSlider) {
+                    progressSlider.value = (player.currentTime / player.duration) * 100;
+                }
                 currentTimeLabel.textContent = formatTime(player.currentTime);
                 durationLabel.textContent = formatTime(player.duration);
 
                 if (currentPlaylist && !player.paused && player.currentTime > 0) {
                     localStorage.setItem('esv_lastTime_' + currentPlaylist, player.currentTime);
                 }
-            });
-
-            progressContainer.addEventListener('click', (e) => {
-                const rect = progressContainer.getBoundingClientRect();
-                player.currentTime = ((e.clientX - rect.left) / rect.width) * player.duration;
             });
 
             function formatTime(sec) {
@@ -2420,6 +2528,18 @@
                 networkButtons.forEach((btn) => {
                     if (btn) btn.disabled = isOffline;
                 });
+
+                // Disable playback when offline
+                const playerCard = document.querySelector('.player-card');
+                const tracksCard = document.querySelector('.tracks-card');
+                if (isOffline) {
+                    if (!player.paused) player.pause();
+                    if (playerCard) { playerCard.style.pointerEvents = 'none'; playerCard.style.opacity = '0.5'; }
+                    if (tracksCard) { tracksCard.style.pointerEvents = 'none'; tracksCard.style.opacity = '0.5'; }
+                } else {
+                    if (playerCard) { playerCard.style.pointerEvents = 'auto'; playerCard.style.opacity = '1'; }
+                    if (tracksCard) { tracksCard.style.pointerEvents = 'auto'; tracksCard.style.opacity = '1'; }
+                }
             }
 
             window.addEventListener('online', updateOnlineStatus);
