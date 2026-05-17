@@ -578,7 +578,7 @@
                             <option value="2">2x</option>
                         </select>
                     </div>
-                    <audio id="playerAudio"></audio>
+                    <audio preload="auto" id="playerAudio"></audio>
                 </div>
             </div>
 
@@ -937,7 +937,7 @@
                 }
 
                 navigator.mediaSession.setActionHandler('play', () => {
-                    player.play();
+                    safePlay();
                 });
 
                 navigator.mediaSession.setActionHandler('pause', () => {
@@ -1893,8 +1893,41 @@
                 player.dataset.chapterIndex = chapIdx;
                 player.dataset.silent = 'false';
                 applySavedSpeed();
-                player.play();
+                safePlay();
                 updateLastPlayedInfo();
+            }
+
+            async function safePlay(retries = 3) {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        await safePlay();
+                        return; // Success! Exit the function.
+                    } catch (error) {
+                        console.warn(`Playback attempt ${i + 1} failed:`, error);
+                        
+                        // If the browser strictly blocks it (Autoplay Policy), retrying won't help.
+                        if (error.name === 'NotAllowedError') {
+                            console.error("Browser blocked autoplay. User interaction needed.");
+                            break; // Break the loop and go straight to UI reset
+                        }
+
+                        // Give the browser 150ms to resolve whatever interrupted it before retrying
+                        if (i < retries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 150));
+                        }
+                    }
+                }
+                
+                // If we get here, all retries failed or it was hard-blocked
+                console.error("Failed to play audio after multiple attempts.");
+                
+                // Reset the UI
+                player.pause(); // Forces your existing pause event listener to fire, fixing the play/pause button
+                
+                const mini = document.getElementById('nowPlayingMini');
+                if (mini) mini.textContent = "Playback failed. Try clicking again.";
+                
+                renderTracks(); // Refreshes the list to ensure the play icons on the tracks are correct
             }
 
             function playChapter(trackId, chapIdx) {
@@ -2111,7 +2144,7 @@
                 let idx = audioSources.findIndex((x) => x._id === trackId);
                 if (idx === -1) return;
                 if (parseInt(player.dataset.index) === idx) {
-                    player.paused ? player.play() : player.pause();
+                    player.paused ? safePlay() : player.pause();
                 } else {
                     playByIndex(idx);
                 }
@@ -2138,7 +2171,7 @@
                     player.src = track.url;
                     player.dataset.silent = 'false';
                     applySavedSpeed();
-                    player.play();
+                    safePlay();
                     updateLastPlayedInfo();
                 }
 
@@ -2148,7 +2181,7 @@
 
             const playBtn = document.getElementById('playPauseBtn');
             playBtn.addEventListener('click', () => {
-                player.paused ? player.play() : player.pause();
+                player.paused ? safePlay() : player.pause();
             });
             player.addEventListener('play', () => (playBtn.querySelector('span').textContent = 'pause'));
             player.addEventListener('pause', () => (playBtn.querySelector('span').textContent = 'play_arrow'));
