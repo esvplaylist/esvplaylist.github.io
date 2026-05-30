@@ -1900,7 +1900,7 @@
             async function safePlay(retries = 3) {
                 for (let i = 0; i < retries; i++) {
                     try {
-                        await safePlay();
+                        await player.play(); // This is the corrected line
                         return; // Success! Exit the function.
                     } catch (error) {
                         console.warn(`Playback attempt ${i + 1} failed:`, error);
