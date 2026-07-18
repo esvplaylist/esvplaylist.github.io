@@ -8,7 +8,7 @@ var APP_PREFIX = 'esvplaylist_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '5.4.1';
+var VERSION = '5.4.2';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
@@ -74,23 +74,23 @@ self.addEventListener('message', (event) => {
     event.ports[0].postMessage({ version: VERSION });
   }
 
-  // if (event.data && event.data.type === 'CACHE_TRACKS') {
-  //   const urls = event.data.urls;
-  //   event.waitUntil(
-  //     caches.open(CACHE_NAME).then(async (cache) => {
-  //       for (const url of urls) {
-  //         try {
-  //           const cachedRes = await cache.match(url);
-  //           if (!cachedRes) {
-  //             // mode: 'no-cors' allows caching cross-origin audio from ESV
-  //             const fetchRes = await fetch(url, { mode: 'no-cors' });
-  //             await cache.put(url, fetchRes);
-  //           }
-  //         } catch (err) {
-  //           console.error('Failed to cache track:', url, err);
-  //         }
-  //       }
-  //     })
-  //   );
-  // }
+  if (event.data && event.data.type === 'CACHE_TRACKS') {
+    const urls = event.data.urls;
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        for (const url of urls) {
+          try {
+            const cachedRes = await cache.match(url);
+            if (!cachedRes) {
+              // mode: 'no-cors' allows caching cross-origin audio from ESV
+              const fetchRes = await fetch(url, { mode: 'no-cors' });
+              await cache.put(url, fetchRes);
+            }
+          } catch (err) {
+            console.error('Failed to cache track:', url, err);
+          }
+        }
+      })
+    );
+  }
 });

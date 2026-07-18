@@ -1439,26 +1439,26 @@
             }
 
             /* Background Caching Helper */
-            // function cacheNewTracks(tracks) {
-            //     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            //         let urlsToCache = [];
-            //         tracks.forEach((track) => {
-            //             if (track.url) urlsToCache.push(track.url);
-            //             if (track.chapters) {
-            //                 track.chapters.forEach((chap) => {
-            //                     if (chap.url) urlsToCache.push(chap.url);
-            //                 });
-            //             }
-            //         });
+            function cacheNewTracks(tracks) {
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    let urlsToCache = [];
+                    tracks.forEach((track) => {
+                        if (track.url) urlsToCache.push(track.url);
+                        if (track.chapters) {
+                            track.chapters.forEach((chap) => {
+                                if (chap.url) urlsToCache.push(chap.url);
+                            });
+                        }
+                    });
 
-            //         if (urlsToCache.length > 0) {
-            //             navigator.serviceWorker.controller.postMessage({
-            //                 type: 'CACHE_TRACKS',
-            //                 urls: urlsToCache,
-            //             });
-            //         }
-            //     }
-            // }
+                    if (urlsToCache.length > 0) {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'CACHE_TRACKS',
+                            urls: urlsToCache,
+                        });
+                    }
+                }
+            }
 
             function addBulkFromText() {
                 const text = document.getElementById('bulkPassages').value;
@@ -2563,16 +2563,16 @@
                 });
 
                 // Disable playback when offline
-                const playerCard = document.querySelector('.player-card');
-                const tracksCard = document.querySelector('.tracks-card');
-                if (isOffline) {
-                    if (!player.paused) player.pause();
-                    if (playerCard) { playerCard.style.pointerEvents = 'none'; playerCard.style.opacity = '0.5'; }
-                    if (tracksCard) { tracksCard.style.pointerEvents = 'none'; tracksCard.style.opacity = '0.5'; }
-                } else {
-                    if (playerCard) { playerCard.style.pointerEvents = 'auto'; playerCard.style.opacity = '1'; }
-                    if (tracksCard) { tracksCard.style.pointerEvents = 'auto'; tracksCard.style.opacity = '1'; }
-                }
+                // const playerCard = document.querySelector('.player-card');
+                // const tracksCard = document.querySelector('.tracks-card');
+                // if (isOffline) {
+                //     if (!player.paused) player.pause();
+                //     if (playerCard) { playerCard.style.pointerEvents = 'none'; playerCard.style.opacity = '0.5'; }
+                //     if (tracksCard) { tracksCard.style.pointerEvents = 'none'; tracksCard.style.opacity = '0.5'; }
+                // } else {
+                //     if (playerCard) { playerCard.style.pointerEvents = 'auto'; playerCard.style.opacity = '1'; }
+                //     if (tracksCard) { tracksCard.style.pointerEvents = 'auto'; tracksCard.style.opacity = '1'; }
+                // }
             }
 
             window.addEventListener('online', updateOnlineStatus);
