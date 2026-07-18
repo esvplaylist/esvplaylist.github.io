@@ -8,7 +8,7 @@ var APP_PREFIX = 'esvplaylist_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '5.4.3';
+var VERSION = '5.4.4';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
@@ -88,6 +88,21 @@ self.addEventListener('message', (event) => {
             }
           } catch (err) {
             console.error('Failed to cache track:', url, err);
+          }
+        }
+      })
+    );
+  }
+
+  if (event.data && event.data.type === 'REMOVE_TRACKS') {
+    const urls = event.data.urls;
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        for (const url of urls) {
+          try {
+            await cache.delete(url);
+          } catch (err) {
+            console.error('Failed to remove track from cache:', url, err);
           }
         }
       })
