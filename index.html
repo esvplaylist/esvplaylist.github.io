@@ -15,13 +15,8 @@
 
     <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
     <script>
-        // 1. Check if the system prefers dark mode
         const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        // 2. Select the correct file path
         const manifestFile = isDarkMode ? '/manifest-dark.json' : '/manifest.json';
-
-        // 3. Create and append the link tag dynamically
         const link = document.createElement('link');
         link.rel = 'manifest';
         link.crossOrigin = 'use-credentials';
