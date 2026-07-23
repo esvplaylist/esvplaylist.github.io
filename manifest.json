@@ -5,8 +5,8 @@
   "display": "standalone",
   "scope": "/esvplaylist.github.io/",
   "start_url": "/esvplaylist.github.io/index.html",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "icons": [
     {
       "src": "/headphone-symbol.png",
