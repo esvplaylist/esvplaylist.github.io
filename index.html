@@ -14,7 +14,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link rel="canonical" href="https://esvplaylist.github.io/esvplaylist.github.io/" />
-    <link rel="manifest" crossorigin="use-credentials" href="manifest.json" />
+    <script>
+        // 1. Check if the system prefers dark mode
+        const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // 2. Select the correct file path
+        const manifestFile = isDarkMode ? '/manifest-dark.json' : '/manifest.json';
+
+        // 3. Create and append the link tag dynamically
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.crossOrigin = 'use-credentials';
+        link.href = manifestFile;
+        document.head.appendChild(link);
+    </script>
+
+    <!-- <link rel="manifest" crossorigin="use-credentials" href="manifest.json" /> -->
     <link rel="icon" type="image/x-icon" href="/headphone-symbol.png" />
 
     <style>

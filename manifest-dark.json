@@ -1,0 +1,17 @@
+{
+  "name": "ESV Playlist",
+  "short_name": "ESV Playlist",
+  "description": "Create your own Scripture playlist.",
+  "display": "standalone",
+  "scope": "/esvplaylist.github.io/",
+  "start_url": "/esvplaylist.github.io/index.html",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/headphone-symbol.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ]
+}
