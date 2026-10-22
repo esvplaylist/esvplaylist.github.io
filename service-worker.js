@@ -1,6 +1,4 @@
-// Change this to your repository name
 var GHPATH = '/esvplaylist.github.io';
-// Choose a different app prefix name
 var APP_PREFIX = 'esv.audio_';
 var VERSION = new Date().toISOString().substring(0,19);
  
