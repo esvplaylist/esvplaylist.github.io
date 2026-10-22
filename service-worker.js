@@ -1,14 +1,8 @@
 // Change this to your repository name
 var GHPATH = '/esvplaylist.github.io';
- 
 // Choose a different app prefix name
-var APP_PREFIX = 'esvplaylist_';
- 
-// The version of the cache. Every time you change any of the files
-// you need to change this version (version_01, version_02…). 
-// If you don't change the version, the service worker will give your
-// users the old files!
-var VERSION = '2026.10.21';
+var APP_PREFIX = 'esv.audio_';
+var VERSION = new Date().toISOString().substring(0,19);
  
 // The files to make available for offline use. make sure to add 
 // others to this list
