@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>ESV Playlist</title>
+    <title>ESV.audio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="white" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
@@ -25,7 +25,7 @@
     </script>
 
     <!-- <link rel="manifest" crossorigin="use-credentials" href="manifest.json" /> -->
-    <link rel="icon" type="image/x-icon" href="/headphone-symbol.png" />
+    <link rel="icon" type="image/x-icon" href="/esv-audio-logo.png" />
 
     <style>
         :root {
@@ -955,14 +955,14 @@
 
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
-                    artist: 'ESV Audio',
-                    album: currentPlaylist || 'ESV Playlist',
+                    artist: 'ESV.audio',
+                    album: currentPlaylist || 'ESV.audio',
                     artwork: [
-                        { src: '/headphone-symbol.png', sizes: '96x96', type: 'image/png' },
-                        { src: '/headphone-symbol.png', sizes: '192x192', type: 'image/png' },
-                        { src: '/headphone-symbol.png', sizes: '256x256', type: 'image/png' },
-                        { src: '/headphone-symbol.png', sizes: '384x384', type: 'image/png' },
-                        { src: '/headphone-symbol.png', sizes: '512x512', type: 'image/png' },
+                        { src: '/esv-audio-logo.png', sizes: '96x96', type: 'image/png' },
+                        { src: '/esv-audio-logo.png', sizes: '192x192', type: 'image/png' },
+                        { src: '/esv-audio-logo.png', sizes: '256x256', type: 'image/png' },
+                        { src: '/esv-audio-logo.png', sizes: '384x384', type: 'image/png' },
+                        { src: '/esv-audio-logo.png', sizes: '512x512', type: 'image/png' },
                     ],
                 });
             }

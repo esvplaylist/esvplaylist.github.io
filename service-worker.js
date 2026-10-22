@@ -8,14 +8,14 @@ var APP_PREFIX = 'esvplaylist_';
 // you need to change this version (version_01, version_02…). 
 // If you don't change the version, the service worker will give your
 // users the old files!
-var VERSION = '7';
+var VERSION = '8';
  
 // The files to make available for offline use. make sure to add 
 // others to this list
 var URLS = [    
   `${GHPATH}/`,
   `${GHPATH}/index.html`,
-  `${GHPATH}/headphone-symbol.png`
+  `${GHPATH}/esv-audio-logo.png`
 ]
 
 const CACHE_NAME = `${APP_PREFIX}-${VERSION}`;
@@ -23,7 +23,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/headphone-symbol.png',
+  '/esv-audio-logo.png',
   '/service-worker.js',
   'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined',
   // add more assets if needed
