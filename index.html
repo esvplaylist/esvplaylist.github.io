@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>ESV.audio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="white" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fdfcfb" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -26,38 +26,37 @@
     <style>
         :root {
             color-scheme: light dark;
-            --bg: #f8f9fa;
+            /* ESV.org inspired color palette */
+            --bg: #fdfcfb;
             --card: #ffffff;
-            --muted: #6c757d;
-            --accent: #0d6efd;
-            --now: #28a745;
-            --btn-bg: #f1f3f5;
-            --text: #212529;
+            --muted: #767676;
+            --accent: #a6192e; /* ESV Classic Red */
+            --done: #c2b291; /* Warm Gold from your app logo for completed states */
+            --btn-bg: #f5f5f5;
+            --text: #222222;
             --border: rgba(0, 0, 0, 0.08);
-            --border-light: rgba(0, 0, 0, 0.05);
-            --shadow: rgba(0, 0, 0, 0.06);
-            --modal-bg: rgba(0, 0, 0, 0.45);
+            --border-light: rgba(0, 0, 0, 0.04);
+            --shadow: rgba(0, 0, 0, 0.05);
+            --modal-bg: rgba(0, 0, 0, 0.5);
+            
+            /* Dual-font system: Sans-serif for UI, Serif for Scripture */
+            --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-serif: "Georgia", "Times New Roman", serif;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #121212;
-                --card: #1e1e1e;
-                --muted: #a1a1aa;
-                --accent: #60a5fa;
-                --now: #34d399;
-                --btn-bg: #2d2d2d;
-                --text: #e5e5e5;
+                --card: #1c1c1c;
+                --muted: #999999;
+                --accent: #d44558; /* Softer, brighter red for dark mode */
+                --done: #c2b291;
+                --btn-bg: #2a2a2a;
+                --text: #e8e8e8;
                 --border: rgba(255, 255, 255, 0.1);
                 --border-light: rgba(255, 255, 255, 0.05);
-                --shadow: rgba(0, 0, 0, 0.3);
-                --modal-bg: rgba(0, 0, 0, 0.7);
-            }
-        }
-
-        @supports (color: AccentColor) {
-            :root {
-                --accent: AccentColor;
+                --shadow: rgba(0, 0, 0, 0.4);
+                --modal-bg: rgba(0, 0, 0, 0.8);
             }
         }
 
@@ -83,7 +82,7 @@
         
         body {
             margin: 18px;
-            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            font-family: var(--font-ui);
             background: var(--bg);
             color: var(--text);
             transition: background 0.2s, color 0.2s;
@@ -94,13 +93,17 @@
             margin: 0 auto;
         }
 
-        h1, h4 { margin: 0; }
+        h1, h4 { 
+            margin: 0; 
+            font-family: var(--font-serif);
+            font-weight: 600;
+        }
 
         .card {
             background: var(--card);
-            border-radius: 12px;
-            box-shadow: 0 6px 18px var(--shadow);
-            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid var(--border-light);
         }
 
         .card-body { padding: 16px; }
@@ -109,6 +112,12 @@
             width: 100%;
             box-sizing: border-box;
             display: block;
+            font-family: var(--font-ui);
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
         }
 
         #planDetailsWrapper div {
@@ -123,7 +132,6 @@
         }
 
         #bulkPassages {
-            font-family: inherit;
             resize: vertical;
             margin-bottom: 8px;
         }
@@ -138,7 +146,10 @@
             text-align: center;
         }
 
-        .custom-player select { cursor: pointer; }
+        .custom-player select { 
+            cursor: pointer; 
+            font-family: var(--font-ui);
+        }
 
         .list-group {
             list-style: none;
@@ -148,7 +159,7 @@
 
         .list-group-item {
             padding: 6px 8px;
-            border-radius: 8px;
+            border-radius: 6px;
             background: transparent;
             margin-bottom: 6px;
             position: relative;
@@ -160,7 +171,7 @@
             justify-content: space-between;
             gap: 10px;
             padding: 8px;
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .track-row:hover {
@@ -180,8 +191,9 @@
             white-space: normal;
             overflow: visible;
             display: block;
-            line-height: 1.25;
-            font-size: 15px;
+            line-height: 1.4;
+            font-size: 16px;
+            font-family: var(--font-serif);
         }
 
         .btn {
@@ -189,16 +201,27 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            border-radius: 8px;
-            padding: 8px 10px;
+            border-radius: 6px;
+            padding: 8px 12px;
             border: none;
             cursor: pointer;
             background: var(--btn-bg);
             color: inherit;
+            font-family: var(--font-ui);
+            font-weight: 500;
+            transition: background 0.1s;
+        }
+
+        .btn:hover {
+            background: var(--border);
         }
 
         .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent); opacity: 0.9; }
+        
         .btn-outline { background: transparent; border: 1px solid var(--border); }
+        .btn-outline:hover { background: rgba(0,0,0,0.02); }
+        
         .btn-danger { background: transparent; border: 1px solid rgba(220, 53, 69, 0.25); color: #dc3545; }
 
         .btn-icon {
@@ -208,7 +231,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 6px;
             background: var(--btn-bg);
         }
 
@@ -218,23 +241,20 @@
         }
 
         .now-playing {
-            border-left: 6px solid var(--now);
-            background: rgba(40, 167, 69, 0.03);
-            font-weight: 600;
+            border-left: 4px solid var(--accent);
+            background: rgba(166, 25, 46, 0.04);
         }
 
         .track-actions .btn {
             padding: 6px 8px;
-            border-radius: 8px;
-            background: var(--btn-bg);
+            border-radius: 6px;
+            background: transparent;
             border: none;
             cursor: pointer;
             transition: transform 0.1s, background 0.1s;
         }
 
-        .track-actions .btn:hover { background: rgba(13, 110, 253, 0.1); transform: translateY(-2px); }
-        .track-actions .btn-icon { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--btn-bg); }
-        .track-actions .btn-icon:hover { background: rgba(13, 110, 253, 0.15); transform: translateY(-2px); }
+        .track-actions .btn:hover { background: var(--border-light); transform: translateY(-2px); }
 
         .modal-overlay {
             position: fixed;
@@ -251,8 +271,8 @@
             width: 100%;
             max-width: 420px;
             background: var(--card);
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 8px;
+            padding: 20px;
             box-shadow: 0 20px 50px var(--shadow);
             max-height: 90vh;
             overflow-y: auto;
@@ -262,18 +282,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border-radius: 6px;
             background: var(--btn-bg);
             margin-bottom: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
 
         .track-menu {
             position: absolute;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 4px;
             z-index: 99999;
             box-shadow: 0 4px 12px var(--shadow);
@@ -282,15 +303,17 @@
         .track-menu button {
             display: block;
             width: 100%;
-            padding: 6px 8px;
+            padding: 8px 12px;
             border: none;
             background: transparent;
             text-align: left;
             cursor: pointer;
             color: var(--text);
+            font-family: var(--font-ui);
+            border-radius: 4px;
         }
 
-        .track-menu button:hover { background: rgba(0, 0, 0, 0.05); }
+        .track-menu button:hover { background: var(--border-light); }
 
         footer {
             margin-top: 26px;
@@ -305,7 +328,7 @@
             .track-left { align-items: flex-start; }
             .track-actions { display: flex; gap: 6px; align-items: center; }
             .material-symbols-outlined { font-size: 16px; }
-            .btn { padding: 6px 8px; border-radius: 6px; }
+            .btn { padding: 6px 10px; border-radius: 6px; }
         }
 
         .offline-banner {
@@ -317,7 +340,7 @@
             background: #dc3545;
             color: #fff;
             padding: 10px 14px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 14px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
             z-index: 100000;
@@ -331,8 +354,9 @@
             border-bottom: 2px solid transparent;
             cursor: pointer;
             color: var(--muted);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
+            font-family: var(--font-ui);
             transition: all 0.2s;
         }
 
@@ -347,23 +371,24 @@
             overflow-y: auto;
             padding: 5px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .book-btn {
-            font-size: 14px;
+            font-size: 13px;
             padding: 8px 2px;
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 4px;
             background: var(--btn-bg);
             cursor: pointer;
             text-align: center;
             color: inherit;
+            font-family: var(--font-ui);
             transition: 0.1s;
         }
 
         .book-btn.selected { background: var(--accent); color: white; border-color: var(--accent); }
-        .book-btn.partial { background: rgba(13, 110, 253, 0.15); color: var(--accent); border-color: rgba(13, 110, 253, 0.25); font-weight: 500; }
+        .book-btn.partial { background: rgba(166, 25, 46, 0.1); color: var(--accent); border-color: rgba(166, 25, 46, 0.2); font-weight: 500; }
     </style>
 </head>
 <body>
@@ -401,13 +426,13 @@
                         <span class="material-symbols-outlined">play_arrow</span>
                     </button>
                     <div class="flex-col flex-1">
-                        <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: var(--accent); margin: 0;" />
+                        <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: var(--accent); margin: 0; padding: 0; background: transparent; border: none;" />
                         <div class="flex-between small-muted mt-1">
                             <span id="currentTime">0:00</span>
                             <span id="duration">0:00</span>
                         </div>
                     </div>
-                    <select id="speedSelect" class="btn" style="width: auto">
+                    <select id="speedSelect" class="btn btn-outline" style="width: auto; padding: 4px 8px;">
                         <option value="0.8">0.8x</option>
                         <option value="1">1x</option>
                         <option value="1.2">1.2x</option>
@@ -424,11 +449,11 @@
         <div id="planProgressCard" class="card mb-3 d-none">
             <div class="card-body" style="padding: 12px 16px">
                 <div class="flex-between mb-1 small-muted">
-                    <strong id="planStatTitle">Reading Plan Progress</strong>
-                    <span id="planStatDetail" style="color: var(--now); font-weight: bold">0%</span>
+                    <strong id="planStatTitle" style="color: var(--text)">Reading Plan Progress</strong>
+                    <span id="planStatDetail" style="color: var(--done); font-weight: bold">0%</span>
                 </div>
                 <div style="width: 100%; height: 6px; background: var(--btn-bg); border-radius: 3px; overflow: hidden">
-                    <div id="planProgressBar" style="height: 100%; width: 0%; background: var(--now); border-radius: 3px; transition: width 0.3s"></div>
+                    <div id="planProgressBar" style="height: 100%; width: 0%; background: var(--done); border-radius: 3px; transition: width 0.3s"></div>
                 </div>
             </div>
         </div>
@@ -436,7 +461,7 @@
         <div class="card tracks-card mb-3">
             <div class="card-body">
                 <div class="flex-between mb-2">
-                    <strong>Tracks</strong>
+                    <strong style="font-family: var(--font-serif); font-size: 18px;">Tracks</strong>
                     <button class="btn btn-icon d-none" id="addTrackBtn" onclick="openAddTrackModal()" title="Add Track" style="width: 30px; height: 30px; align-items: center; justify-content: center">
                         <span class="material-symbols-outlined" style="font-size: 20px">add</span>
                     </button>
@@ -485,7 +510,7 @@
                     </select>
                 </div>
 
-                <div id="planNavControls" class="d-none flex-row gap-2 mb-2" style="background: var(--btn-bg); padding: 8px; border-radius: 8px">
+                <div id="planNavControls" class="d-none flex-row gap-2 mb-2" style="background: var(--btn-bg); padding: 8px; border-radius: 6px">
                     <button class="btn btn-outline" id="planBackBtn" onclick="planGoBack()" style="padding: 2px 8px; height: 24px; font-size: 12px">Back</button>
                     <span id="planBreadcrumb" style="font-weight: 600; font-size: 13px"></span>
                     <label id="verseSelectOption" class="flex-row gap-1" style="margin-left: auto; font-size: 13px; cursor: pointer">
@@ -557,7 +582,7 @@
 
             <div class="small-muted mb-1">Connect to another device:</div>
             <div class="flex-row gap-2 mb-2">
-                <input id="remotePeerId" placeholder="Enter Peer ID" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card)" />
+                <input id="remotePeerId" placeholder="Enter Peer ID" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg)" />
                 <button class="btn btn-primary" onclick="connectToPeer()">Connect</button>
             </div>
 
@@ -570,7 +595,7 @@
     <div id="addTrackModal" class="modal-overlay" onclick="closeAddTrackModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h4 class="mb-3">Add Track</h4>
-            <input id="singleTrackInput" class="w-100 mb-3" placeholder="Enter passage (e.g. John 3:16)" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text);" />
+            <input id="singleTrackInput" class="w-100 mb-3" placeholder="Enter passage (e.g. John 3:16)" />
             <button class="btn btn-primary w-100" onclick="addSingleTrack()">Add</button>
             <div class="flex-end gap-2 mt-3" style="border-top: 1px solid var(--border); padding-top: 15px">
                 <button class="btn btn-outline" onclick="closeAddTrackModal(event)">Cancel</button>
@@ -587,7 +612,7 @@
         let audioSources = [];
         let isShuffle = false;
         let repeatTrackIndex = null;
-        let dragStartIndex = -1; // Fixes global leak bug
+        let dragStartIndex = -1;
 
         let planView = 'books'; // 'books', 'chapters', 'verses'
         let planNavBook = -1;
@@ -616,7 +641,6 @@
         player.dataset.silent = 'true';
         player.load();
 
-        // Event Listeners Initialization
         singleTrackInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') addSingleTrack();
         });
@@ -830,7 +854,7 @@
             downloadAnchorNode.remove();
 
             const status = document.getElementById('ioStatus');
-            status.style.color = "var(--now)";
+            status.style.color = "var(--done)";
             status.textContent = "Backup downloaded successfully!";
             setTimeout(() => status.textContent = "", 3000);
         }
@@ -854,7 +878,7 @@
                         localStorage.setItem(key, config[key]);
                     }
 
-                    status.style.color = "var(--now)";
+                    status.style.color = "var(--done)";
                     status.textContent = "Import successful! Reloading app...";
                     setTimeout(() => window.location.reload(), 1500);
                 } catch (err) {
@@ -1038,10 +1062,10 @@
                         <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
+                        <button class="btn btn-outline" title="Rename" onclick="renameFromModal('${encodeURIComponent(name)}'); event.stopPropagation();" style="padding: 6px;">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();">
+                        <button class="btn btn-outline" title="Delete" onclick="deleteFromModal('${encodeURIComponent(name)}'); event.stopPropagation();" style="padding: 6px;">
                             <span class="material-symbols-outlined">delete</span>
                         </button>
                     </div>`;
@@ -1724,25 +1748,25 @@
                 const isToday = isPlan && track.date === todayStr;
                 const isLastPlayed = track._id === lastPlayedId;
                 
-                const lastPlayedBadge = isLastPlayed ? `<span style="font-size: 10px; background: rgba(13, 110, 253, 0.1); color: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; vertical-align: middle;">Last Played</span>` : '';
+                const lastPlayedBadge = isLastPlayed ? `<span style="font-size: 10px; background: rgba(166, 25, 46, 0.1); color: var(--accent); padding: 3px 6px; border-radius: 4px; margin-left: 8px; font-weight: 600; font-family: var(--font-ui); vertical-align: middle;">Last Played</span>` : '';
                 const repeatIcon = repeatTrackIndex === index ? `<span class="material-symbols-outlined" style="color: var(--accent); font-size: 16px; margin-left: 6px; vertical-align: middle;" title="Repeat Track">repeat</span>` : '';
-                const dateHtml = isPlan ? `<div style="font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 3px;">${isToday ? 'TODAY' : track.date}</div>` : '';
+                const dateHtml = isPlan ? `<div style="font-size: 11px; color: var(--accent); font-family: var(--font-ui); font-weight: 600; margin-bottom: 3px;">${isToday ? 'TODAY' : track.date}</div>` : '';
                 const doneStyle = track.done ? 'text-decoration: line-through; opacity: 0.5;' : '';
-                const checkIcon = isPlan && track.done ? `<span class="material-symbols-outlined" style="color: var(--now); font-size: 18px; margin-right: 6px; vertical-align: middle;">check_circle</span>` : '';
+                const checkIcon = isPlan && track.done ? `<span class="material-symbols-outlined" style="color: var(--done); font-size: 18px; margin-right: 6px; vertical-align: middle;">check_circle</span>` : '';
 
                 const chapterButtons = (track.chapters || []).map((c, chapIdx) => {
                     const isDone = track.lastChapterIdxDone >= chapIdx;
                     const isPlayingThisChapter = parseInt(player.dataset.index) === index && parseInt(player.dataset.chapterIndex) === chapIdx;
 
                     let btnStyle = 'background: var(--btn-bg); color: var(--text);';
-                    if (isPlayingThisChapter) btnStyle = 'background: rgba(13, 110, 253, 0.2); color: var(--accent); border: 1px solid var(--accent);';
-                    else if (isDone) btnStyle = 'background: var(--now); color: white; border-color: var(--now);';
+                    if (isPlayingThisChapter) btnStyle = 'background: rgba(166, 25, 46, 0.1); color: var(--accent); border: 1px solid var(--accent);';
+                    else if (isDone) btnStyle = 'background: var(--done); color: white; border-color: var(--done);';
 
                     return `<button class="btn" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; margin-right: 4px; ${btnStyle}" onclick="event.stopPropagation(); playChapter('${track._id}', ${chapIdx})">${c.chapter}</button>`;
                 }).join('');
 
                 li.innerHTML = `
-                    <div class="track-row" style="${isToday ? 'border-left: 4px solid var(--accent); background: rgba(13, 110, 253, 0.05);' : ''}">
+                    <div class="track-row" style="${isToday ? 'border-left: 4px solid var(--accent); background: rgba(166, 25, 46, 0.04);' : ''}">
                         <div class="track-left">
                             <button class="btn-icon" onclick="playTrack('${track._id}')" title="Play/Pause">
                                 <span class="material-symbols-outlined">${playIcon}</span>
