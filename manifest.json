@@ -5,8 +5,8 @@
   "display": "standalone",
   "scope": "/esvplaylist.github.io/",
   "start_url": "/esvplaylist.github.io/index.html",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#fdfcfb",
+  "theme_color": "#fdfcfb",
   "icons": [
     {
       "src": "/esv-audio-logo.png",

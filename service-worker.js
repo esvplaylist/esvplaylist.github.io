@@ -40,16 +40,23 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Only handle GET requests
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
         caches.match(event.request).then((cached) => {
             if (cached) return cached;
 
             return fetch(event.request).then((res) => {
                 // Dynamically cache UI files so the app works offline
-                return caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, res.clone());
-                    return res;
-                });
+                // Check if the request scheme is HTTP or HTTPS before caching
+                if (event.request.url.startsWith('http://') || event.request.url.startsWith('https://')) {
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, res.clone());
+                        return res;
+                    });
+                }
+                return res;
             }).catch(() => {
                 // Offline fallback for page navigation
                 if (event.request.mode === 'navigate') {
